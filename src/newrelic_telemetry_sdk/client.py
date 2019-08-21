@@ -18,6 +18,11 @@ import requests
 import zlib
 
 try:
+    from requests.packages.urllib3.util.retry import Retry as BaseRetry
+except ImportError:
+    from urllib3.util.retry import Retry as BaseRetry
+
+try:
     from newrelic_telemetry_sdk.version import version
 except ImportError:  # pragma: no cover
     version = "unknown"  # pragma: no cover
@@ -28,7 +33,65 @@ USER_AGENT = "NewRelic-Python-TelemetrySDK/%s (Python %s %s)" % (
     sys.platform,
 )
 
-__all__ = ("SpanClient", "MetricClient")
+__all__ = ("SpanClient", "MetricClient", "Retry")
+
+
+class Retry(BaseRetry):
+    """A standard retry strategy that can be used with a Client
+
+    See :class:`~urllib3.util.retry.Retry` for details.
+
+    This class implements the recommended default New Relic retry strategy.
+
+    Usage::
+
+        >>> import os
+        >>> insert_key = os.environ.get("NEW_RELIC_INSERT_KEY")
+        >>> from newrelic_telemetry_sdk import SpanClient
+        >>> retry = Retry()
+        >>> client = SpanClient(insert_key, retry=retry)
+    """
+
+    DEFAULT_METHOD_WHITELIST = frozenset(("POST",))
+    RETRY_AFTER_STATUS_CODES = frozenset((429, 503))
+    NO_RETRY_STATUS_CODES = frozenset((400, 403, 404, 405, 411, 413))
+    BACKOFF_MAX = 80
+
+    def __init__(
+        self,
+        total=5,
+        connect=None,
+        read=0,
+        redirect=False,
+        status=None,
+        method_whitelist=DEFAULT_METHOD_WHITELIST,
+        status_forcelist=None,
+        backoff_factor=0.1,
+        raise_on_redirect=False,
+        raise_on_status=False,
+        *args,
+        **kwargs,
+    ):
+        return super(Retry, self).__init__(
+            total,
+            connect,
+            read,
+            redirect,
+            status,
+            method_whitelist,
+            status_forcelist,
+            backoff_factor,
+            raise_on_redirect,
+            raise_on_status,
+            *args,
+            **kwargs,
+        )
+
+    def is_retry(self, method, status_code, *args, **kwargs):
+        if 200 <= status_code < 300:
+            return False
+        should_retry = super(Retry, self).is_retry(method, status_code, *args, **kwargs)
+        return should_retry or status_code not in self.NO_RETRY_STATUS_CODES
 
 
 class Client(object):
@@ -44,19 +107,21 @@ class Client(object):
     :param compression_threshold: Compress if number of bytes in payload is
         above this threshold.
     :type compression_threshold: int
+    :param retry: The retry strategy for the client.
+    :type retry: urllib3.util.retry.Retry
 
     Usage::
 
         >>> import os
         >>> insert_key = os.environ.get("NEW_RELIC_INSERT_KEY")
-        >>> client = Client(insert_key, "https://metric-api.newrelic.com/trace/v1", 0)
+        >>> client = Client(insert_key, "https://metric-api.newrelic.com/trace/v1", 0, None)
         >>> response = client.send({})
     """
 
     PAYLOAD_TYPE = ""
     GZIP_HEADER = {"Content-Encoding": "gzip"}
 
-    def __init__(self, insert_key, url, compression_threshold):
+    def __init__(self, insert_key, url, compression_threshold, retry):
         self.url = url
         self.compression_threshold = compression_threshold
         headers = {
@@ -66,6 +131,9 @@ class Client(object):
         }
         session = self.session = requests.Session()
         session.headers.update(headers)
+        if retry:
+            adapter = session.get_adapter(url)
+            adapter.max_retries = retry
 
     @staticmethod
     def _compress_payload(payload):
@@ -121,6 +189,9 @@ class SpanClient(Client):
     :param compression_threshold: Compress if number of bytes in payload is
         above this threshold. (Default: 64K)
     :type compression_threshold: int
+    :param retry: (optional) The retry strategy for the client.
+        Default: None (no retry)
+    :type retry: urllib3.util.retry.Retry
 
     Usage::
 
@@ -134,10 +205,12 @@ class SpanClient(Client):
     URL_TEMPLATE = "https://{0}/trace/v1"
     PAYLOAD_TYPE = "spans"
 
-    def __init__(self, insert_key, host=None, compression_threshold=64 * 1024):
+    def __init__(
+        self, insert_key, host=None, compression_threshold=64 * 1024, retry=None
+    ):
         host = host or self.HOST
         url = self.URL_TEMPLATE.format(host)
-        super(SpanClient, self).__init__(insert_key, url, compression_threshold)
+        super(SpanClient, self).__init__(insert_key, url, compression_threshold, retry)
 
 
 class MetricClient(Client):
@@ -153,6 +226,9 @@ class MetricClient(Client):
     :param compression_threshold: Compress if number of bytes in payload is
         above this threshold. (Default: 64K)
     :type compression_threshold: int
+    :param retry: (optional) The retry strategy for the client.
+        Default: None (no retry)
+    :type retry: urllib3.util.retry.Retry
 
     Usage::
 
@@ -166,7 +242,11 @@ class MetricClient(Client):
     URL_TEMPLATE = "https://{0}/metric/v1"
     PAYLOAD_TYPE = "metrics"
 
-    def __init__(self, insert_key, host=None, compression_threshold=64 * 1024):
+    def __init__(
+        self, insert_key, host=None, compression_threshold=64 * 1024, retry=None
+    ):
         host = host or self.HOST
         url = self.URL_TEMPLATE.format(host)
-        super(MetricClient, self).__init__(insert_key, url, compression_threshold)
+        super(MetricClient, self).__init__(
+            insert_key, url, compression_threshold, retry
+        )

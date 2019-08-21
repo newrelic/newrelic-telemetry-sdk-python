@@ -119,4 +119,5 @@ htmlhelp_basename = "newrelic-telemetry-sdkdoc"
 intersphinx_mapping = {
     "python": ("http://docs.python.org/3", None),
     "requests": ("http://docs.python-requests.org/en/master", None),
+    "urllib3": ("https://urllib3.readthedocs.io/en/latest", None),
 }
