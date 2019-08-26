@@ -1,0 +1,366 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>newrelic_telemetry_sdk.client &mdash; newrelic-telemetry-sdk 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> newrelic-telemetry-sdk
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">newrelic-telemetry-sdk</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>newrelic_telemetry_sdk.client</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for newrelic_telemetry_sdk.client</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2019 New Relic, Inc.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">zlib</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">newrelic_telemetry_sdk.version</span> <span class="k">import</span> <span class="n">version</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="n">version</span> <span class="o">=</span> <span class="s2">&quot;unknown&quot;</span>  <span class="c1"># pragma: no cover</span>
+
+<span class="n">USER_AGENT</span> <span class="o">=</span> <span class="s2">&quot;NewRelic-Python-TelemetrySDK/</span><span class="si">%s</span><span class="s2"> (Python </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span>
+    <span class="n">version</span><span class="p">,</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;SpanClient&quot;</span><span class="p">,</span> <span class="s2">&quot;MetricClient&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">Client</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;HTTP Client for interacting with New Relic APIs</span>
+
+<span class="sd">    This class is used to send data to the New Relic APIs over HTTP. This class</span>
+<span class="sd">    will automatically handle retries as needed.</span>
+
+<span class="sd">    :param insert_key: Insights insert key</span>
+<span class="sd">    :type insert_key: str</span>
+<span class="sd">    :param url: The API endpoint.</span>
+<span class="sd">    :type url: str</span>
+<span class="sd">    :param compression_threshold: Compress if number of bytes in payload is</span>
+<span class="sd">        above this threshold.</span>
+<span class="sd">    :type compression_threshold: int</span>
+
+<span class="sd">    Usage::</span>
+
+<span class="sd">        &gt;&gt;&gt; import os</span>
+<span class="sd">        &gt;&gt;&gt; insert_key = os.environ.get(&quot;NEW_RELIC_INSERT_KEY&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; client = Client(insert_key, &quot;https://metric-api.newrelic.com/trace/v1&quot;, 0)</span>
+<span class="sd">        &gt;&gt;&gt; response = client.send({})</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">PAYLOAD_TYPE</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">GZIP_HEADER</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Content-Encoding&quot;</span><span class="p">:</span> <span class="s2">&quot;gzip&quot;</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">insert_key</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">compression_threshold</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compression_threshold</span> <span class="o">=</span> <span class="n">compression_threshold</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;Api-Key&quot;</span><span class="p">:</span> <span class="n">insert_key</span><span class="p">,</span>
+            <span class="s2">&quot;User-Agent&quot;</span><span class="p">:</span> <span class="n">USER_AGENT</span><span class="p">,</span>
+            <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_compress_payload</span><span class="p">(</span><span class="n">payload</span><span class="p">):</span>
+        <span class="n">level</span> <span class="o">=</span> <span class="n">zlib</span><span class="o">.</span><span class="n">Z_DEFAULT_COMPRESSION</span>
+        <span class="n">compressor</span> <span class="o">=</span> <span class="n">zlib</span><span class="o">.</span><span class="n">compressobj</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">zlib</span><span class="o">.</span><span class="n">DEFLATED</span><span class="p">,</span> <span class="mi">31</span><span class="p">)</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">compressor</span><span class="o">.</span><span class="n">compress</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+        <span class="n">payload</span> <span class="o">+=</span> <span class="n">compressor</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">payload</span>
+
+    <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Send a single item</span>
+
+<span class="sd">        :param item: The object to send</span>
+<span class="sd">        :type item: dict</span>
+
+<span class="sd">        :rtype: requests.Response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">send_batch</span><span class="p">((</span><span class="n">item</span><span class="p">,))</span>
+
+    <span class="k">def</span> <span class="nf">send_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">common</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Send a batch of spans</span>
+
+<span class="sd">        :param items: An iterable of items to send to New Relic.</span>
+<span class="sd">        :type items: list or tuple</span>
+
+<span class="sd">        :rtype: requests.Response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">PAYLOAD_TYPE</span><span class="p">:</span> <span class="n">items</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">common</span><span class="p">:</span>
+            <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;common&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">common</span>
+
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">([</span><span class="n">payload</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+
+        <span class="n">headers</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">compression_threshold</span><span class="p">:</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compress_payload</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GZIP_HEADER</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SpanClient"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.SpanClient">[docs]</a><span class="k">class</span> <span class="nc">SpanClient</span><span class="p">(</span><span class="n">Client</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;HTTP Client for interacting with the New Relic Span API</span>
+
+<span class="sd">    This class is used to send spans to the New Relic Span API over HTTP.</span>
+
+<span class="sd">    :param insert_key: Insights insert key</span>
+<span class="sd">    :type insert_key: str</span>
+<span class="sd">    :param host: (optional) Override the host for the span API endpoint.</span>
+<span class="sd">    :type host: str</span>
+<span class="sd">    :param compression_threshold: Compress if number of bytes in payload is</span>
+<span class="sd">        above this threshold. (Default: 64K)</span>
+<span class="sd">    :type compression_threshold: int</span>
+
+<span class="sd">    Usage::</span>
+
+<span class="sd">        &gt;&gt;&gt; import os</span>
+<span class="sd">        &gt;&gt;&gt; insert_key = os.environ.get(&quot;NEW_RELIC_INSERT_KEY&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; span_client = SpanClient(insert_key)</span>
+<span class="sd">        &gt;&gt;&gt; response = span_client.send({})</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">HOST</span> <span class="o">=</span> <span class="s2">&quot;trace-api.newrelic.com&quot;</span>
+    <span class="n">URL_TEMPLATE</span> <span class="o">=</span> <span class="s2">&quot;https://</span><span class="si">{0}</span><span class="s2">/trace/v1&quot;</span>
+    <span class="n">PAYLOAD_TYPE</span> <span class="o">=</span> <span class="s2">&quot;spans&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">insert_key</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compression_threshold</span><span class="o">=</span><span class="mi">64</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">):</span>
+        <span class="n">host</span> <span class="o">=</span> <span class="n">host</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">HOST</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">URL_TEMPLATE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SpanClient</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">insert_key</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">compression_threshold</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MetricClient"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.MetricClient">[docs]</a><span class="k">class</span> <span class="nc">MetricClient</span><span class="p">(</span><span class="n">Client</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;HTTP Client for interacting with the New Relic Metric API</span>
+
+<span class="sd">    This class is used to send metrics to the New Relic Metric API over HTTP.</span>
+
+<span class="sd">    :param insert_key: Insights insert key</span>
+<span class="sd">    :type insert_key: str</span>
+<span class="sd">    :param metric_host: (optional) Override the host for the metric API</span>
+<span class="sd">        endpoint.</span>
+<span class="sd">    :type metric_host: str</span>
+<span class="sd">    :param compression_threshold: Compress if number of bytes in payload is</span>
+<span class="sd">        above this threshold. (Default: 64K)</span>
+<span class="sd">    :type compression_threshold: int</span>
+
+<span class="sd">    Usage::</span>
+
+<span class="sd">        &gt;&gt;&gt; import os</span>
+<span class="sd">        &gt;&gt;&gt; insert_key = os.environ.get(&quot;NEW_RELIC_INSERT_KEY&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; metric_client = MetricClient(insert_key)</span>
+<span class="sd">        &gt;&gt;&gt; response = metric_client.send({})</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">HOST</span> <span class="o">=</span> <span class="s2">&quot;metric-api.newrelic.com&quot;</span>
+    <span class="n">URL_TEMPLATE</span> <span class="o">=</span> <span class="s2">&quot;https://</span><span class="si">{0}</span><span class="s2">/metric/v1&quot;</span>
+    <span class="n">PAYLOAD_TYPE</span> <span class="o">=</span> <span class="s2">&quot;metrics&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">insert_key</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compression_threshold</span><span class="o">=</span><span class="mi">64</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">):</span>
+        <span class="n">host</span> <span class="o">=</span> <span class="n">host</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">HOST</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">URL_TEMPLATE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MetricClient</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">insert_key</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">compression_threshold</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, New Relic
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
