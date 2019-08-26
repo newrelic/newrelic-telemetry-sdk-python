@@ -116,12 +116,12 @@ stages:
         inputs:
           hostName: 'github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=='
           sshPublicKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDFJni31fgrXUYAq1bwM7XD8oCc5nCpv83IP52/GMaimakRv5mUUoTGJA4N/3WjNyB5rGrbvcB7T2bFpvsznibQpMuKYCf+Z0ziY1hMdaV3BcjD8hLuEUUSQ1KtIcZqONcvFEbATd2kyhWB2P8ixQrHEeaZ7REr/ftCsn9vGcso0RPz5G3PebkEBZusmeH9lZPzi3CFJdqgl/+U88GuIDze3wDU9vAFOx/vLGVAd7SiM+TlrJ2LlIAtXxFmRkGn2yQhHv6by0Mjt87EyK9Fx/LY/JTtrd2mAiZoxuIDLb0tQZHTMqnPuoHYh0C2PL9yvxMUMSlcDFg1M/EnVgO/2i9N'
-          sshKeySecureFile: 'python-telemetry#deploy_key'
+          sshKeySecureFile: 'newrelic-telemetry-sdk-python#deploy_key'
 
       - script: |
           git config --local user.name "Azure Pipelines"
           git config --local user.email "bot@bot.localhost"
-          git remote add upstream git@github.com:newrelic/python-telemetry.git
+          git remote add upstream git@github.com:newrelic/newrelic-telemetry-sdk-python.git
           git fetch upstream gh-pages && git worktree add -B gh-pages docs/_build upstream/gh-pages
         displayName: 'Prepare git directory for docs'
 
