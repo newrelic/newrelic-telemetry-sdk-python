@@ -30,7 +30,7 @@ except NameError:
 
 SPAN = {
     "id": str(uuid.uuid4()),
-    "traceId": "traceId",
+    "trace.id": "trace.id",
     "attributes": {
         "name": "testing",
         "timestamp": int(time.time() * 1000.0),
@@ -223,7 +223,7 @@ def test_span_endpoint_batch(span_client):
     spans = [
         {
             "id": str(uuid.uuid4()),
-            "traceId": "traceId",
+            "trace.id": "trace.id",
             "attributes": {
                 "name": "testing",
                 "duration.ms": 1,

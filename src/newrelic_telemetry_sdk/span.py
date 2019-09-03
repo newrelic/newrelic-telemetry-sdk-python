@@ -62,20 +62,19 @@ class Span(dict):
         duration_ms=None,
     ):
         self["id"] = guid or ("%016x" % random.getrandbits(64))
-        self["traceId"] = trace_id or ("%016x" % random.getrandbits(64))
+        self["trace.id"] = trace_id or ("%016x" % random.getrandbits(64))
+        self["timestamp"] = int(start_time_ms or (time.time() * 1000))
 
         attributes = tags and tags.copy() or {}
         self["attributes"] = attributes
 
         attributes["name"] = name
 
-        attributes["timestamp"] = int(start_time_ms or (time.time() * 1000))
-
         if duration_ms is not None:
             attributes["duration.ms"] = int(duration_ms)
 
         if parent_id:
-            attributes["parentId"] = parent_id
+            attributes["parent.id"] = parent_id
 
     def finish(self, finish_time_ms=None):
         """Record the duration on this span.
@@ -85,9 +84,7 @@ class Span(dict):
         :type finish_time_ms: int
         """
         finish_time_ms = int(finish_time_ms or (time.time() * 1000))
-        self["attributes"]["duration.ms"] = (
-            finish_time_ms - self["attributes"]["timestamp"]
-        )
+        self["attributes"]["duration.ms"] = finish_time_ms - self["timestamp"]
 
     def __enter__(self):
         return self

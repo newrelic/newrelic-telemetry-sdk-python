@@ -20,29 +20,30 @@ def test_span_defaults(freeze_time):
     span = Span("name")
     attributes = span["attributes"]
     assert attributes["name"] == "name"
-    assert attributes["timestamp"] == 2000
-    assert type(attributes["timestamp"]) is int
+    assert len(attributes) == 1
 
-    assert len(attributes) == 2
+    # Verify timestamp intrinsic
+    assert span["timestamp"] == 2000
+    assert type(span["timestamp"]) is int
 
     # Verify guid-type values
     assert type(span["id"]) is str
     int(span["id"], 16)
     assert len(span["id"]) == 16
 
-    assert type(span["traceId"]) is str
-    int(span["traceId"], 16)
-    assert len(span["traceId"]) == 16
+    assert type(span["trace.id"]) is str
+    int(span["trace.id"], 16)
+    assert len(span["trace.id"]) == 16
 
 
 @pytest.mark.parametrize(
     "arg_name,arg_value,span_key,span_value",
     (
         ("guid", "foo", ("id",), "foo"),
-        ("trace_id", "foo", ("traceId",), "foo"),
-        ("start_time_ms", 1500.0, ("attributes", "timestamp"), 1500),
+        ("trace_id", "foo", ("trace.id",), "foo"),
+        ("start_time_ms", 1500.0, ("timestamp",), 1500),
         ("duration_ms", 1500.0, ("attributes", "duration.ms"), 1500),
-        ("parent_id", "parent", ("attributes", "parentId"), "parent"),
+        ("parent_id", "parent", ("attributes", "parent.id"), "parent"),
         ("tags", {"foo": "bar"}, ("attributes", "foo"), "bar"),
     ),
 )
