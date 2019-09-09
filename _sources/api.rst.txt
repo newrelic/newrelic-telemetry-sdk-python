@@ -9,7 +9,7 @@ New Relic HTTP Clients
     :members:
     :undoc-members:
     :inherited-members:
-    :exclude-members: URL_TEMPLATE, HOST, PAYLOAD_TYPE, Client
+    :exclude-members: URL_TEMPLATE, HOST, PAYLOAD_TYPE, GZIP_HEADER, Client
 
 Spans
 -----

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>newrelic_telemetry_sdk.span &mdash; newrelic-telemetry-sdk 0.1.0 documentation</title>
+  <title>newrelic_telemetry_sdk.span &mdash; newrelic-telemetry-sdk 0.1.1 documentation</title>
   
 
   
@@ -214,20 +214,19 @@
         <span class="n">duration_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">guid</span> <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">%016x</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">random</span><span class="o">.</span><span class="n">getrandbits</span><span class="p">(</span><span class="mi">64</span><span class="p">))</span>
-        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;traceId&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">trace_id</span> <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">%016x</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">random</span><span class="o">.</span><span class="n">getrandbits</span><span class="p">(</span><span class="mi">64</span><span class="p">))</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;trace.id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">trace_id</span> <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">%016x</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">random</span><span class="o">.</span><span class="n">getrandbits</span><span class="p">(</span><span class="mi">64</span><span class="p">))</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">start_time_ms</span> <span class="ow">or</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">))</span>
 
         <span class="n">attributes</span> <span class="o">=</span> <span class="n">tags</span> <span class="ow">and</span> <span class="n">tags</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="ow">or</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attributes</span>
 
         <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
 
-        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">start_time_ms</span> <span class="ow">or</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">))</span>
-
         <span class="k">if</span> <span class="n">duration_ms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;duration.ms&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">duration_ms</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">parent_id</span><span class="p">:</span>
-            <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;parentId&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">parent_id</span>
+            <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;parent.id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">parent_id</span>
 
 <div class="viewcode-block" id="Span.finish"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.span.Span.finish">[docs]</a>    <span class="k">def</span> <span class="nf">finish</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">finish_time_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Record the duration on this span.</span>
@@ -237,9 +236,7 @@
 <span class="sd">        :type finish_time_ms: int</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">finish_time_ms</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">finish_time_ms</span> <span class="ow">or</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">))</span>
-        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">][</span><span class="s2">&quot;duration.ms&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">finish_time_ms</span> <span class="o">-</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">][</span><span class="s2">&quot;timestamp&quot;</span><span class="p">]</span>
-        <span class="p">)</span></div>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">][</span><span class="s2">&quot;duration.ms&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">finish_time_ms</span> <span class="o">-</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">]</span></div>
 
     <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span>
