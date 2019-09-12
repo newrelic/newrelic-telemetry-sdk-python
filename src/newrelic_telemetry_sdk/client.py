@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import json
-import sys
 import requests
 import zlib
 
@@ -22,11 +21,7 @@ try:
 except ImportError:  # pragma: no cover
     version = "unknown"  # pragma: no cover
 
-USER_AGENT = "NewRelic-Python-TelemetrySDK/%s (Python %s %s)" % (
-    version,
-    sys.version.split(None, 1)[0],
-    sys.platform,
-)
+USER_AGENT = "NewRelic-Python-TelemetrySDK/{}".format(version)
 
 __all__ = ("SpanClient", "MetricClient")
 
