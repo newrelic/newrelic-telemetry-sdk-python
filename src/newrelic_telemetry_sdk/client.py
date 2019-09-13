@@ -57,6 +57,7 @@ class Client(object):
         headers = {
             "Api-Key": insert_key,
             "User-Agent": USER_AGENT,
+            "Content-Encoding": "identity",
             "Content-Type": "application/json",
         }
         session = self.session = requests.Session()

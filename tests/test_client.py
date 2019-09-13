@@ -128,10 +128,13 @@ def validate_request(legal_urls, typ, request, items, common=None):
     assert "Api-Key" in headers
 
     payload = request.body
-    if "Content-Encoding" in request.headers:
-        assert request.headers["Content-Encoding"] == "gzip"
+    assert "Content-Encoding" in request.headers
+
+    if request.headers["Content-Encoding"] == "gzip":
         # Decompress the payload
         payload = decompress(request.body)
+    else:
+        assert request.headers["Content-Encoding"] == "identity"
 
     # payload is always in the form [{typ: ..., '...'}]
     payload = json.loads(ensure_str(payload))
@@ -187,7 +190,7 @@ def test_span_endpoint_compressed(span_client):
 def test_span_endpoint_uncompressed(span_client):
     response = span_client.send(SPAN)
     request = response.request
-    assert "Content-Encoding" not in request.headers
+    assert request.headers["Content-Encoding"] == "identity"
     validate_span_request(request, [SPAN])
 
 
@@ -195,7 +198,7 @@ def test_span_endpoint_uncompressed(span_client):
 def test_metric_endpoint_compressed(metric_client):
     response = metric_client.send(METRIC)
     request = response.request
-    assert "Content-Encoding" in request.headers
+    assert request.headers["Content-Encoding"] == "gzip"
     validate_metric_request(request, [METRIC])
 
 
@@ -203,7 +206,7 @@ def test_metric_endpoint_compressed(metric_client):
 def test_metric_endpoint_uncompressed(metric_client):
     response = metric_client.send(METRIC)
     request = response.request
-    assert "Content-Encoding" not in request.headers
+    assert request.headers["Content-Encoding"] == "identity"
     validate_metric_request(request, [METRIC])
 
 
