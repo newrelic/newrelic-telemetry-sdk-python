@@ -123,3 +123,9 @@ The example code assumes you've set the following environment variables:
     response = metric_client.send_batch((temperature, errors, summary))
     response.raise_for_status()
     print("Sent metrics successfully!")
+
+Limitations
+^^^^^^^^^^^
+The New Relic Telemetry APIs are rate limited. Please reference the documentation for `New Relic Metrics API <https://docs.newrelic.com/docs/introduction-new-relic-metric-api>`_ and `New Relic Trace API Requirements and Limits <https://docs.newrelic.com/docs/apm/distributed-tracing/trace-api/trace-api-general-requirements-limits>`_ on the specifics of the rate limits.
+
+
