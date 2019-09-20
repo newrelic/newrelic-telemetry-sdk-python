@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>newrelic_telemetry_sdk.client &mdash; newrelic-telemetry-sdk 0.1.1 documentation</title>
+  <title>newrelic_telemetry_sdk.client &mdash; newrelic-telemetry-sdk 0.1.2 documentation</title>
   
 
   
@@ -165,7 +165,6 @@
 <span class="c1"># limitations under the License.</span>
 
 <span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">import</span> <span class="nn">zlib</span>
 
@@ -174,11 +173,7 @@
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
     <span class="n">version</span> <span class="o">=</span> <span class="s2">&quot;unknown&quot;</span>  <span class="c1"># pragma: no cover</span>
 
-<span class="n">USER_AGENT</span> <span class="o">=</span> <span class="s2">&quot;NewRelic-Python-TelemetrySDK/</span><span class="si">%s</span><span class="s2"> (Python </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span>
-    <span class="n">version</span><span class="p">,</span>
-    <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
-    <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="n">USER_AGENT</span> <span class="o">=</span> <span class="s2">&quot;NewRelic-Python-TelemetrySDK/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;SpanClient&quot;</span><span class="p">,</span> <span class="s2">&quot;MetricClient&quot;</span><span class="p">)</span>
 
@@ -214,6 +209,7 @@
         <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;Api-Key&quot;</span><span class="p">:</span> <span class="n">insert_key</span><span class="p">,</span>
             <span class="s2">&quot;User-Agent&quot;</span><span class="p">:</span> <span class="n">USER_AGENT</span><span class="p">,</span>
+            <span class="s2">&quot;Content-Encoding&quot;</span><span class="p">:</span> <span class="s2">&quot;identity&quot;</span><span class="p">,</span>
             <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
