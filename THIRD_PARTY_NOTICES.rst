@@ -8,11 +8,11 @@ These notices are provided below.
 In the event that a required notice is missing or incorrect, please
 notify us by e-mailing open-source@newrelic.com.
 
-`requests <https://pypi.org/project/requests>`__
-------------------------------------------------
+`urllib3 <https://pypi.org/project/urllib3>`__
+----------------------------------------------
 
-Copyright 2018 Kenneth Reitz
+Copyright (c) 2008-2019 Andrey Petrov and contributors (see CONTRIBUTORS.txt)
 
 Distributed under the following license(s):
 
--  `Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>`__
+- `The MIT License <https://opensource.org/licenses/MIT>`_
