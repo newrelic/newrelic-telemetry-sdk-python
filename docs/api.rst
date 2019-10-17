@@ -9,7 +9,7 @@ New Relic HTTP Clients
     :members:
     :undoc-members:
     :inherited-members:
-    :exclude-members: URL, HOST, PAYLOAD_TYPE, GZIP_HEADER, Client, HTTPResponse
+    :exclude-members: URL, HOST, PAYLOAD_TYPE, HEADERS, GZIP_HEADER, Client, HTTPResponse
 
 
 .. autoclass:: newrelic_telemetry_sdk.client.HTTPResponse()
