@@ -168,17 +168,13 @@ class SummaryMetric(Metric):
 
     :param name: The name of the metric.
     :type name: str
-    :param count: (optional) The initial count in the summary metric.
-        Defaults to 0.
+    :param count: The count in the summary metric.
     :type count: int
-    :param sum: (optional) The initial sum in the summary metric.
-        Defaults to 0.
+    :param sum: The sum in the summary metric.
     :type sum: int or float
-    :param min: (optional) The initial min in the minmary metric. Defaults to
-        float('inf').
+    :param min: The minimum value in the summary metric.
     :type min: int or float
-    :param max: (optional) The initial max in the maxmary metric. Defaults to
-        float('-inf').
+    :param max: The maximum value in the summary metric.
     :type max: int or float
     :param tags: (optional) A set of tags that can be used to filter this
         metric in the New Relic UI.
@@ -199,15 +195,7 @@ class SummaryMetric(Metric):
     """
 
     def __init__(
-        self,
-        name,
-        count=0,
-        sum=0,
-        min=float("inf"),
-        max=float("-inf"),
-        tags=None,
-        interval_ms=None,
-        end_time_ms=None,
+        self, name, count, sum, min, max, tags=None, interval_ms=None, end_time_ms=None
     ):
         value = {"count": count, "sum": sum, "min": min, "max": max}
         super(SummaryMetric, self).__init__(name, value, tags, interval_ms, end_time_ms)
