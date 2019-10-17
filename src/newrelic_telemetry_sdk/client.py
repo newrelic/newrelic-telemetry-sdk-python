@@ -184,9 +184,9 @@ class MetricClient(Client):
 
     :param insert_key: Insights insert key
     :type insert_key: str
-    :param metric_host: (optional) Override the host for the metric API
+    :param host: (optional) Override the host for the metric API
         endpoint.
-    :type metric_host: str
+    :type host: str
     :param compression_threshold: (optional) Compress if number of bytes in
         payload is above this threshold. (Default: 64K)
     :type compression_threshold: int
