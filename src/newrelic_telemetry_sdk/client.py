@@ -51,7 +51,10 @@ class HTTPResponse(urllib3.HTTPResponse):
         return 200 <= self.status < 300
 
     def raise_for_status(self):
-        """Raise an exception for an unsuccessful HTTP status code"""
+        """Raise an exception for an unsuccessful HTTP status code
+
+        :raises HTTPError: if response status is not successful
+        """
         if not self.ok:
             raise HTTPError(self.status, self)
 
