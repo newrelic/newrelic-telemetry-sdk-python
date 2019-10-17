@@ -10,5 +10,5 @@ setuptools.setup(
 version = "{version!s}"
 """,
     },
-    install_requires=("requests<3",),
+    install_requires=("urllib3<2",),
 )
