@@ -25,6 +25,8 @@ stages:
           containerImage: python:3.6
         Python37:
           containerImage: python:3.7
+        Python38:
+          containerImage: python:3.8
         PyPy:
           containerImage: pypy:2.7
         PyPy3:
@@ -75,7 +77,7 @@ stages:
   - job: Lint
     pool:
       vmImage: 'Ubuntu-16.04'
-    container: python:3.7
+    container: python:3.8
 
     steps:
     - script: |
@@ -94,7 +96,7 @@ stages:
     - job: pypi
       pool:
         vmImage: 'Ubuntu-16.04'
-      container: python:3.7
+      container: python:3.8
       steps:
       - script: |
           python setup.py sdist bdist_wheel
@@ -109,7 +111,7 @@ stages:
       dependsOn: pypi
       pool:
         vmImage: 'Ubuntu-16.04'
-      container: python:3.7
+      container: python:3.8
 
       steps:
       - task: InstallSSHKey@0
