@@ -70,10 +70,10 @@ class Client(object):
 
     :param insert_key: Insights insert key
     :type insert_key: str
-    :param url: The API endpoint.
-    :type url: str
-    :param compression_threshold: Compress if number of bytes in payload is
-        above this threshold.
+    :param host: (optional) Override the host for the client.
+    :type host: str
+    :param compression_threshold: (optional) Compress if number of bytes in
+        payload is above this threshold. (Default: 64K)
     :type compression_threshold: int
 
     Usage::
@@ -160,8 +160,8 @@ class SpanClient(Client):
     :type insert_key: str
     :param host: (optional) Override the host for the span API endpoint.
     :type host: str
-    :param compression_threshold: Compress if number of bytes in payload is
-        above this threshold. (Default: 64K)
+    :param compression_threshold: (optional) Compress if number of bytes in
+        payload is above this threshold. (Default: 64K)
     :type compression_threshold: int
 
     Usage::
@@ -187,8 +187,8 @@ class MetricClient(Client):
     :param metric_host: (optional) Override the host for the metric API
         endpoint.
     :type metric_host: str
-    :param compression_threshold: Compress if number of bytes in payload is
-        above this threshold. (Default: 64K)
+    :param compression_threshold: (optional) Compress if number of bytes in
+        payload is above this threshold. (Default: 64K)
     :type compression_threshold: int
 
     Usage::
