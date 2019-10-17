@@ -32,7 +32,7 @@ def test_metric_defaults(method, freeze_time):
 
 
 def test_count_metric_defaults(freeze_time):
-    metric = CountMetric("name")
+    metric = CountMetric("name", 0)
     assert metric["type"] == "count"
     assert metric["name"] == "name"
     assert metric["value"] == 0
@@ -44,15 +44,10 @@ def test_count_metric_defaults(freeze_time):
 
 
 def test_summary_metric_defaults(freeze_time):
-    metric = SummaryMetric("name")
+    metric = SummaryMetric("name", 0, 0, 0, 0)
     assert metric["type"] == "summary"
     assert metric["name"] == "name"
-    assert metric["value"] == {
-        "count": 0,
-        "sum": 0,
-        "min": float("inf"),
-        "max": float("-inf"),
-    }
+    assert metric["value"] == {"count": 0, "sum": 0, "min": 0, "max": 0}
     assert metric["timestamp"] == 2000
     assert type(metric["timestamp"]) is int
 
