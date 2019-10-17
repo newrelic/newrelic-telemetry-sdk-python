@@ -133,7 +133,7 @@ class CountMetric(Metric):
 
     :param name: The name of the metric.
     :type name: str
-    :param value: (optional) The initial metric value. Defaults to 0.
+    :param value: The metric count value.
     :type value: int or float
     :param tags: (optional) A set of tags that can be used to filter this
         metric in the New Relic UI.
@@ -148,12 +148,12 @@ class CountMetric(Metric):
     Usage::
 
         >>> from newrelic_telemetry_sdk import CountMetric
-        >>> metric = CountMetric('response_status', tags={'code': 200})
+        >>> metric = CountMetric('response_status', 0, tags={'code': 200})
         >>> metric.value
         0
     """
 
-    def __init__(self, name, value=0, tags=None, interval_ms=None, end_time_ms=None):
+    def __init__(self, name, value, tags=None, interval_ms=None, end_time_ms=None):
         super(CountMetric, self).__init__(name, value, tags, interval_ms, end_time_ms)
 
         self["type"] = "count"
