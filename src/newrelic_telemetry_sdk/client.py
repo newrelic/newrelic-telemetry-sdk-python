@@ -13,17 +13,53 @@
 # limitations under the License.
 
 import json
-import requests
+import urllib3
 import zlib
 
 try:
-    from newrelic_telemetry_sdk.version import version
+    from newrelic_telemetry_sdk.version import version as __version__
 except ImportError:  # pragma: no cover
-    version = "unknown"  # pragma: no cover
+    __version__ = "unknown"
 
-USER_AGENT = "NewRelic-Python-TelemetrySDK/{}".format(version)
+USER_AGENT = "NewRelic-Python-TelemetrySDK/{}".format(__version__)
 
 __all__ = ("SpanClient", "MetricClient")
+
+
+class HTTPError(ValueError):
+    """Unexpected HTTP Status"""
+
+
+class HTTPResponse(urllib3.HTTPResponse):
+    """Response object with helper methods
+
+    :ivar headers: The HTTP headers
+    :ivar status: The HTTP status code
+    :ivar data: The raw byte encoded response data
+    """
+
+    def json(self):
+        """Returns the json-encoded content of a response.
+
+        :rtype: dict
+        """
+        return json.loads(self.data.decode("utf-8"))
+
+    @property
+    def ok(self):
+        """Return true if status code indicates success"""
+        return 200 <= self.status < 300
+
+    def raise_for_status(self):
+        """Raise an exception for an unsuccessful HTTP status code"""
+        if not self.ok:
+            raise HTTPError(self.status, self)
+
+
+class HTTPSConnectionPool(urllib3.HTTPSConnectionPool):
+    """Connection pool providing HTTPResponse objects"""
+
+    ResponseCls = HTTPResponse
 
 
 class Client(object):
@@ -44,24 +80,34 @@ class Client(object):
 
         >>> import os
         >>> insert_key = os.environ.get("NEW_RELIC_INSERT_KEY")
-        >>> client = Client(insert_key, "https://metric-api.newrelic.com/trace/v1", 0)
+        >>> client = Client(insert_key, host="metric-api.newrelic.com")
         >>> response = client.send({})
     """
 
     PAYLOAD_TYPE = ""
+    HOST = ""
+    URL = "/"
     GZIP_HEADER = {"Content-Encoding": "gzip"}
+    HEADERS = urllib3.make_headers(
+        keep_alive=True, accept_encoding=True, user_agent=USER_AGENT
+    )
 
-    def __init__(self, insert_key, url, compression_threshold):
-        self.url = url
+    def __init__(self, insert_key, host=None, compression_threshold=64 * 1024):
+        host = host or self.HOST
         self.compression_threshold = compression_threshold
-        headers = {
-            "Api-Key": insert_key,
-            "User-Agent": USER_AGENT,
-            "Content-Encoding": "identity",
-            "Content-Type": "application/json",
-        }
-        session = self.session = requests.Session()
-        session.headers.update(headers)
+        headers = self.HEADERS.copy()
+        headers.update(
+            {
+                "Api-Key": insert_key,
+                "Content-Encoding": "identity",
+                "Content-Type": "application/json",
+            }
+        )
+        self._pool = pool = HTTPSConnectionPool(
+            host=host, port=443, retries=False, headers=headers, strict=True
+        )
+        self._gzip_headers = gzip_headers = pool.headers.copy()
+        gzip_headers.update(self.GZIP_HEADER)
 
     @staticmethod
     def _compress_payload(payload):
@@ -77,7 +123,7 @@ class Client(object):
         :param item: The object to send
         :type item: dict
 
-        :rtype: requests.Response
+        :rtype: HTTPResponse
         """
         return self.send_batch((item,))
 
@@ -87,7 +133,7 @@ class Client(object):
         :param items: An iterable of items to send to New Relic.
         :type items: list or tuple
 
-        :rtype: requests.Response
+        :rtype: HTTPResponse
         """
         payload = {self.PAYLOAD_TYPE: items}
         if common:
@@ -100,9 +146,9 @@ class Client(object):
         headers = None
         if len(payload) > self.compression_threshold:
             payload = self._compress_payload(payload)
-            headers = self.GZIP_HEADER
+            headers = self._gzip_headers
 
-        return self.session.post(self.url, headers=headers, data=payload)
+        return self._pool.urlopen("POST", self.URL, body=payload, headers=headers)
 
 
 class SpanClient(Client):
@@ -127,13 +173,8 @@ class SpanClient(Client):
     """
 
     HOST = "trace-api.newrelic.com"
-    URL_TEMPLATE = "https://{0}/trace/v1"
+    URL = "/trace/v1"
     PAYLOAD_TYPE = "spans"
-
-    def __init__(self, insert_key, host=None, compression_threshold=64 * 1024):
-        host = host or self.HOST
-        url = self.URL_TEMPLATE.format(host)
-        super(SpanClient, self).__init__(insert_key, url, compression_threshold)
 
 
 class MetricClient(Client):
@@ -159,10 +200,5 @@ class MetricClient(Client):
     """
 
     HOST = "metric-api.newrelic.com"
-    URL_TEMPLATE = "https://{0}/metric/v1"
+    URL = "/metric/v1"
     PAYLOAD_TYPE = "metrics"
-
-    def __init__(self, insert_key, host=None, compression_threshold=64 * 1024):
-        host = host or self.HOST
-        url = self.URL_TEMPLATE.format(host)
-        super(MetricClient, self).__init__(insert_key, url, compression_threshold)

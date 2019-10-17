@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from newrelic_telemetry_sdk.client import SpanClient, MetricClient
+from newrelic_telemetry_sdk.client import SpanClient, MetricClient, HTTPError
 from newrelic_telemetry_sdk.span import Span
 from newrelic_telemetry_sdk.metric import GaugeMetric, CountMetric, SummaryMetric
 
@@ -22,6 +22,7 @@ except ImportError:  # pragma: no cover
     __version__ = "unknown"  # pragma: no cover
 
 __all__ = (
+    "HTTPError",
     "SpanClient",
     "MetricClient",
     "Span",
