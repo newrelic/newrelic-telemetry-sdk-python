@@ -20,7 +20,12 @@ import time
 import uuid
 import zlib
 from newrelic_telemetry_sdk.version import version
-from newrelic_telemetry_sdk.client import SpanClient, MetricClient, HTTPResponse
+from newrelic_telemetry_sdk.client import (
+    SpanClient,
+    MetricClient,
+    HTTPError,
+    HTTPResponse,
+)
 from urllib3 import HTTPConnectionPool
 
 try:
@@ -73,6 +78,30 @@ def disable_sending(*args, **kwargs):
     response = HTTPResponse(status=202)
     response.request = Request(*args, **kwargs)
     return response
+
+
+def test_response_json():
+    response = HTTPResponse(status=200, body=b"{}")
+    assert response.json() == {}
+
+
+@pytest.mark.parametrize(
+    "status,expected", ((199, False), (200, True), (299, True), (300, False))
+)
+def test_repsonse_ok(status, expected):
+    response = HTTPResponse(status=status)
+    assert response.ok is expected
+
+
+def test_response_raise_for_status_error():
+    response = HTTPResponse(status=500)
+    with pytest.raises(HTTPError):
+        response.raise_for_status()
+
+
+def test_response_raise_for_status_ok():
+    response = HTTPResponse(status=200)
+    response.raise_for_status()
 
 
 @pytest.fixture
