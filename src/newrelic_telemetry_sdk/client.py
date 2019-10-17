@@ -79,7 +79,7 @@ class Client(object):
     Usage::
 
         >>> import os
-        >>> insert_key = os.environ.get("NEW_RELIC_INSERT_KEY")
+        >>> insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
         >>> client = Client(insert_key, host="metric-api.newrelic.com")
         >>> response = client.send({})
     """
@@ -167,7 +167,7 @@ class SpanClient(Client):
     Usage::
 
         >>> import os
-        >>> insert_key = os.environ.get("NEW_RELIC_INSERT_KEY")
+        >>> insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
         >>> span_client = SpanClient(insert_key)
         >>> response = span_client.send({})
     """
@@ -194,7 +194,7 @@ class MetricClient(Client):
     Usage::
 
         >>> import os
-        >>> insert_key = os.environ.get("NEW_RELIC_INSERT_KEY")
+        >>> insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
         >>> metric_client = MetricClient(insert_key)
         >>> response = metric_client.send({})
     """

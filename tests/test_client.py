@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import functools
 import json
 import pytest
 import os
@@ -19,9 +20,8 @@ import time
 import uuid
 import zlib
 from newrelic_telemetry_sdk.version import version
-from newrelic_telemetry_sdk.client import SpanClient, MetricClient
-from requests.adapters import HTTPAdapter
-from requests.models import Response
+from newrelic_telemetry_sdk.client import SpanClient, MetricClient, HTTPResponse
+from urllib3 import HTTPConnectionPool
 
 try:
     string_types = basestring
@@ -48,10 +48,30 @@ METRIC = {
 }
 
 
-def disable_sending(self, request, *args, **kwargs):
-    response = Response()
-    response.status_code = 200
-    response.request = request
+class Request(object):
+    def __init__(instance, self, method, url, body=None, headers=None, *args, **kwargs):
+        headers = headers or self.headers
+        instance.method = method
+        instance.url = url
+        instance.body = body
+        instance.headers = headers
+        instance.args = args
+        instance.kwargs = kwargs
+
+
+def capture_request(fn):
+    @functools.wraps(fn)
+    def wrapper(*args, **kwargs):
+        response = fn(*args, **kwargs)
+        response.request = Request(*args, **kwargs)
+        return response
+
+    return wrapper
+
+
+def disable_sending(*args, **kwargs):
+    response = HTTPResponse(status=202)
+    response.request = Request(*args, **kwargs)
     return response
 
 
@@ -63,8 +83,11 @@ def span_client(request, monkeypatch):
     if host.startswith("staging"):
         host = "staging-trace-api.newrelic.com"
 
-    if not insert_key:
-        monkeypatch.setattr(HTTPAdapter, "send", disable_sending)
+    if insert_key:
+        urlopen = getattr(HTTPConnectionPool, "urlopen")
+        monkeypatch.setattr(HTTPConnectionPool, "urlopen", capture_request(urlopen))
+    else:
+        monkeypatch.setattr(HTTPConnectionPool, "urlopen", disable_sending)
 
     # Allow client_args to be specified by a marker
     client_args = request.node.get_closest_marker("client_args")
@@ -82,8 +105,11 @@ def metric_client(request, monkeypatch):
     if host.startswith("staging"):
         host = "staging-metric-api.newrelic.com"
 
-    if not insert_key:
-        monkeypatch.setattr(HTTPAdapter, "send", disable_sending)
+    if insert_key:
+        urlopen = getattr(HTTPConnectionPool, "urlopen")
+        monkeypatch.setattr(HTTPConnectionPool, "urlopen", capture_request(urlopen))
+    else:
+        monkeypatch.setattr(HTTPConnectionPool, "urlopen", disable_sending)
 
     # Allow client_args to be specified by a marker
     client_args = request.node.get_closest_marker("client_args")
@@ -109,12 +135,12 @@ def decompress(payload):
     return payload
 
 
-def validate_request(legal_urls, typ, request, items, common=None):
+def validate_request(expected_url, typ, request, items, common=None):
     # request method should be POST
     assert request.method == "POST"
 
     # Validate that the user agent string is correct
-    user_agent = request.headers["User-Agent"]
+    user_agent = request.headers["user-agent"]
     assert user_agent.startswith("NewRelic-Python-TelemetrySDK/")
     assert version in user_agent
 
@@ -122,7 +148,7 @@ def validate_request(legal_urls, typ, request, items, common=None):
     assert request.headers["Content-Type"] == "application/json"
 
     # Validate the URL
-    assert request.url in legal_urls
+    assert request.url == expected_url
 
     headers = request.headers
     assert "Api-Key" in headers
@@ -153,29 +179,11 @@ def validate_request(legal_urls, typ, request, items, common=None):
 
 
 def validate_span_request(request, items, common=None):
-    validate_request(
-        (
-            "https://trace-api.newrelic.com/trace/v1",
-            "https://staging-trace-api.newrelic.com/trace/v1",
-        ),
-        "spans",
-        request,
-        items,
-        common,
-    )
+    validate_request("/trace/v1", "spans", request, items, common)
 
 
 def validate_metric_request(request, items, common=None):
-    validate_request(
-        (
-            "https://metric-api.newrelic.com/metric/v1",
-            "https://staging-metric-api.newrelic.com/metric/v1",
-        ),
-        "metrics",
-        request,
-        items,
-        common,
-    )
+    validate_request("/metric/v1", "metrics", request, items, common)
 
 
 @pytest.mark.client_args(compression_threshold=0)
