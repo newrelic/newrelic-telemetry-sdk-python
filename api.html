@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; newrelic-telemetry-sdk 0.1.2 documentation</title>
+  <title>API Reference &mdash; newrelic-telemetry-sdk 0.2.0 documentation</title>
   
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                0.1
+                0.2
               </div>
             
           
@@ -169,16 +169,16 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>insert_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Insights insert key</p></li>
-<li><p><strong>host</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – (optional) Override the host for the span API endpoint.</p></li>
-<li><p><strong>compression_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Compress if number of bytes in payload is
-above this threshold. (Default: 64K)</p></li>
+<li><p><strong>insert_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Insights insert key</p></li>
+<li><p><strong>host</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – (optional) Override the host for the span API endpoint.</p></li>
+<li><p><strong>compression_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – (optional) Compress if number of bytes in
+payload is above this threshold. (Default: 64K)</p></li>
 </ul>
 </dd>
 </dl>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">os</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">insert_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;NEW_RELIC_INSERT_KEY&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">insert_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;NEW_RELIC_INSERT_KEY&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">span_client</span> <span class="o">=</span> <span class="n">SpanClient</span><span class="p">(</span><span class="n">insert_key</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">span_client</span><span class="o">.</span><span class="n">send</span><span class="p">({})</span>
 </pre></div>
@@ -189,10 +189,10 @@ above this threshold. (Default: 64K)</p></li>
 <dd><p>Send a single item</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>item</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – The object to send</p>
+<dd class="field-odd"><p><strong>item</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The object to send</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://2.python-requests.org//en/master/api/#requests.Response" title="(in Requests v2.22.0)">requests.Response</a></p>
+<dd class="field-even"><p><a class="reference internal" href="#newrelic_telemetry_sdk.client.HTTPResponse" title="newrelic_telemetry_sdk.client.HTTPResponse">HTTPResponse</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -203,10 +203,10 @@ above this threshold. (Default: 64K)</p></li>
 <dd><p>Send a batch of spans</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>items</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><em>tuple</em></a>) – An iterable of items to send to New Relic.</p>
+<dd class="field-odd"><p><strong>items</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) – An iterable of items to send to New Relic.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://2.python-requests.org//en/master/api/#requests.Response" title="(in Requests v2.22.0)">requests.Response</a></p>
+<dd class="field-even"><p><a class="reference internal" href="#newrelic_telemetry_sdk.client.HTTPResponse" title="newrelic_telemetry_sdk.client.HTTPResponse">HTTPResponse</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -221,17 +221,17 @@ above this threshold. (Default: 64K)</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>insert_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Insights insert key</p></li>
-<li><p><strong>metric_host</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – (optional) Override the host for the metric API
+<li><p><strong>insert_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Insights insert key</p></li>
+<li><p><strong>host</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – (optional) Override the host for the metric API
 endpoint.</p></li>
-<li><p><strong>compression_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Compress if number of bytes in payload is
-above this threshold. (Default: 64K)</p></li>
+<li><p><strong>compression_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – (optional) Compress if number of bytes in
+payload is above this threshold. (Default: 64K)</p></li>
 </ul>
 </dd>
 </dl>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">os</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">insert_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;NEW_RELIC_INSERT_KEY&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">insert_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;NEW_RELIC_INSERT_KEY&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">metric_client</span> <span class="o">=</span> <span class="n">MetricClient</span><span class="p">(</span><span class="n">insert_key</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">metric_client</span><span class="o">.</span><span class="n">send</span><span class="p">({})</span>
 </pre></div>
@@ -242,10 +242,10 @@ above this threshold. (Default: 64K)</p></li>
 <dd><p>Send a single item</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>item</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – The object to send</p>
+<dd class="field-odd"><p><strong>item</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The object to send</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://2.python-requests.org//en/master/api/#requests.Response" title="(in Requests v2.22.0)">requests.Response</a></p>
+<dd class="field-even"><p><a class="reference internal" href="#newrelic_telemetry_sdk.client.HTTPResponse" title="newrelic_telemetry_sdk.client.HTTPResponse">HTTPResponse</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -256,10 +256,71 @@ above this threshold. (Default: 64K)</p></li>
 <dd><p>Send a batch of spans</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>items</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><em>tuple</em></a>) – An iterable of items to send to New Relic.</p>
+<dd class="field-odd"><p><strong>items</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) – An iterable of items to send to New Relic.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://2.python-requests.org//en/master/api/#requests.Response" title="(in Requests v2.22.0)">requests.Response</a></p>
+<dd class="field-even"><p><a class="reference internal" href="#newrelic_telemetry_sdk.client.HTTPResponse" title="newrelic_telemetry_sdk.client.HTTPResponse">HTTPResponse</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="newrelic_telemetry_sdk.client.HTTPError">
+<em class="property">exception </em><code class="sig-prename descclassname">newrelic_telemetry_sdk.client.</code><code class="sig-name descname">HTTPError</code><a class="reference internal" href="_modules/newrelic_telemetry_sdk/client.html#HTTPError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.client.HTTPError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unexpected HTTP Status</p>
+<dl class="attribute">
+<dt id="newrelic_telemetry_sdk.client.HTTPError.args">
+<code class="sig-name descname">args</code><a class="headerlink" href="#newrelic_telemetry_sdk.client.HTTPError.args" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="newrelic_telemetry_sdk.client.HTTPError.with_traceback">
+<code class="sig-name descname">with_traceback</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#newrelic_telemetry_sdk.client.HTTPError.with_traceback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exception.with_traceback(tb) –
+set self.__traceback__ to tb and return self.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="newrelic_telemetry_sdk.client.HTTPResponse">
+<em class="property">class </em><code class="sig-prename descclassname">newrelic_telemetry_sdk.client.</code><code class="sig-name descname">HTTPResponse</code><a class="reference internal" href="_modules/newrelic_telemetry_sdk/client.html#HTTPResponse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.client.HTTPResponse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Response object with helper methods</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>headers</strong> – The HTTP headers</p></li>
+<li><p><strong>status</strong> – The HTTP status code</p></li>
+<li><p><strong>data</strong> – The raw byte encoded response data</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="newrelic_telemetry_sdk.client.HTTPResponse.json">
+<code class="sig-name descname">json</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/newrelic_telemetry_sdk/client.html#HTTPResponse.json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.client.HTTPResponse.json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the json-encoded content of a response.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="newrelic_telemetry_sdk.client.HTTPResponse.ok">
+<em class="property">property </em><code class="sig-name descname">ok</code><a class="headerlink" href="#newrelic_telemetry_sdk.client.HTTPResponse.ok" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return true if status code indicates success</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="newrelic_telemetry_sdk.client.HTTPResponse.raise_for_status">
+<code class="sig-name descname">raise_for_status</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/newrelic_telemetry_sdk/client.html#HTTPResponse.raise_for_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.client.HTTPResponse.raise_for_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raise an exception for an unsuccessful HTTP status code</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#newrelic_telemetry_sdk.client.HTTPError" title="newrelic_telemetry_sdk.client.HTTPError"><strong>HTTPError</strong></a> – if response status is not successful</p>
 </dd>
 </dl>
 </dd></dl>
@@ -279,19 +340,19 @@ manager.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The name of the span.</p></li>
-<li><p><strong>tags</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – (optional) A set of tags that can be used to filter this span
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the span.</p></li>
+<li><p><strong>tags</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – (optional) A set of tags that can be used to filter this span
 in the New Relic UI.</p></li>
-<li><p><strong>guid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – (optional) A random, unique identifier used to locate exactly
+<li><p><strong>guid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – (optional) A random, unique identifier used to locate exactly
 1 span in New Relic. This must be a unique identifier across all spans
 in a New Relic account.</p></li>
-<li><p><strong>trace_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – (optional) A random identifier representing a group of
+<li><p><strong>trace_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – (optional) A random identifier representing a group of
 spans known as a “trace”. Spans having the same trace_id are grouped
 into a single view.</p></li>
-<li><p><strong>parent_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – (optional) The guid of the span that called this span.</p></li>
-<li><p><strong>start_time_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – (optional) A unix timestamp in milliseconds
+<li><p><strong>parent_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – (optional) The guid of the span that called this span.</p></li>
+<li><p><strong>start_time_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – (optional) A unix timestamp in milliseconds
 representing the start time of the span. Defaults to time.time() * 1000</p></li>
-<li><p><strong>duration_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – (optional) Total duration of the span in milliseconds.</p></li>
+<li><p><strong>duration_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – (optional) Total duration of the span in milliseconds.</p></li>
 </ul>
 </dd>
 </dl>
@@ -307,7 +368,7 @@ representing the start time of the span. Defaults to time.time() * 1000</p></li>
 <dd><p>Record the duration on this span.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>finish_time_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – (optional) Timestamp in milliseconds. Defaults
+<dd class="field-odd"><p><strong>finish_time_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – (optional) Timestamp in milliseconds. Defaults
 to time.time() * 1000</p>
 </dd>
 </dl>
@@ -320,7 +381,7 @@ to time.time() * 1000</p>
 <span id="metrics"></span><h2>Metrics<a class="headerlink" href="#module-newrelic_telemetry_sdk.metric" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="newrelic_telemetry_sdk.metric.CountMetric">
-<em class="property">class </em><code class="sig-prename descclassname">newrelic_telemetry_sdk.metric.</code><code class="sig-name descname">CountMetric</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">value=0</em>, <em class="sig-param">tags=None</em>, <em class="sig-param">interval_ms=None</em>, <em class="sig-param">end_time_ms=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newrelic_telemetry_sdk/metric.html#CountMetric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.metric.CountMetric" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">newrelic_telemetry_sdk.metric.</code><code class="sig-name descname">CountMetric</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">value</em>, <em class="sig-param">tags=None</em>, <em class="sig-param">interval_ms=None</em>, <em class="sig-param">end_time_ms=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newrelic_telemetry_sdk/metric.html#CountMetric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.metric.CountMetric" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#newrelic_telemetry_sdk.metric.Metric" title="newrelic_telemetry_sdk.metric.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">newrelic_telemetry_sdk.metric.Metric</span></code></a></p>
 <p>Count Metric</p>
 <p>This metric is of a “count” type. The metric holds an integer indicating a
@@ -328,20 +389,20 @@ count of events which have taken place.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The name of the metric.</p></li>
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – (optional) The initial metric value. Defaults to 0.</p></li>
-<li><p><strong>tags</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – (optional) A set of tags that can be used to filter this
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the metric.</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The metric count value.</p></li>
+<li><p><strong>tags</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – (optional) A set of tags that can be used to filter this
 metric in the New Relic UI.</p></li>
-<li><p><strong>interval_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – (optional) The interval of time in milliseconds over which
+<li><p><strong>interval_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – (optional) The interval of time in milliseconds over which
 the metric was recorded.</p></li>
-<li><p><strong>end_time_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – (optional) A unix timestamp in milliseconds representing the
+<li><p><strong>end_time_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – (optional) A unix timestamp in milliseconds representing the
 end time of the metric. Defaults to time.time() * 1000</p></li>
 </ul>
 </dd>
 </dl>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">newrelic_telemetry_sdk</span> <span class="k">import</span> <span class="n">CountMetric</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">metric</span> <span class="o">=</span> <span class="n">CountMetric</span><span class="p">(</span><span class="s1">&#39;response_status&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metric</span> <span class="o">=</span> <span class="n">CountMetric</span><span class="p">(</span><span class="s1">&#39;response_status&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">metric</span><span class="o">.</span><span class="n">value</span>
 <span class="go">0</span>
 </pre></div>
@@ -357,13 +418,13 @@ end time of the metric. Defaults to time.time() * 1000</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The name of the metric.</p></li>
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – The metric value.</p></li>
-<li><p><strong>tags</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – (optional) A set of tags that can be used to filter this
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the metric.</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The metric value.</p></li>
+<li><p><strong>tags</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – (optional) A set of tags that can be used to filter this
 metric in the New Relic UI.</p></li>
-<li><p><strong>interval_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – (optional) The interval of time in milliseconds over which
+<li><p><strong>interval_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – (optional) The interval of time in milliseconds over which
 the metric was recorded.</p></li>
-<li><p><strong>end_time_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – (optional) A unix timestamp in milliseconds representing the
+<li><p><strong>end_time_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – (optional) A unix timestamp in milliseconds representing the
 end time of the metric. Defaults to time.time() * 1000</p></li>
 </ul>
 </dd>
@@ -380,19 +441,19 @@ end time of the metric. Defaults to time.time() * 1000</p></li>
 <dl class="class">
 <dt id="newrelic_telemetry_sdk.metric.Metric">
 <em class="property">class </em><code class="sig-prename descclassname">newrelic_telemetry_sdk.metric.</code><code class="sig-name descname">Metric</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">value</em>, <em class="sig-param">tags=None</em>, <em class="sig-param">interval_ms=None</em>, <em class="sig-param">end_time_ms=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newrelic_telemetry_sdk/metric.html#Metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.metric.Metric" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a></p>
 <p>Base Metric type</p>
 <p>Includes common method definitions and implementations for metrics.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The name of the metric.</p></li>
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – The metric value.</p></li>
-<li><p><strong>tags</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – (optional) A set of tags that can be used to filter this
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the metric.</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The metric value.</p></li>
+<li><p><strong>tags</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – (optional) A set of tags that can be used to filter this
 metric in the New Relic UI.</p></li>
-<li><p><strong>interval_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – (optional) The interval of time in milliseconds over which
+<li><p><strong>interval_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – (optional) The interval of time in milliseconds over which
 the metric was recorded.</p></li>
-<li><p><strong>end_time_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – (optional) A unix timestamp in milliseconds representing the
+<li><p><strong>end_time_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – (optional) A unix timestamp in milliseconds representing the
 end time_ms of the metric. Defaults to time.time() * 1000</p></li>
 </ul>
 </dd>
@@ -447,7 +508,7 @@ end time_ms of the metric. Defaults to time.time() * 1000</p></li>
 
 <dl class="class">
 <dt id="newrelic_telemetry_sdk.metric.SummaryMetric">
-<em class="property">class </em><code class="sig-prename descclassname">newrelic_telemetry_sdk.metric.</code><code class="sig-name descname">SummaryMetric</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">count=0</em>, <em class="sig-param">sum=0</em>, <em class="sig-param">min=inf</em>, <em class="sig-param">max=-inf</em>, <em class="sig-param">tags=None</em>, <em class="sig-param">interval_ms=None</em>, <em class="sig-param">end_time_ms=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newrelic_telemetry_sdk/metric.html#SummaryMetric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.metric.SummaryMetric" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">newrelic_telemetry_sdk.metric.</code><code class="sig-name descname">SummaryMetric</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">count</em>, <em class="sig-param">sum</em>, <em class="sig-param">min</em>, <em class="sig-param">max</em>, <em class="sig-param">tags=None</em>, <em class="sig-param">interval_ms=None</em>, <em class="sig-param">end_time_ms=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newrelic_telemetry_sdk/metric.html#SummaryMetric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.metric.SummaryMetric" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#newrelic_telemetry_sdk.metric.Metric" title="newrelic_telemetry_sdk.metric.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">newrelic_telemetry_sdk.metric.Metric</span></code></a></p>
 <p>Summary Metric</p>
 <p>This metric is of a “summary” type. It tracks the count, sum, min, and
@@ -456,20 +517,16 @@ averages and distributions over time.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The name of the metric.</p></li>
-<li><p><strong>count</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – (optional) The initial count in the summary metric.
-Defaults to 0.</p></li>
-<li><p><strong>sum</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – (optional) The initial sum in the summary metric.
-Defaults to 0.</p></li>
-<li><p><strong>min</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – (optional) The initial min in the minmary metric. Defaults to
-float(‘inf’).</p></li>
-<li><p><strong>max</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – (optional) The initial max in the maxmary metric. Defaults to
-float(‘-inf’).</p></li>
-<li><p><strong>tags</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – (optional) A set of tags that can be used to filter this
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the metric.</p></li>
+<li><p><strong>count</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The count in the summary metric.</p></li>
+<li><p><strong>sum</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The sum in the summary metric.</p></li>
+<li><p><strong>min</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The minimum value in the summary metric.</p></li>
+<li><p><strong>max</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The maximum value in the summary metric.</p></li>
+<li><p><strong>tags</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – (optional) A set of tags that can be used to filter this
 metric in the New Relic UI.</p></li>
-<li><p><strong>interval_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – (optional) The interval of time in milliseconds over which
+<li><p><strong>interval_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – (optional) The interval of time in milliseconds over which
 the metric was recorded.</p></li>
-<li><p><strong>end_time_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – (optional) A unix timestamp in milliseconds representing the
+<li><p><strong>end_time_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – (optional) A unix timestamp in milliseconds representing the
 end time of the metric. Defaults to time.time() * 1000</p></li>
 </ul>
 </dd>
@@ -488,13 +545,13 @@ end time of the metric. Defaults to time.time() * 1000</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The name of the metric.</p></li>
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – The metric value.</p></li>
-<li><p><strong>tags</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – (optional) A set of tags that can be used to filter this
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the metric.</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The metric value.</p></li>
+<li><p><strong>tags</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – (optional) A set of tags that can be used to filter this
 metric in the New Relic UI.</p></li>
-<li><p><strong>interval_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – (optional) The interval of time in milliseconds over which
+<li><p><strong>interval_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – (optional) The interval of time in milliseconds over which
 the metric was recorded.</p></li>
-<li><p><strong>end_time_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – (optional) A unix timestamp in milliseconds representing
+<li><p><strong>end_time_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – (optional) A unix timestamp in milliseconds representing
 the end time of the metric. Defaults to time.time() * 1000</p></li>
 </ul>
 </dd>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>newrelic_telemetry_sdk.metric &mdash; newrelic-telemetry-sdk 0.1.2 documentation</title>
+  <title>newrelic_telemetry_sdk.metric &mdash; newrelic-telemetry-sdk 0.2.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.1
+                0.2
               </div>
             
           
@@ -285,7 +285,7 @@
 
 <span class="sd">    :param name: The name of the metric.</span>
 <span class="sd">    :type name: str</span>
-<span class="sd">    :param value: (optional) The initial metric value. Defaults to 0.</span>
+<span class="sd">    :param value: The metric count value.</span>
 <span class="sd">    :type value: int or float</span>
 <span class="sd">    :param tags: (optional) A set of tags that can be used to filter this</span>
 <span class="sd">        metric in the New Relic UI.</span>
@@ -300,12 +300,12 @@
 <span class="sd">    Usage::</span>
 
 <span class="sd">        &gt;&gt;&gt; from newrelic_telemetry_sdk import CountMetric</span>
-<span class="sd">        &gt;&gt;&gt; metric = CountMetric(&#39;response_status&#39;, tags={&#39;code&#39;: 200})</span>
+<span class="sd">        &gt;&gt;&gt; metric = CountMetric(&#39;response_status&#39;, 0, tags={&#39;code&#39;: 200})</span>
 <span class="sd">        &gt;&gt;&gt; metric.value</span>
 <span class="sd">        0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">CountMetric</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">interval_ms</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;count&quot;</span></div>
@@ -320,17 +320,13 @@
 
 <span class="sd">    :param name: The name of the metric.</span>
 <span class="sd">    :type name: str</span>
-<span class="sd">    :param count: (optional) The initial count in the summary metric.</span>
-<span class="sd">        Defaults to 0.</span>
+<span class="sd">    :param count: The count in the summary metric.</span>
 <span class="sd">    :type count: int</span>
-<span class="sd">    :param sum: (optional) The initial sum in the summary metric.</span>
-<span class="sd">        Defaults to 0.</span>
+<span class="sd">    :param sum: The sum in the summary metric.</span>
 <span class="sd">    :type sum: int or float</span>
-<span class="sd">    :param min: (optional) The initial min in the minmary metric. Defaults to</span>
-<span class="sd">        float(&#39;inf&#39;).</span>
+<span class="sd">    :param min: The minimum value in the summary metric.</span>
 <span class="sd">    :type min: int or float</span>
-<span class="sd">    :param max: (optional) The initial max in the maxmary metric. Defaults to</span>
-<span class="sd">        float(&#39;-inf&#39;).</span>
+<span class="sd">    :param max: The maximum value in the summary metric.</span>
 <span class="sd">    :type max: int or float</span>
 <span class="sd">    :param tags: (optional) A set of tags that can be used to filter this</span>
 <span class="sd">        metric in the New Relic UI.</span>
@@ -351,15 +347,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">name</span><span class="p">,</span>
-        <span class="n">count</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="nb">sum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="nb">min</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span>
-        <span class="nb">max</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">),</span>
-        <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">interval_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">end_time_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="nb">sum</span><span class="p">,</span> <span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
         <span class="n">value</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="n">count</span><span class="p">,</span> <span class="s2">&quot;sum&quot;</span><span class="p">:</span> <span class="nb">sum</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">:</span> <span class="nb">min</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">:</span> <span class="nb">max</span><span class="p">}</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">SummaryMetric</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">interval_ms</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="p">)</span>
