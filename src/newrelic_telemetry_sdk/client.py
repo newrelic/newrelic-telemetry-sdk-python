@@ -87,6 +87,7 @@ class Client(object):
         >>> response = client.send({})
     """
 
+    POOL_CLS = HTTPSConnectionPool
     PAYLOAD_TYPE = ""
     HOST = ""
     URL = "/"
@@ -106,7 +107,7 @@ class Client(object):
                 "Content-Type": "application/json",
             }
         )
-        self._pool = pool = HTTPSConnectionPool(
+        self._pool = pool = self.POOL_CLS(
             host=host, port=443, retries=False, headers=headers, strict=True
         )
         self._gzip_headers = gzip_headers = pool.headers.copy()
