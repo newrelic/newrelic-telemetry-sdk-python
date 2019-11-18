@@ -285,3 +285,55 @@ def test_span_endpoint_batch(span_client):
 def test_defaults(cls, host):
     assert cls.HOST == host
     assert cls(None).compression_threshold == 64 * 1024
+
+
+@pytest.mark.client_args(compression_threshold=float("inf"))
+def test_metric_add_version_info_uncompressed(metric_client):
+    metric_client.add_version_info("foo", "0.1")
+    metric_client.add_version_info("bar", "0.2")
+    response = metric_client.send(METRIC)
+    request = response.request
+    validate_metric_request(request, [METRIC])
+
+    assert request.headers["Content-Encoding"] == "identity"
+    user_agent = request.headers["user-agent"]
+    assert user_agent.endswith(" foo/0.1 bar/0.2"), user_agent
+
+
+@pytest.mark.client_args(compression_threshold=0)
+def test_metric_add_version_info_compressed(metric_client):
+    metric_client.add_version_info("foo", "0.1")
+    metric_client.add_version_info("bar", "0.2")
+    response = metric_client.send(METRIC)
+    request = response.request
+    validate_metric_request(request, [METRIC])
+
+    assert request.headers["Content-Encoding"] == "gzip"
+    user_agent = request.headers["user-agent"]
+    assert user_agent.endswith(" foo/0.1 bar/0.2"), user_agent
+
+
+@pytest.mark.client_args(compression_threshold=float("inf"))
+def test_span_add_version_info_uncompressed(span_client):
+    span_client.add_version_info("foo", "0.1")
+    span_client.add_version_info("bar", "0.2")
+    response = span_client.send(SPAN)
+    request = response.request
+    validate_span_request(request, [SPAN])
+
+    assert request.headers["Content-Encoding"] == "identity"
+    user_agent = request.headers["user-agent"]
+    assert user_agent.endswith(" foo/0.1 bar/0.2"), user_agent
+
+
+@pytest.mark.client_args(compression_threshold=0)
+def test_span_add_version_info_compressed(span_client):
+    span_client.add_version_info("foo", "0.1")
+    span_client.add_version_info("bar", "0.2")
+    response = span_client.send(SPAN)
+    request = response.request
+    validate_span_request(request, [SPAN])
+
+    assert request.headers["Content-Encoding"] == "gzip"
+    user_agent = request.headers["user-agent"]
+    assert user_agent.endswith(" foo/0.1 bar/0.2"), user_agent

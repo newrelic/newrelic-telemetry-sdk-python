@@ -113,6 +113,21 @@ class Client(object):
         self._gzip_headers = gzip_headers = pool.headers.copy()
         gzip_headers.update(self.GZIP_HEADER)
 
+    def add_version_info(self, product, product_version):
+        """Adds product and version information to a User-Agent header
+
+        This method implements
+        https://tools.ietf.org/html/rfc7231#section-5.5.3
+
+        :param product: The product name using the SDK
+        :type product: str
+        :param product_version: The version string of the product in use
+        :type product_version: str
+        """
+        product_ua_header = " {}/{}".format(product, product_version)
+        self._pool.headers["user-agent"] += product_ua_header
+        self._gzip_headers["user-agent"] += product_ua_header
+
     @staticmethod
     def _compress_payload(payload):
         level = zlib.Z_DEFAULT_COMPRESSION
