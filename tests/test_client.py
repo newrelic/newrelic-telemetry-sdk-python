@@ -88,7 +88,7 @@ def test_response_json():
 @pytest.mark.parametrize(
     "status,expected", ((199, False), (200, True), (299, True), (300, False))
 )
-def test_repsonse_ok(status, expected):
+def test_response_ok(status, expected):
     response = HTTPResponse(status=status)
     assert response.ok is expected
 
