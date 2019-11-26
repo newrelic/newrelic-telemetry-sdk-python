@@ -2,7 +2,7 @@ newrelic-telemetry-sdk: Send data to New Relic!
 ===============================================
 
 ``newrelic-telemetry-sdk`` provides a Python library for sending Span and Metric data
-into `New Relic <https://newrelic.com>`_ using the Python `urllib3 <https://https://urllib3.readthedocs.io>`_ library.
+into `New Relic <https://newrelic.com>`_ using the Python `urllib3 <https://urllib3.readthedocs.io>`_ library.
 
 The current SDK supports sending dimensional metrics to the New Relic Metric API and spans to the New Relic Trace API.
 

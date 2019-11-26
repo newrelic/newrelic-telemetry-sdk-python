@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Quickstart &mdash; newrelic-telemetry-sdk 0.2.0 documentation</title>
+  <title>Quickstart &mdash; newrelic-telemetry-sdk 0.2.1 documentation</title>
   
 
   
@@ -193,7 +193,7 @@ The example code assumes you’ve set the following environment variables:</p>
 <span class="n">span_client</span> <span class="o">=</span> <span class="n">SpanClient</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;NEW_RELIC_INSERT_KEY&#39;</span><span class="p">])</span>
 <span class="n">response</span> <span class="o">=</span> <span class="n">span_client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">span</span><span class="p">)</span>
 <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
-<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Span sleep sent successfully!&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Span sleep sent successfully!&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -265,7 +265,7 @@ Required</p></th>
 
 <span class="n">response</span> <span class="o">=</span> <span class="n">metric_client</span><span class="o">.</span><span class="n">send_batch</span><span class="p">((</span><span class="n">temperature</span><span class="p">,</span> <span class="n">errors</span><span class="p">,</span> <span class="n">summary</span><span class="p">))</span>
 <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Sent metrics successfully!&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sent metrics successfully!&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
