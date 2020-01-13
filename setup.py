@@ -1,6 +1,7 @@
 import setuptools
 
 setuptools.setup(
+    name="newrelic-telemetry-sdk",
     use_scm_version={
         "write_to": "src/newrelic_telemetry_sdk/version.py",
         "write_to_template": """\
