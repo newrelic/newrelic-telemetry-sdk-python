@@ -16,6 +16,22 @@ import pytest
 from newrelic_telemetry_sdk.span import Span
 
 
+class CustomMapping(object):
+    def __getitem__(self, key):
+        if key == "foo":
+            return "bar"
+        raise KeyError(key)
+
+    def __iter__(self):
+        return iter(("foo",))
+
+    def __len__(self):
+        return 1
+
+    def keys(self):
+        return ("foo",)
+
+
 def test_span_defaults(freeze_time):
     span = Span("name")
     attributes = span["attributes"]
@@ -91,3 +107,10 @@ def test_span_duration_zero():
     value = span["attributes"]["duration.ms"]
     assert value == 0
     assert isinstance(value, int)
+
+
+def test_span_custom_mapping_for_tags():
+    span = Span("name", tags=CustomMapping())
+
+    assert type(span["attributes"]) is dict
+    assert span["attributes"]["foo"] == "bar"
