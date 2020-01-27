@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>newrelic_telemetry_sdk.metric &mdash; newrelic-telemetry-sdk 0.2.1 documentation</title>
+  <title>newrelic_telemetry_sdk.metric &mdash; newrelic-telemetry-sdk 0.2.2 documentation</title>
   
 
   
@@ -199,7 +199,7 @@
         <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">end_time_ms</span> <span class="ow">or</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">))</span> <span class="o">-</span> <span class="n">interval</span>
 
         <span class="k">if</span> <span class="n">tags</span><span class="p">:</span>
-            <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tags</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">tags</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Metric.copy"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.metric.Metric.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">cls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
