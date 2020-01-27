@@ -47,7 +47,7 @@ class Metric(dict):
         self["timestamp"] = int(end_time_ms or (time.time() * 1000)) - interval
 
         if tags:
-            self["attributes"] = tags
+            self["attributes"] = dict(tags)
 
     def copy(self):
         cls = type(self)
