@@ -16,6 +16,22 @@ import pytest
 from newrelic_telemetry_sdk.metric import Metric, CountMetric, SummaryMetric
 
 
+class CustomMapping(object):
+    def __getitem__(self, key):
+        if key == "foo":
+            return "bar"
+        raise KeyError(key)
+
+    def __iter__(self):
+        return iter(("foo",))
+
+    def __len__(self):
+        return 1
+
+    def keys(self):
+        return ("foo",)
+
+
 @pytest.mark.parametrize("method", (None, "from_value"))
 def test_metric_defaults(method, freeze_time):
     new = Metric
@@ -59,6 +75,7 @@ def test_summary_metric_defaults(freeze_time):
     "arg_name,arg_value,metric_key,metric_value",
     (
         ("tags", {"foo": "bar"}, "attributes", {"foo": "bar"}),
+        ("tags", CustomMapping(), "attributes", {"foo": "bar"}),
         ("interval_ms", 2000, "interval.ms", 2000),
         ("end_time_ms", 1000, "timestamp", 1000),
     ),
