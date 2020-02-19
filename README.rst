@@ -1,12 +1,9 @@
 New Relic Telemetry SDK
 =======================
 
-|ci| |coverage| |docs| |black|
+|ci| |docs| |black|
 
 .. |ci| image:: https://img.shields.io/azure-devops/build/newrelic-builds/python/1.svg
-    :target: https://dev.azure.com/newrelic-builds/python/_build/latest?definitionId=1&branchName=master
-
-.. |coverage| image:: https://img.shields.io/azure-devops/coverage/newrelic-builds/python/1.svg
     :target: https://dev.azure.com/newrelic-builds/python/_build/latest?definitionId=1&branchName=master
 
 .. |docs| image:: https://img.shields.io/badge/docs-available-brightgreen.svg

@@ -1,0 +1,63 @@
+name: Deploy
+
+on:
+  release:
+    types:
+      - published
+
+
+jobs:
+  pypi:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+        architecture: x64
+    - name: Install Dependencies
+      run: |
+        pip install -U pip
+        pip install -U wheel setuptools twine
+    - name: Build and Upload Packages
+      run: |
+        python setup.py sdist bdist_wheel
+        twine upload --non-interactive dist/*
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+
+  docs:
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+        architecture: x64
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@b6c65becb03b5d9487d1ddb2ab9f28bdffa1fa77
+      with:
+        ssh-private-key: ${{ secrets.SSH_DEPLOY_KEY }}
+    - name: Prepare git directory for docs build
+      run: |
+        git config --local user.name "bot"
+        git config --local user.email "bot@bot.localhost"
+        git remote add upstream git@github.com:${GITHUB_REPOSITORY}.git
+        git fetch upstream gh-pages && \
+        git worktree add -B gh-pages docs/_build upstream/gh-pages
+    - name: Install Dependencies
+      run: |
+        pip install -U pip
+        pip install -U wheel setuptools tox
+    - name: Generate docs
+      run: tox -edocs
+    - name: Publish docs
+      run: |
+        git add --all
+        git commit -m "Publishing docs to gh-pages"
+        git push
+      working-directory: ./docs/_build
