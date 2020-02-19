@@ -3,8 +3,8 @@ New Relic Telemetry SDK
 
 |ci| |docs| |black|
 
-.. |ci| image:: https://img.shields.io/azure-devops/build/newrelic-builds/python/1.svg
-    :target: https://dev.azure.com/newrelic-builds/python/_build/latest?definitionId=1&branchName=master
+.. |ci| image:: https://github.com/newrelic/newrelic-telemetry-sdk-python/workflows/Tests/badge.svg
+    :target: https://github.com/newrelic/newrelic-telemetry-sdk-python/actions?query=workflow%3ATests
 
 .. |docs| image:: https://img.shields.io/badge/docs-available-brightgreen.svg
     :target: https://newrelic.github.io/newrelic-telemetry-sdk-python/
