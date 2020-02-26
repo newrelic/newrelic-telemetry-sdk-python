@@ -48,7 +48,7 @@ jobs:
         git config --local user.email "bot@bot.localhost"
         git remote add upstream git@github.com:${GITHUB_REPOSITORY}.git
         git fetch upstream gh-pages && \
-        git worktree add -B gh-pages docs/_build upstream/gh-pages
+        git worktree add --no-checkout -B gh-pages docs/_build upstream/gh-pages
     - name: Install Dependencies
       run: |
         pip install -U pip
