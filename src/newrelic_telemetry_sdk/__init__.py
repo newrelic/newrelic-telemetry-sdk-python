@@ -16,6 +16,7 @@ from newrelic_telemetry_sdk.client import SpanClient, MetricClient, HTTPError
 from newrelic_telemetry_sdk.span import Span
 from newrelic_telemetry_sdk.metric import GaugeMetric, CountMetric, SummaryMetric
 from newrelic_telemetry_sdk.metric_batch import MetricBatch
+from newrelic_telemetry_sdk.harvester import Harvester
 
 try:
     from newrelic_telemetry_sdk.version import version as __version__
@@ -31,4 +32,5 @@ __all__ = (
     "CountMetric",
     "SummaryMetric",
     "MetricBatch",
+    "Harvester",
 )
