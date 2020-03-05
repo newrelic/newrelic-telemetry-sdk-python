@@ -107,8 +107,11 @@ class Client(object):
                 "Content-Type": "application/json",
             }
         )
+        retries = urllib3.Retry(
+            total=False, connect=None, read=None, redirect=0, status=None
+        )
         self._pool = pool = self.POOL_CLS(
-            host=host, port=443, retries=False, headers=headers, strict=True
+            host=host, port=443, retries=retries, headers=headers, strict=True
         )
         self._gzip_headers = gzip_headers = pool.headers.copy()
         gzip_headers.update(self.GZIP_HEADER)
