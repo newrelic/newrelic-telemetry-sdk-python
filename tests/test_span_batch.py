@@ -16,9 +16,39 @@ import pytest
 from newrelic_telemetry_sdk.span_batch import SpanBatch
 
 
+class VerifyLockSpanBatch(SpanBatch):
+    """Verify sensitive attributes are accessed / assigned under lock
+
+    These attributes are sensitive and should only be accessed under lock.
+    NOTE: It doesn't guarantee that the values returned are only modified under
+    lock; however, this provides some level of checking.
+    """
+
+    @property
+    def _batch(self):
+        assert self._lock.locked()
+        return self._internal_batch
+
+    @_batch.setter
+    def _batch(self, value):
+        if hasattr(self, "_internal_batch"):
+            assert self._lock.locked()
+        self._internal_batch = value
+
+    @property
+    def _common(self):
+        return self._internal_common
+
+    @_common.setter
+    def _common(self, value):
+        # This attribute should never be assigned
+        assert not hasattr(self, "_internal_common")
+        self._internal_common = value
+
+
 @pytest.mark.parametrize("tags", (None, {"foo": "bar"},))
 def test_span_batch_common_tags(tags):
-    batch = SpanBatch(tags)
+    batch = VerifyLockSpanBatch(tags)
 
     if tags:
         expected = {"attributes": tags}
@@ -34,7 +64,7 @@ def test_span_batch_common_tags(tags):
 
 
 def test_span_batch_simple():
-    batch = SpanBatch()
+    batch = VerifyLockSpanBatch()
 
     # Verify that item is recorded and that flush clears out the batch
     for _ in range(2):
