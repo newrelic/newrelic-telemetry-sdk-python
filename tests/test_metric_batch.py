@@ -17,6 +17,47 @@ from newrelic_telemetry_sdk.metric import GaugeMetric, CountMetric, SummaryMetri
 from newrelic_telemetry_sdk.metric_batch import MetricBatch
 
 
+class VerifyLockMetricBatch(MetricBatch):
+    """Verify sensitive attributes are accessed / assigned under lock
+
+    These attributes are sensitive and should only be accessed under lock.
+    NOTE: It doesn't guarantee that the values returned are only modified under
+    lock; however, this provides some level of checking.
+    """
+
+    @property
+    def _batch(self):
+        assert self._lock.locked()
+        return self._internal_batch
+
+    @_batch.setter
+    def _batch(self, value):
+        if hasattr(self, "_internal_batch"):
+            assert self._lock.locked()
+        self._internal_batch = value
+
+    @property
+    def _interval_start(self):
+        assert self._lock.locked()
+        return self._internal_interval_start
+
+    @_interval_start.setter
+    def _interval_start(self, value):
+        if hasattr(self, "_internal_interval_start"):
+            assert self._lock.locked()
+        self._internal_interval_start = value
+
+    @property
+    def _common(self):
+        return self._internal_common
+
+    @_common.setter
+    def _common(self, value):
+        # This attribute should never be assigned
+        assert not hasattr(self, "_internal_common")
+        self._internal_common = value
+
+
 @pytest.mark.parametrize("tags", (None, {"foo": "bar"}))
 def test_create_identity(tags):
     metric = GaugeMetric("name", 1000, tags=tags)
@@ -42,7 +83,7 @@ def test_create_identity(tags):
     ),
 )
 def test_merge_metric(metric_a, metric_b, expected_value):
-    batch = MetricBatch()
+    batch = VerifyLockMetricBatch()
 
     batch.record(metric_a)
     batch.record(metric_b)
@@ -50,8 +91,8 @@ def test_merge_metric(metric_a, metric_b, expected_value):
     assert metric_a.start_time_ms
     assert metric_b.start_time_ms
 
-    assert len(batch._batch) == 1
-    _, metric = batch._batch.popitem()
+    assert len(batch._internal_batch) == 1
+    _, metric = batch._internal_batch.popitem()
 
     assert metric.name == "name"
     assert metric.value == expected_value
@@ -60,11 +101,11 @@ def test_merge_metric(metric_a, metric_b, expected_value):
 
 def test_flush():
     metric = GaugeMetric("name", 1)
-    batch = MetricBatch()
+    batch = VerifyLockMetricBatch()
     batch.record(metric)
 
     # Initialize with dummy timestamp to verify timestamp update
-    batch._interval_start = 0
+    batch._internal_interval_start = 0
 
     metrics, common = batch.flush()
 
@@ -74,5 +115,8 @@ def test_flush():
     assert common["interval.ms"] > 0
 
     # Verify internal state is updated
-    assert batch._interval_start > 0
-    assert batch._batch == {}
+    assert batch._internal_interval_start > 0
+    assert batch._internal_batch == {}
+
+    # Verify that we don't return the same objects twice
+    assert batch.flush()[1] is not common
