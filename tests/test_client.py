@@ -122,9 +122,12 @@ def span_client(request, monkeypatch):
     # Allow client_args to be specified by a marker
     client_args = request.node.get_closest_marker("client_args")
     if client_args:
-        return SpanClient(insert_key, host, *client_args.args, **client_args.kwargs)
+        client = SpanClient(insert_key, host, *client_args.args, **client_args.kwargs)
     else:
-        return SpanClient(insert_key, host)
+        client = SpanClient(insert_key, host)
+
+    assert client._pool.port == 443
+    return client
 
 
 @pytest.fixture
@@ -144,9 +147,12 @@ def metric_client(request, monkeypatch):
     # Allow client_args to be specified by a marker
     client_args = request.node.get_closest_marker("client_args")
     if client_args:
-        return MetricClient(insert_key, host, *client_args.args, **client_args.kwargs)
+        client = MetricClient(insert_key, host, *client_args.args, **client_args.kwargs)
     else:
-        return MetricClient(insert_key, host)
+        client = MetricClient(insert_key, host)
+
+    assert client._pool.port == 443
+    return client
 
 
 def ensure_str(s):
