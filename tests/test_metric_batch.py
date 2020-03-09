@@ -99,9 +99,10 @@ def test_merge_metric(metric_a, metric_b, expected_value):
     assert "timestamp" not in metric
 
 
-def test_flush():
+@pytest.mark.parametrize("tags", (None, {"foo": "bar"},))
+def test_flush(tags):
     metric = GaugeMetric("name", 1)
-    batch = VerifyLockMetricBatch()
+    batch = VerifyLockMetricBatch(tags)
     batch.record(metric)
 
     # Initialize with dummy timestamp to verify timestamp update
@@ -113,6 +114,10 @@ def test_flush():
 
     assert common["timestamp"] == 0
     assert common["interval.ms"] > 0
+    if tags:
+        assert common["attributes"] == tags
+    else:
+        assert "attributes" not in common
 
     # Verify internal state is updated
     assert batch._internal_interval_start > 0

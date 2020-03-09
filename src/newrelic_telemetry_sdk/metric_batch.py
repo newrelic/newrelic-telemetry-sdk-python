@@ -35,7 +35,9 @@ class MetricBatch(object):
         self._lock = self.LOCK_CLS()
         self._batch = {}
         tags = tags and tags.copy() or {}
-        self._common = {"attributes": tags}
+        self._common = {}
+        if tags:
+            self._common["attributes"] = tags
 
     @staticmethod
     def create_identity(metric):
