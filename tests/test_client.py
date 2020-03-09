@@ -55,6 +55,7 @@ METRIC = {
 
 class Request(object):
     def __init__(instance, self, method, url, body=None, headers=None, *args, **kwargs):
+        assert isinstance(headers, dict) or headers is None
         headers = headers or self.headers
         instance.method = method
         instance.url = url
