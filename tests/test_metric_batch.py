@@ -99,6 +99,23 @@ def test_merge_metric(metric_a, metric_b, expected_value):
     assert "timestamp" not in metric
 
 
+@pytest.mark.parametrize(
+    "metric_a, metric_b",
+    (
+        (GaugeMetric("name", 1), CountMetric("name", 1)),
+        (GaugeMetric("foo", 1), GaugeMetric("bar", 1)),
+        (GaugeMetric("foo", 1, {"foo": 1}), GaugeMetric("foo", 1, {"foo": 2})),
+    ),
+)
+def test_different_metric(metric_a, metric_b):
+    batch = VerifyLockMetricBatch()
+
+    batch.record(metric_a)
+    batch.record(metric_b)
+
+    assert len(batch._internal_batch) == 2
+
+
 @pytest.mark.parametrize("tags", (None, {"foo": "bar"},))
 def test_flush(tags):
     metric = GaugeMetric("name", 1)
