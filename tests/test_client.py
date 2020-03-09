@@ -168,6 +168,12 @@ def validate_request(expected_url, typ, request, items, common=None):
     # request method should be POST
     assert request.method == "POST"
 
+    # Connection should be keep-alive
+    assert request.headers["connection"] == "keep-alive"
+
+    # Should accept gzip and deflate encoding
+    assert request.headers["accept-encoding"] == "gzip,deflate"
+
     # Validate that the user agent string is correct
     user_agent = request.headers["user-agent"]
     assert user_agent.startswith("NewRelic-Python-TelemetrySDK/")
