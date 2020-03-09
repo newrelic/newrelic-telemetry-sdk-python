@@ -181,3 +181,8 @@ def test_harvest_timing(harvester, monkeypatch):
     # Second call should account for the time between harvest intervals
     assert harvester._wait_for_harvest()
     assert timeout.pop() == (harvester.harvest_interval - DELTA)
+
+
+def test_defaults(harvester):
+    assert harvester.daemon is True
+    assert harvester.harvest_interval == 5
