@@ -228,35 +228,41 @@ def validate_metric_request(request, items, common=None):
     validate_request("/metric/v1", "metrics", request, items, common)
 
 
-@pytest.mark.client_args(compression_threshold=0)
-def test_span_endpoint_compressed(span_client):
+@pytest.mark.parametrize(
+    "compressed",
+    (
+        pytest.param(True, marks=pytest.mark.client_args(compression_threshold=0)),
+        pytest.param(
+            False, marks=pytest.mark.client_args(compression_threshold=float("inf"))
+        ),
+    ),
+)
+def test_span_endpoint_compression(compressed, span_client):
     response = span_client.send(SPAN)
     request = response.request
-    assert "Content-Encoding" in request.headers
+    if compressed:
+        assert request.headers["Content-Encoding"] == "gzip"
+    else:
+        assert request.headers["Content-Encoding"] == "identity"
     validate_span_request(request, [SPAN])
 
 
-@pytest.mark.client_args(compression_threshold=float("inf"))
-def test_span_endpoint_uncompressed(span_client):
-    response = span_client.send(SPAN)
-    request = response.request
-    assert request.headers["Content-Encoding"] == "identity"
-    validate_span_request(request, [SPAN])
-
-
-@pytest.mark.client_args(compression_threshold=0)
-def test_metric_endpoint_compressed(metric_client):
+@pytest.mark.parametrize(
+    "compressed",
+    (
+        pytest.param(True, marks=pytest.mark.client_args(compression_threshold=0)),
+        pytest.param(
+            False, marks=pytest.mark.client_args(compression_threshold=float("inf"))
+        ),
+    ),
+)
+def test_metric_endpoint_compression(compressed, metric_client):
     response = metric_client.send(METRIC)
     request = response.request
-    assert request.headers["Content-Encoding"] == "gzip"
-    validate_metric_request(request, [METRIC])
-
-
-@pytest.mark.client_args(compression_threshold=float("inf"))
-def test_metric_endpoint_uncompressed(metric_client):
-    response = metric_client.send(METRIC)
-    request = response.request
-    assert request.headers["Content-Encoding"] == "identity"
+    if compressed:
+        assert request.headers["Content-Encoding"] == "gzip"
+    else:
+        assert request.headers["Content-Encoding"] == "identity"
     validate_metric_request(request, [METRIC])
 
 
@@ -300,33 +306,31 @@ def test_defaults(cls, host):
     assert cls(None).compression_threshold == 64 * 1024
 
 
-@pytest.mark.client_args(compression_threshold=float("inf"))
-def test_metric_add_version_info_uncompressed(metric_client):
+@pytest.mark.parametrize(
+    "",
+    (
+        pytest.param(marks=pytest.mark.client_args(compression_threshold=0)),
+        pytest.param(marks=pytest.mark.client_args(compression_threshold=float("inf"))),
+    ),
+)
+def test_metric_add_version_info(metric_client):
     metric_client.add_version_info("foo", "0.1")
     metric_client.add_version_info("bar", "0.2")
     response = metric_client.send(METRIC)
     request = response.request
     validate_metric_request(request, [METRIC])
 
-    assert request.headers["Content-Encoding"] == "identity"
     user_agent = request.headers["user-agent"]
     assert user_agent.endswith(" foo/0.1 bar/0.2"), user_agent
 
 
-@pytest.mark.client_args(compression_threshold=0)
-def test_metric_add_version_info_compressed(metric_client):
-    metric_client.add_version_info("foo", "0.1")
-    metric_client.add_version_info("bar", "0.2")
-    response = metric_client.send(METRIC)
-    request = response.request
-    validate_metric_request(request, [METRIC])
-
-    assert request.headers["Content-Encoding"] == "gzip"
-    user_agent = request.headers["user-agent"]
-    assert user_agent.endswith(" foo/0.1 bar/0.2"), user_agent
-
-
-@pytest.mark.client_args(compression_threshold=float("inf"))
+@pytest.mark.parametrize(
+    "",
+    (
+        pytest.param(marks=pytest.mark.client_args(compression_threshold=0)),
+        pytest.param(marks=pytest.mark.client_args(compression_threshold=float("inf"))),
+    ),
+)
 def test_span_add_version_info_uncompressed(span_client):
     span_client.add_version_info("foo", "0.1")
     span_client.add_version_info("bar", "0.2")
@@ -334,19 +338,5 @@ def test_span_add_version_info_uncompressed(span_client):
     request = response.request
     validate_span_request(request, [SPAN])
 
-    assert request.headers["Content-Encoding"] == "identity"
-    user_agent = request.headers["user-agent"]
-    assert user_agent.endswith(" foo/0.1 bar/0.2"), user_agent
-
-
-@pytest.mark.client_args(compression_threshold=0)
-def test_span_add_version_info_compressed(span_client):
-    span_client.add_version_info("foo", "0.1")
-    span_client.add_version_info("bar", "0.2")
-    response = span_client.send(SPAN)
-    request = response.request
-    validate_span_request(request, [SPAN])
-
-    assert request.headers["Content-Encoding"] == "gzip"
     user_agent = request.headers["user-agent"]
     assert user_agent.endswith(" foo/0.1 bar/0.2"), user_agent
