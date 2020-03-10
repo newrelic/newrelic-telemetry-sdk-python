@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import time
 import pytest
 from newrelic_telemetry_sdk.metric import GaugeMetric, CountMetric, SummaryMetric
 from newrelic_telemetry_sdk.metric_batch import MetricBatch
@@ -117,20 +118,31 @@ def test_different_metric(metric_a, metric_b):
 
 
 @pytest.mark.parametrize("tags", (None, {"foo": "bar"},))
-def test_flush(tags):
+def test_flush(monkeypatch, tags):
     metric = GaugeMetric("name", 1)
+
+    DELTA = 4.0
+    current_t = [1.0]
+
+    def _time():
+        # Move time forward by DELTA on every call
+        current_t[0] *= DELTA
+        return current_t[0]
+
+    monkeypatch.setattr(time, "time", _time, raising=True)
+
     batch = VerifyLockMetricBatch(tags)
     batch.record(metric)
 
-    # Initialize with dummy timestamp to verify timestamp update
-    batch._internal_interval_start = 0
+    # Timestamp starts at 4
+    assert batch._internal_interval_start == 4000
 
     metrics, common = batch.flush()
 
     assert len(metrics) == 1
 
-    assert common["timestamp"] == 0
-    assert common["interval.ms"] > 0
+    assert common["timestamp"] == 4000
+    assert common["interval.ms"] == 12000
     if tags:
         assert common["attributes"] == tags
     else:
