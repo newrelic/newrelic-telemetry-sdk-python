@@ -331,7 +331,7 @@ def test_metric_add_version_info(metric_client):
         pytest.param(marks=pytest.mark.client_args(compression_threshold=float("inf"))),
     ),
 )
-def test_span_add_version_info_uncompressed(span_client):
+def test_span_add_version_info(span_client):
     span_client.add_version_info("foo", "0.1")
     span_client.add_version_info("bar", "0.2")
     response = span_client.send(SPAN)
