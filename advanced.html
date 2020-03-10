@@ -234,11 +234,7 @@
 <span class="n">metric_harvester</span> <span class="o">=</span> <span class="n">Harvester</span><span class="p">(</span><span class="n">metric_client</span><span class="p">,</span> <span class="n">metric_batch</span><span class="p">)</span>
 
 <span class="c1"># Send any buffered data when the process exits</span>
-<span class="k">def</span> <span class="nf">wait_to_send_metric_data</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mf">5.0</span><span class="p">):</span>
-    <span class="n">metric_harvester</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
-    <span class="n">metric_harvester</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
-
-<span class="n">atexit</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">wait_to_send_metric_data</span><span class="p">)</span>
+<span class="n">atexit</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">metric_harvester</span><span class="o">.</span><span class="n">stop</span><span class="p">)</span>
 
 <span class="c1"># Start the harvester background thread</span>
 <span class="n">metric_harvester</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>

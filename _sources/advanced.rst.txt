@@ -68,11 +68,7 @@ The example code assumes you've set the following environment variables:
     metric_harvester = Harvester(metric_client, metric_batch)
 
     # Send any buffered data when the process exits
-    def wait_to_send_metric_data(timeout=5.0):
-        metric_harvester.stop()
-        metric_harvester.join(timeout=timeout)
-
-    atexit.register(wait_to_send_metric_data)
+    atexit.register(metric_harvester.stop)
 
     # Start the harvester background thread
     metric_harvester.start()
