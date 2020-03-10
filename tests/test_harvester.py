@@ -70,7 +70,7 @@ def test_record(harvester, batch):
 
 
 def test_run_once(harvester, client):
-    harvester.harvest_interval = 0.01
+    harvester.harvest_interval = 0
     send_batch = client.send_batch
 
     def shutdown_after_send(*args, **kwargs):
