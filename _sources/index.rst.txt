@@ -26,6 +26,14 @@ Get Started!
 
    quickstart
 
+Advanced Usage
+--------------
+
+.. toctree::
+   :maxdepth: 2
+
+   advanced
+
 API Reference
 -------------
 
