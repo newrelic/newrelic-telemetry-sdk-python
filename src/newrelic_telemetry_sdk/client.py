@@ -154,6 +154,9 @@ class Client(object):
 
         :param items: An iterable of items to send to New Relic.
         :type items: list or tuple
+        :param common: (optional) A map of attributes that will be set on each
+            item.
+        :type common: dict
 
         :rtype: HTTPResponse
         """
