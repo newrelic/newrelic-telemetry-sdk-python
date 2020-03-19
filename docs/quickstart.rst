@@ -18,7 +18,7 @@ If that fails, download the library from its GitHub page and install it using:
     $ python setup.py install
 
 
-Reporting Your First Span
+Reporting your first span
 -------------------------
 
 Spans provide an easy way to time components of your code.
@@ -40,7 +40,7 @@ The example code assumes you've set the following environment variables:
     response.raise_for_status()
     print('Span sleep sent successfully!')
 
-Reporting Your First Metric
+Reporting your first metric
 ---------------------------
 
 There are 3 different types of metrics:
@@ -49,12 +49,12 @@ There are 3 different types of metrics:
 * :class:`CountMetric <newrelic_telemetry_sdk.metric.CountMetric>`
 * :class:`SummaryMetric <newrelic_telemetry_sdk.metric.SummaryMetric>`
 
-Metric Descriptions
+Metric descriptions
 ^^^^^^^^^^^^^^^^^^^
 
 +-------------+----------+----------------------------------------------------+-----------------------------------------------+
-| Metric Type | Interval | Description                                        | Example                                       |
-|             | Required |                                                    |                                               |
+| Metric type | Interval | Description                                        | Example                                       |
+|             | required |                                                    |                                               |
 +=============+==========+====================================================+===============================================+
 | Gauge       | No       | A single value at a single point in time.          | Room Temperature.                             |
 +-------------+----------+----------------------------------------------------+-----------------------------------------------+
@@ -90,3 +90,16 @@ The example code assumes you've set the following environment variables:
     response = metric_client.send_batch((temperature, errors, summary))
     response.raise_for_status()
     print("Sent metrics successfully!")
+
+Find and use data
+-----------------
+
+Tips on how to find and query your data in New Relic:
+
+* `Find metric data <https://docs.newrelic.com/docs/data-ingest-apis/get-data-new-relic/metric-api/introduction-metric-api#find-data>`_
+* `Find trace/span data <https://docs.newrelic.com/docs/understand-dependencies/distributed-tracing/trace-api/introduction-trace-api#view-data>`_
+
+For general querying information, see:
+
+* `Query New Relic data <https://docs.newrelic.com/docs/using-new-relic/data/understand-data/query-new-relic-data>`_
+* `Intro to NRQL <https://docs.newrelic.com/docs/query-data/nrql-new-relic-query-language/getting-started/introduction-nrql>`_
