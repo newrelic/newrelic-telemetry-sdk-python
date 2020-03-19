@@ -20,7 +20,7 @@ The current SDK supports sending dimensional metrics to our `Metric API <https:/
 Why is this cool?
 -----------------
 
-Dimensional metrics and traces in New Relic! No agent required. 
+Dimensional metrics and traces in New Relic! No agent required.
 
 Our `Telemetry SDK <https://docs.newrelic.com/docs/data-ingest-apis/get-data-new-relic/new-relic-sdks/telemetry-sdks-send-custom-telemetry-data-new-relic>`_ tries to be helpful, so your job of sending telemetry data to New Relic can be done in the right way, easily. We've covered all of the basics for you so you can focus on writing feature code directly related to your business need or interest.
 
@@ -119,7 +119,7 @@ The example code assumes you've set the following environment variables:
     response = metric_client.send_batch((temperature, errors, summary))
     response.raise_for_status()
     print("Sent metrics successfully!")
-    
+
 Find and use data
 -----------------
 
