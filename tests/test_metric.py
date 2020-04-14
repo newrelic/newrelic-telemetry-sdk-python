@@ -14,22 +14,7 @@
 
 import pytest
 from newrelic_telemetry_sdk.metric import Metric, CountMetric, SummaryMetric
-
-
-class CustomMapping(object):
-    def __getitem__(self, key):
-        if key == "foo":
-            return "bar"
-        raise KeyError(key)
-
-    def __iter__(self):
-        return iter(("foo",))
-
-    def __len__(self):
-        return 1
-
-    def keys(self):
-        return ("foo",)
+from utils import CustomMapping
 
 
 @pytest.mark.parametrize("method", (None, "from_value"))

@@ -14,6 +14,7 @@
 
 import pytest
 from newrelic_telemetry_sdk.span_batch import SpanBatch
+from utils import CustomMapping
 
 
 class VerifyLockSpanBatch(SpanBatch):
@@ -46,12 +47,12 @@ class VerifyLockSpanBatch(SpanBatch):
         self._internal_common = value
 
 
-@pytest.mark.parametrize("tags", (None, {"foo": "bar"},))
+@pytest.mark.parametrize("tags", (None, {"foo": "bar"}, CustomMapping()))
 def test_span_batch_common_tags(tags):
     batch = VerifyLockSpanBatch(tags)
 
     if tags:
-        expected = {"attributes": tags}
+        expected = {"attributes": dict(tags)}
     else:
         expected = None
 

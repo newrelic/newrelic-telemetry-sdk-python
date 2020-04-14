@@ -16,6 +16,7 @@ import time
 import pytest
 from newrelic_telemetry_sdk.metric import GaugeMetric, CountMetric, SummaryMetric
 from newrelic_telemetry_sdk.metric_batch import MetricBatch
+from utils import CustomMapping
 
 
 class VerifyLockMetricBatch(MetricBatch):
@@ -117,7 +118,7 @@ def test_different_metric(metric_a, metric_b):
     assert len(batch._internal_batch) == 2
 
 
-@pytest.mark.parametrize("tags", (None, {"foo": "bar"},))
+@pytest.mark.parametrize("tags", (None, {"foo": "bar"}, CustomMapping(),))
 def test_flush(monkeypatch, tags):
     metric = GaugeMetric("name", 1)
 
@@ -144,7 +145,7 @@ def test_flush(monkeypatch, tags):
     assert common["timestamp"] == 4000
     assert common["interval.ms"] == 12000
     if tags:
-        assert common["attributes"] == tags
+        assert common["attributes"] == dict(tags)
     else:
         assert "attributes" not in common
 
