@@ -150,7 +150,7 @@ class Client(object):
         return self.send_batch((item,))
 
     def send_batch(self, items, common=None):
-        """Send a batch of spans
+        """Send a batch of items
 
         :param items: An iterable of items to send to New Relic.
         :type items: list or tuple
