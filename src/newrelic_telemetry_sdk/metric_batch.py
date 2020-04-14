@@ -34,7 +34,7 @@ class MetricBatch(object):
         self._interval_start = int(time.time() * 1000.0)
         self._lock = self.LOCK_CLS()
         self._batch = {}
-        tags = tags and tags.copy() or {}
+        tags = tags and dict(tags)
         self._common = {}
         if tags:
             self._common["attributes"] = tags

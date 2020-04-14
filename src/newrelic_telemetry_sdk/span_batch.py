@@ -26,7 +26,7 @@ class SpanBatch(object):
     def __init__(self, tags=None):
         self._lock = self.LOCK_CLS()
         self._batch = []
-        tags = tags and tags.copy()
+        tags = tags and dict(tags)
         if tags:
             self._common = {"attributes": tags}
         else:
