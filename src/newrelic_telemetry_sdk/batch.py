@@ -14,8 +14,8 @@
 import threading
 
 
-class SpanBatch(object):
-    """Aggregates spans, providing a record / flush interface.
+class Batch(object):
+    """Implements aggregation, providing a record / flush interface.
 
     :param tags: (optional) A dictionary of tags to attach to all flushes.
     :type tags: dict
@@ -42,12 +42,14 @@ class SpanBatch(object):
             self._batch.append(item)
 
     def flush(self):
-        """Flush all spans from the batch
+        """Flush all items from the batch
 
-        This method returns all metrics in the batch and a common block
+        This method returns all items in the batch and a common block
         representing any tags if applicable.
 
-        :returns: A tuple of (spans, common)
+        The batch is cleared as part of this operation.
+
+        :returns: A tuple of (items, common)
         :rtype: tuple
         """
         with self._lock:
@@ -56,3 +58,41 @@ class SpanBatch(object):
 
         common = self._common and self._common.copy()
         return batch, common
+
+
+class SpanBatch(Batch):
+    """Aggregates spans, providing a record / flush interface.
+
+    :param tags: (optional) A dictionary of tags to attach to all flushes.
+    :type tags: dict
+    """
+
+
+class EventBatch(Batch):
+    """Aggregates events, providing a record / flush interface.
+
+    :param tags: (optional) A dictionary of tags to attach to all flushes.
+    :type tags: dict
+    """
+
+    def __init__(self, tags=None):
+        super(EventBatch, self).__init__(tags)
+        if tags:
+            # Events are currently a flat structure, so there's no nesting of
+            # user attributes.
+            self._common = dict(tags)
+
+    def flush(self):
+        """Flush all items from the batch
+
+        This method returns all items in the batch.
+
+        The batch is cleared as part of this operation.
+
+        :returns: A tuple of (items,)
+        :rtype: tuple
+        """
+        items, common = super(EventBatch, self).flush()
+        if common:
+            items = tuple(dict(common, **item) for item in items)
+        return (items,)
