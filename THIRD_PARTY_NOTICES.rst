@@ -11,7 +11,7 @@ notify us by e-mailing open-source@newrelic.com.
 `urllib3 <https://pypi.org/project/urllib3>`__
 ----------------------------------------------
 
-Copyright (c) 2008-2019 Andrey Petrov and contributors (see CONTRIBUTORS.txt)
+Copyright (c) 2008-2020 Andrey Petrov and contributors (see CONTRIBUTORS.txt)
 
 Distributed under the following license(s):
 
