@@ -23,6 +23,7 @@ from newrelic_telemetry_sdk.version import version
 from newrelic_telemetry_sdk.client import (
     SpanClient,
     MetricClient,
+    EventClient,
     HTTPError,
     HTTPResponse,
 )
@@ -50,6 +51,10 @@ METRIC = {
     "value": 1,
     "timestamp": int(time.time() - 1),
     "interval.ms": 1000,
+}
+
+EVENT = {
+    "eventType": "testing",
 }
 
 
@@ -155,6 +160,31 @@ def metric_client(request, monkeypatch):
     return client
 
 
+@pytest.fixture
+def event_client(request, monkeypatch):
+    host = os.environ.get("NEW_RELIC_HOST", "")
+    insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
+
+    if host.startswith("staging"):
+        host = "staging-insights-collector.newrelic.com"
+
+    if insert_key:
+        urlopen = getattr(HTTPConnectionPool, "urlopen")
+        monkeypatch.setattr(HTTPConnectionPool, "urlopen", capture_request(urlopen))
+    else:
+        monkeypatch.setattr(HTTPConnectionPool, "urlopen", disable_sending)
+
+    # Allow client_args to be specified by a marker
+    client_args = request.node.get_closest_marker("client_args")
+    if client_args:
+        client = EventClient(insert_key, host, *client_args.args, **client_args.kwargs)
+    else:
+        client = EventClient(insert_key, host)
+
+    assert client._pool.port == 443
+    return client
+
+
 def ensure_str(s):
     if not isinstance(s, string_types):
         try:
@@ -171,7 +201,7 @@ def decompress(payload):
     return payload
 
 
-def validate_request(expected_url, typ, request, items, common=None):
+def extract_and_validate_metadata(expected_url, request):
     # request method should be POST
     assert request.method == "POST"
 
@@ -204,8 +234,14 @@ def validate_request(expected_url, typ, request, items, common=None):
     else:
         assert request.headers["Content-Encoding"] == "identity"
 
-    # payload is always in the form [{typ: ..., '...'}]
     payload = json.loads(ensure_str(payload))
+    return payload
+
+
+def validate_request(expected_url, typ, request, items, common=None):
+    payload = extract_and_validate_metadata(expected_url, request)
+
+    # payload is always in the form [{typ: ..., '...'}]
     assert len(payload) == 1
     payload = payload[0]
 
@@ -226,6 +262,11 @@ def validate_span_request(request, items, common=None):
 
 def validate_metric_request(request, items, common=None):
     validate_request("/metric/v1", "metrics", request, items, common)
+
+
+def validate_event_request(request, items):
+    payload = extract_and_validate_metadata("/v1/accounts/events", request)
+    assert payload == items
 
 
 @pytest.mark.parametrize(
@@ -266,6 +307,25 @@ def test_metric_endpoint_compression(compressed, metric_client):
     validate_metric_request(request, [METRIC])
 
 
+@pytest.mark.parametrize(
+    "compressed",
+    (
+        pytest.param(True, marks=pytest.mark.client_args(compression_threshold=0)),
+        pytest.param(
+            False, marks=pytest.mark.client_args(compression_threshold=float("inf"))
+        ),
+    ),
+)
+def test_event_endpoint_compression(compressed, event_client):
+    response = event_client.send(EVENT)
+    request = response.request
+    if compressed:
+        assert request.headers["Content-Encoding"] == "gzip"
+    else:
+        assert request.headers["Content-Encoding"] == "identity"
+    validate_event_request(request, [EVENT])
+
+
 def test_metric_endpoint_batch(metric_client):
     metrics = [{"name": "testing", "type": "count", "value": 1}]
     tags = {"hostname": "localhost"}
@@ -297,9 +357,20 @@ def test_span_endpoint_batch(span_client):
     validate_span_request(response.request, spans, common)
 
 
+def test_event_endpoint_batch(event_client):
+    events = [EVENT, EVENT]
+
+    response = event_client.send_batch(events)
+    validate_event_request(response.request, events)
+
+
 @pytest.mark.parametrize(
     "cls,host",
-    ((SpanClient, "trace-api.newrelic.com"), (MetricClient, "metric-api.newrelic.com")),
+    (
+        (SpanClient, "trace-api.newrelic.com"),
+        (MetricClient, "metric-api.newrelic.com"),
+        (EventClient, "insights-collector.newrelic.com"),
+    ),
 )
 def test_defaults(cls, host):
     assert cls.HOST == host
@@ -318,7 +389,6 @@ def test_metric_add_version_info(metric_client):
     metric_client.add_version_info("bar", "0.2")
     response = metric_client.send(METRIC)
     request = response.request
-    validate_metric_request(request, [METRIC])
 
     user_agent = request.headers["user-agent"]
     assert user_agent.endswith(" foo/0.1 bar/0.2"), user_agent
@@ -336,7 +406,23 @@ def test_span_add_version_info(span_client):
     span_client.add_version_info("bar", "0.2")
     response = span_client.send(SPAN)
     request = response.request
-    validate_span_request(request, [SPAN])
+
+    user_agent = request.headers["user-agent"]
+    assert user_agent.endswith(" foo/0.1 bar/0.2"), user_agent
+
+
+@pytest.mark.parametrize(
+    "",
+    (
+        pytest.param(marks=pytest.mark.client_args(compression_threshold=0)),
+        pytest.param(marks=pytest.mark.client_args(compression_threshold=float("inf"))),
+    ),
+)
+def test_event_add_version_info(event_client):
+    event_client.add_version_info("foo", "0.1")
+    event_client.add_version_info("bar", "0.2")
+    response = event_client.send(EVENT)
+    request = response.request
 
     user_agent = request.headers["user-agent"]
     assert user_agent.endswith(" foo/0.1 bar/0.2"), user_agent
