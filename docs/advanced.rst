@@ -19,7 +19,9 @@ Batches are broken out by data type that they contain:
 +==========================================================+===========================================================================+
 | :class:`Metric <newrelic_telemetry_sdk.metric.Metric>`   | :class:`MetricBatch <newrelic_telemetry_sdk.metric_batch.MetricBatch>`    |
 +----------------------------------------------------------+---------------------------------------------------------------------------+
-| :class:`Span <newrelic_telemetry_sdk.span.Span>`         | :class:`SpanBatch <newrelic_telemetry_sdk.span_batch.SpanBatch>`          |
+| :class:`Event <newrelic_telemetry_sdk.span.Event>`       | :class:`EventBatch <newrelic_telemetry_sdk.batch.EventBatch>`             |
++----------------------------------------------------------+---------------------------------------------------------------------------+
+| :class:`Span <newrelic_telemetry_sdk.span.Span>`         | :class:`SpanBatch <newrelic_telemetry_sdk.batch.SpanBatch>`               |
 +----------------------------------------------------------+---------------------------------------------------------------------------+
 
 Example
