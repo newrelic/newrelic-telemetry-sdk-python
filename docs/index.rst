@@ -1,15 +1,14 @@
 newrelic-telemetry-sdk: Send data to New Relic!
 ===============================================
 
-``newrelic-telemetry-sdk`` provides a Python library for sending span and metric data
-into `New Relic <https://newrelic.com>`_ using the Python `urllib3 <https://urllib3.readthedocs.io>`_ library.
+``newrelic-telemetry-sdk`` provides a Python library for sending data into `New Relic <https://newrelic.com>`_ using the Python `urllib3 <https://urllib3.readthedocs.io>`_ library.
 
 The current SDK supports sending dimensional metrics to our `Metric API <https://docs.newrelic.com/docs/data-ingest-apis/get-data-new-relic/metric-api/introduction-metric-api>`_ and spans to our `Trace API <https://docs.newrelic.com/docs/understand-dependencies/distributed-tracing/trace-api/introduction-trace-api>`_.
 
 Why is this cool?
 -----------------
 
-Dimensional metrics and traces in New Relic! No agent required.
+Dimensional metrics, events, and traces in New Relic! No agent required.
 
 Our `Telemetry SDK <https://docs.newrelic.com/docs/data-ingest-apis/get-data-new-relic/new-relic-sdks/telemetry-sdks-send-custom-telemetry-data-new-relic>`_ tries to be helpful, so your job of sending telemetry data to New Relic can be done in the right way, easily. We've covered all of the basics for you so you can focus on writing feature code directly related to your business need or interest.
 

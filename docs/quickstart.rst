@@ -18,28 +18,6 @@ If that fails, download the library from its GitHub page and install it using:
     $ python setup.py install
 
 
-Reporting your first span
--------------------------
-
-Spans provide an easy way to time components of your code.
-The example code assumes you've set the following environment variables:
-
-* ``NEW_RELIC_INSERT_KEY``
-
-.. code-block:: python
-
-    import os
-    import time
-    from newrelic_telemetry_sdk import Span, SpanClient
-
-    with Span(name='sleep') as span:
-        time.sleep(0.5)
-
-    span_client = SpanClient(os.environ['NEW_RELIC_INSERT_KEY'])
-    response = span_client.send(span)
-    response.raise_for_status()
-    print('Span sleep sent successfully!')
-
 Reporting your first metric
 ---------------------------
 
@@ -91,12 +69,59 @@ The example code assumes you've set the following environment variables:
     response.raise_for_status()
     print("Sent metrics successfully!")
 
+Reporting your first event
+--------------------------
+
+Events represent a record of something that has occurred on a system being monitored.
+The example code assumes you've set the following environment variables:
+
+* ``NEW_RELIC_INSERT_KEY``
+
+.. code-block:: python
+
+    import os
+    import time
+    from newrelic_telemetry_sdk import Event, EventClient
+
+    # Record that a rate limit has been applied to an endpoint for an account
+    event = Event(
+        "RateLimit", {"path": "/v1/endpoint", "accountId": 1000, "rejectRatio": 0.1}
+    )
+
+    event_client = EventClient(os.environ["NEW_RELIC_INSERT_KEY"])
+    response = event_client.send(event)
+    response.raise_for_status()
+    print("Event sent successfully!")
+
+Reporting your first span
+-------------------------
+
+Spans provide an easy way to time components of your code.
+The example code assumes you've set the following environment variables:
+
+* ``NEW_RELIC_INSERT_KEY``
+
+.. code-block:: python
+
+    import os
+    import time
+    from newrelic_telemetry_sdk import Span, SpanClient
+
+    with Span(name='sleep') as span:
+        time.sleep(0.5)
+
+    span_client = SpanClient(os.environ['NEW_RELIC_INSERT_KEY'])
+    response = span_client.send(span)
+    response.raise_for_status()
+    print('Span sleep sent successfully!')
+
 Find and use data
 -----------------
 
 Tips on how to find and query your data in New Relic:
 
 * `Find metric data <https://docs.newrelic.com/docs/data-ingest-apis/get-data-new-relic/metric-api/introduction-metric-api#find-data>`_
+* `Find event data <https://docs.newrelic.com/docs/insights/insights-data-sources/custom-data/introduction-event-api#find-data>`_
 * `Find trace/span data <https://docs.newrelic.com/docs/understand-dependencies/distributed-tracing/trace-api/introduction-trace-api#view-data>`_
 
 For general querying information, see:
