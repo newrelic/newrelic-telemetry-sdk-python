@@ -13,11 +13,11 @@
 # limitations under the License.
 
 import pytest
-from newrelic_telemetry_sdk.span_batch import SpanBatch
+from newrelic_telemetry_sdk.batch import Batch, EventBatch
 from utils import CustomMapping
 
 
-class VerifyLockSpanBatch(SpanBatch):
+class VerifyLockBatch(Batch):
     """Verify sensitive attributes are accessed / assigned under lock
 
     These attributes are sensitive and should only be accessed under lock.
@@ -48,8 +48,8 @@ class VerifyLockSpanBatch(SpanBatch):
 
 
 @pytest.mark.parametrize("tags", (None, {"foo": "bar"}, CustomMapping()))
-def test_span_batch_common_tags(tags):
-    batch = VerifyLockSpanBatch(tags)
+def test_batch_common_tags(tags):
+    batch = VerifyLockBatch(tags)
 
     if tags:
         expected = {"attributes": dict(tags)}
@@ -64,8 +64,9 @@ def test_span_batch_common_tags(tags):
         assert batch.flush()[1] is not common
 
 
-def test_span_batch_simple():
-    batch = VerifyLockSpanBatch()
+@pytest.mark.parametrize("batch_cls", (VerifyLockBatch, EventBatch))
+def test_batch_simple(batch_cls):
+    batch = batch_cls()
 
     # Verify that item is recorded and that flush clears out the batch
     for _ in range(2):
@@ -73,3 +74,21 @@ def test_span_batch_simple():
         batch.record(item)
 
         assert batch.flush()[0] == (item,)
+
+
+@pytest.mark.parametrize("tags", (None, {"foo": "bar"}, {"boo": "baz"}))
+def test_event_batch_common_tags(tags):
+    batch = EventBatch(tags)
+
+    expected = item = {"foo": "foo"}
+    if tags:
+        expected = dict(tags)
+        expected.update(item)
+
+    for _ in range(2):
+        batch.record(item)
+
+        result = batch.flush()
+        items = result[0]
+
+        assert items == (expected,)
