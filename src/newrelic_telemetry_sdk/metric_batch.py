@@ -46,14 +46,11 @@ class MetricBatch(object):
         :param metric: A New Relic metric object
         :type metric: newrelic_telemetry_sdk.metric.Metric
 
-        Usage::
-
-            >>> from newrelic_telemetry_sdk import GaugeMetric
-            >>> metric_a = GaugeMetric('foo', 0, tags={'units': 'C'})
-            >>> metric_b = GaugeMetric('foo', 1, tags={'units': 'C'})
-            >>> MetricBatch.create_identity(metric_a) == \
-                MetricBatch.create_identity(metric_b)
-            True
+        >>> from newrelic_telemetry_sdk import GaugeMetric
+        >>> foo_0 = GaugeMetric('foo', 0, tags={'units': 'C'})
+        >>> foo_1 = GaugeMetric('foo', 1, tags={'units': 'C'})
+        >>> MetricBatch.create_identity(foo_0) == MetricBatch.create_identity(foo_1)
+        True
         """
         tags = metric.tags
         if tags:
