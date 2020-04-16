@@ -69,18 +69,10 @@ class SpanBatch(Batch):
 
 
 class EventBatch(Batch):
-    """Aggregates events, providing a record / flush interface.
+    """Aggregates events, providing a record / flush interface."""
 
-    :param tags: (optional) A dictionary of tags to attach to all flushes.
-    :type tags: dict
-    """
-
-    def __init__(self, tags=None):
-        super(EventBatch, self).__init__(tags)
-        if tags:
-            # Events are currently a flat structure, so there's no nesting of
-            # user attributes.
-            self._common = dict(tags)
+    def __init__(self):
+        super(EventBatch, self).__init__()
 
     def flush(self):
         """Flush all items from the batch
@@ -92,7 +84,5 @@ class EventBatch(Batch):
         :returns: A tuple of (items,)
         :rtype: tuple
         """
-        items, common = super(EventBatch, self).flush()
-        if common:
-            items = tuple(dict(common, **item) for item in items)
+        items, _ = super(EventBatch, self).flush()
         return (items,)

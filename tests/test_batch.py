@@ -74,21 +74,3 @@ def test_batch_simple(batch_cls):
         batch.record(item)
 
         assert batch.flush()[0] == (item,)
-
-
-@pytest.mark.parametrize("tags", (None, {"foo": "bar"}, {"boo": "baz"}))
-def test_event_batch_common_tags(tags):
-    batch = EventBatch(tags)
-
-    expected = item = {"foo": "foo"}
-    if tags:
-        expected = dict(tags)
-        expected.update(item)
-
-    for _ in range(2):
-        batch.record(item)
-
-        result = batch.flush()
-        items = result[0]
-
-        assert items == (expected,)
