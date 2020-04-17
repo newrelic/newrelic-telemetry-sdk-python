@@ -15,31 +15,38 @@ New Relic HTTP Clients
 .. autoclass:: newrelic_telemetry_sdk.client.HTTPResponse()
     :members:
 
-Spans
------
-.. automodule:: newrelic_telemetry_sdk.span
-    :members:
-
 Metrics
 -------
 .. automodule:: newrelic_telemetry_sdk.metric
     :members:
     :undoc-members:
-    :show-inheritance:
+    :exclude-members: Metric
 
+Events
+-------
+.. automodule:: newrelic_telemetry_sdk.event
+    :members:
+
+Spans
+-----
+.. automodule:: newrelic_telemetry_sdk.span
+    :members:
 
 Batches
 -------
 .. automodule:: newrelic_telemetry_sdk.metric_batch
     :members:
+    :exclude-members: LOCK_CLS
 
-.. automodule:: newrelic_telemetry_sdk.span_batch
+.. automodule:: newrelic_telemetry_sdk.batch
     :members:
+    :exclude-members: Batch, LOCK_CLS
+    :inherited-members:
 
 Harvester
 ---------
 .. automodule:: newrelic_telemetry_sdk.harvester
     :members:
-    :exclude-members: LOCK_CLS, EVENT_CLS, run, daemon
+    :exclude-members: EVENT_CLS, run, daemon
     :show-inheritance:
     :inherited-members:

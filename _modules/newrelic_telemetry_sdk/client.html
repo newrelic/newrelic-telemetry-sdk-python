@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>newrelic_telemetry_sdk.client &mdash; newrelic-telemetry-sdk 0.2.3 documentation</title>
+  <title>newrelic_telemetry_sdk.client &mdash; newrelic-telemetry-sdk 0.2.4 documentation</title>
   
 
   
@@ -305,10 +305,13 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">send_batch</span><span class="p">((</span><span class="n">item</span><span class="p">,))</span>
 
     <span class="k">def</span> <span class="nf">send_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">common</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Send a batch of spans</span>
+        <span class="sd">&quot;&quot;&quot;Send a batch of items</span>
 
 <span class="sd">        :param items: An iterable of items to send to New Relic.</span>
 <span class="sd">        :type items: list or tuple</span>
+<span class="sd">        :param common: (optional) A map of attributes that will be set on each</span>
+<span class="sd">            item.</span>
+<span class="sd">        :type common: dict</span>
 
 <span class="sd">        :rtype: HTTPResponse</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -379,6 +382,51 @@
     <span class="n">HOST</span> <span class="o">=</span> <span class="s2">&quot;metric-api.newrelic.com&quot;</span>
     <span class="n">URL</span> <span class="o">=</span> <span class="s2">&quot;/metric/v1&quot;</span>
     <span class="n">PAYLOAD_TYPE</span> <span class="o">=</span> <span class="s2">&quot;metrics&quot;</span></div>
+
+
+<span class="k">class</span> <span class="nc">EventClient</span><span class="p">(</span><span class="n">Client</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;HTTP Client for interacting with the New Relic Event API</span>
+
+<span class="sd">    This class is used to send events to the New Relic Event API over HTTP.</span>
+
+<span class="sd">    :param insert_key: Insights insert key</span>
+<span class="sd">    :type insert_key: str</span>
+<span class="sd">    :param host: (optional) Override the host for the event API</span>
+<span class="sd">        endpoint.</span>
+<span class="sd">    :type host: str</span>
+<span class="sd">    :param compression_threshold: (optional) Compress if number of bytes in</span>
+<span class="sd">        payload is above this threshold. (Default: 64K)</span>
+<span class="sd">    :type compression_threshold: int</span>
+
+<span class="sd">    Usage::</span>
+
+<span class="sd">        &gt;&gt;&gt; import os</span>
+<span class="sd">        &gt;&gt;&gt; insert_key = os.environ.get(&quot;NEW_RELIC_INSERT_KEY&quot;, &quot;&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; event_client = EventClient(insert_key)</span>
+<span class="sd">        &gt;&gt;&gt; response = event_client.send({})</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">HOST</span> <span class="o">=</span> <span class="s2">&quot;insights-collector.newrelic.com&quot;</span>
+    <span class="n">URL</span> <span class="o">=</span> <span class="s2">&quot;/v1/accounts/events&quot;</span>
+
+    <span class="k">def</span> <span class="nf">send_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Send a batch of items</span>
+
+<span class="sd">        :param items: An iterable of items to send to New Relic.</span>
+<span class="sd">        :type items: list or tuple</span>
+
+<span class="sd">        :rtype: HTTPResponse</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+
+        <span class="n">headers</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">compression_threshold</span><span class="p">:</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compress_payload</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gzip_headers</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">URL</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
 </pre></div>
 
            </div>

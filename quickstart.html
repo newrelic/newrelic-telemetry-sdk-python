@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Quickstart &mdash; newrelic-telemetry-sdk 0.2.3 documentation</title>
+  <title>Quickstart &mdash; newrelic-telemetry-sdk 0.2.4 documentation</title>
   
 
   
@@ -87,12 +87,14 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Quickstart</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installing-newrelic-telemetry-sdk">Installing newrelic_telemetry_sdk</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#reporting-your-first-span">Reporting Your First Span</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#reporting-your-first-metric">Reporting Your First Metric</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#metric-descriptions">Metric Descriptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reporting-your-first-metric">Reporting your first metric</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#metric-descriptions">Metric descriptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#example">Example</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#reporting-your-first-event">Reporting your first event</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reporting-your-first-span">Reporting your first span</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#find-and-use-data">Find and use data</a></li>
 </ul>
 </li>
 </ul>
@@ -179,29 +181,8 @@ through pip:</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="reporting-your-first-span">
-<h2>Reporting Your First Span<a class="headerlink" href="#reporting-your-first-span" title="Permalink to this headline">¶</a></h2>
-<p>Spans provide an easy way to time components of your code.
-The example code assumes you’ve set the following environment variables:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">NEW_RELIC_INSERT_KEY</span></code></p></li>
-</ul>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">newrelic_telemetry_sdk</span> <span class="kn">import</span> <span class="n">Span</span><span class="p">,</span> <span class="n">SpanClient</span>
-
-<span class="k">with</span> <span class="n">Span</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;sleep&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">span</span><span class="p">:</span>
-    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
-
-<span class="n">span_client</span> <span class="o">=</span> <span class="n">SpanClient</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;NEW_RELIC_INSERT_KEY&#39;</span><span class="p">])</span>
-<span class="n">response</span> <span class="o">=</span> <span class="n">span_client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">span</span><span class="p">)</span>
-<span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Span sleep sent successfully!&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
 <div class="section" id="reporting-your-first-metric">
-<h2>Reporting Your First Metric<a class="headerlink" href="#reporting-your-first-metric" title="Permalink to this headline">¶</a></h2>
+<h2>Reporting your first metric<a class="headerlink" href="#reporting-your-first-metric" title="Permalink to this headline">¶</a></h2>
 <p>There are 3 different types of metrics:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="api.html#newrelic_telemetry_sdk.metric.GaugeMetric" title="newrelic_telemetry_sdk.metric.GaugeMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">GaugeMetric</span></code></a></p></li>
@@ -209,7 +190,7 @@ The example code assumes you’ve set the following environment variables:</p>
 <li><p><a class="reference internal" href="api.html#newrelic_telemetry_sdk.metric.SummaryMetric" title="newrelic_telemetry_sdk.metric.SummaryMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">SummaryMetric</span></code></a></p></li>
 </ul>
 <div class="section" id="metric-descriptions">
-<h3>Metric Descriptions<a class="headerlink" href="#metric-descriptions" title="Permalink to this headline">¶</a></h3>
+<h3>Metric descriptions<a class="headerlink" href="#metric-descriptions" title="Permalink to this headline">¶</a></h3>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 11%" />
@@ -218,9 +199,9 @@ The example code assumes you’ve set the following environment variables:</p>
 <col style="width: 39%" />
 </colgroup>
 <thead>
-<tr class="row-odd"><th class="head"><p>Metric Type</p></th>
+<tr class="row-odd"><th class="head"><p>Metric type</p></th>
 <th class="head"><p>Interval
-Required</p></th>
+required</p></th>
 <th class="head"><p>Description</p></th>
 <th class="head"><p>Example</p></th>
 </tr>
@@ -272,6 +253,64 @@ Required</p></th>
 </pre></div>
 </div>
 </div>
+</div>
+<div class="section" id="reporting-your-first-event">
+<h2>Reporting your first event<a class="headerlink" href="#reporting-your-first-event" title="Permalink to this headline">¶</a></h2>
+<p>Events represent a record of something that has occurred on a system being monitored.
+The example code assumes you’ve set the following environment variables:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">NEW_RELIC_INSERT_KEY</span></code></p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">newrelic_telemetry_sdk</span> <span class="kn">import</span> <span class="n">Event</span><span class="p">,</span> <span class="n">EventClient</span>
+
+<span class="c1"># Record that a rate limit has been applied to an endpoint for an account</span>
+<span class="n">event</span> <span class="o">=</span> <span class="n">Event</span><span class="p">(</span>
+    <span class="s2">&quot;RateLimit&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;/v1/endpoint&quot;</span><span class="p">,</span> <span class="s2">&quot;accountId&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span> <span class="s2">&quot;rejectRatio&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">event_client</span> <span class="o">=</span> <span class="n">EventClient</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;NEW_RELIC_INSERT_KEY&quot;</span><span class="p">])</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">event_client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+<span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Event sent successfully!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="reporting-your-first-span">
+<h2>Reporting your first span<a class="headerlink" href="#reporting-your-first-span" title="Permalink to this headline">¶</a></h2>
+<p>Spans provide an easy way to time components of your code.
+The example code assumes you’ve set the following environment variables:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">NEW_RELIC_INSERT_KEY</span></code></p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">newrelic_telemetry_sdk</span> <span class="kn">import</span> <span class="n">Span</span><span class="p">,</span> <span class="n">SpanClient</span>
+
+<span class="k">with</span> <span class="n">Span</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;sleep&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">span</span><span class="p">:</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+
+<span class="n">span_client</span> <span class="o">=</span> <span class="n">SpanClient</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;NEW_RELIC_INSERT_KEY&#39;</span><span class="p">])</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">span_client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">span</span><span class="p">)</span>
+<span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Span sleep sent successfully!&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="find-and-use-data">
+<h2>Find and use data<a class="headerlink" href="#find-and-use-data" title="Permalink to this headline">¶</a></h2>
+<p>Tips on how to find and query your data in New Relic:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.newrelic.com/docs/data-ingest-apis/get-data-new-relic/metric-api/introduction-metric-api#find-data">Find metric data</a></p></li>
+<li><p><a class="reference external" href="https://docs.newrelic.com/docs/insights/insights-data-sources/custom-data/introduction-event-api#find-data">Find event data</a></p></li>
+<li><p><a class="reference external" href="https://docs.newrelic.com/docs/understand-dependencies/distributed-tracing/trace-api/introduction-trace-api#view-data">Find trace/span data</a></p></li>
+</ul>
+<p>For general querying information, see:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.newrelic.com/docs/using-new-relic/data/understand-data/query-new-relic-data">Query New Relic data</a></p></li>
+<li><p><a class="reference external" href="https://docs.newrelic.com/docs/query-data/nrql-new-relic-query-language/getting-started/introduction-nrql">Intro to NRQL</a></p></li>
+</ul>
 </div>
 </div>
 

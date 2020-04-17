@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>newrelic_telemetry_sdk.metric &mdash; newrelic-telemetry-sdk 0.2.3 documentation</title>
+  <title>newrelic_telemetry_sdk.metric &mdash; newrelic-telemetry-sdk 0.2.4 documentation</title>
   
 
   
@@ -170,7 +170,7 @@
 <span class="kn">import</span> <span class="nn">time</span>
 
 
-<div class="viewcode-block" id="Metric"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.metric.Metric">[docs]</a><span class="k">class</span> <span class="nc">Metric</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">Metric</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Base Metric type</span>
 
 <span class="sd">    Includes common method definitions and implementations for metrics.</span>
@@ -204,11 +204,11 @@
         <span class="k">if</span> <span class="n">tags</span><span class="p">:</span>
             <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">tags</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Metric.copy"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.metric.Metric.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">cls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">d</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">d</span></div>
+        <span class="k">return</span> <span class="n">d</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -241,7 +241,7 @@
         <span class="sd">&quot;&quot;&quot;Metric Tags&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;attributes&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Metric.from_value"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.metric.Metric.from_value">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
@@ -249,7 +249,7 @@
             <span class="n">tags</span><span class="o">=</span><span class="n">tags</span><span class="p">,</span>
             <span class="n">interval_ms</span><span class="o">=</span><span class="n">interval_ms</span><span class="p">,</span>
             <span class="n">end_time_ms</span><span class="o">=</span><span class="n">end_time_ms</span><span class="p">,</span>
-        <span class="p">)</span></div></div>
+        <span class="p">)</span>
 
 
 <div class="viewcode-block" id="GaugeMetric"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.metric.GaugeMetric">[docs]</a><span class="k">class</span> <span class="nc">GaugeMetric</span><span class="p">(</span><span class="n">Metric</span><span class="p">):</span>
