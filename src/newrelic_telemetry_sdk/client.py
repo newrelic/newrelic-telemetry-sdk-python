@@ -75,6 +75,9 @@ class Client(object):
     :type insert_key: str
     :param host: (optional) Override the host for the client.
     :type host: str
+    :param port: (optional) Override the port for the client.
+        Default: 443
+    :type port: int
 
     Usage::
 
@@ -92,7 +95,7 @@ class Client(object):
         keep_alive=True, accept_encoding=True, user_agent=USER_AGENT
     )
 
-    def __init__(self, insert_key, host=None):
+    def __init__(self, insert_key, host=None, port=443):
         host = host or self.HOST
         headers = self.HEADERS.copy()
         headers.update(
@@ -106,7 +109,7 @@ class Client(object):
             total=False, connect=None, read=None, redirect=0, status=None
         )
         self._pool = self.POOL_CLS(
-            host=host, port=443, retries=retries, headers=headers, strict=True
+            host=host, port=port, retries=retries, headers=headers, strict=True
         )
 
     def add_version_info(self, product, product_version):
@@ -174,6 +177,9 @@ class SpanClient(Client):
     :type insert_key: str
     :param host: (optional) Override the host for the span API endpoint.
     :type host: str
+    :param port: (optional) Override the port for the client.
+        Default: 443
+    :type port: int
 
     Usage::
 
@@ -198,6 +204,9 @@ class MetricClient(Client):
     :param host: (optional) Override the host for the metric API
         endpoint.
     :type host: str
+    :param port: (optional) Override the port for the client.
+        Default: 443
+    :type port: int
 
     Usage::
 
@@ -222,6 +231,9 @@ class EventClient(Client):
     :param host: (optional) Override the host for the event API
         endpoint.
     :type host: str
+    :param port: (optional) Override the port for the client.
+        Default: 443
+    :type port: int
 
     Usage::
 
