@@ -14,7 +14,6 @@
 
 import json
 import urllib3
-import warnings
 import zlib
 
 try:
@@ -25,8 +24,6 @@ except ImportError:  # pragma: no cover
 USER_AGENT = "NewRelic-Python-TelemetrySDK/{}".format(__version__)
 
 __all__ = ("SpanClient", "MetricClient", "HTTPError", "HTTPResponse")
-
-DEFAULT_COMPRESSION = object()
 
 
 class HTTPError(ValueError):
@@ -78,9 +75,6 @@ class Client(object):
     :type insert_key: str
     :param host: (optional) Override the host for the client.
     :type host: str
-    :param compression_threshold: (optional-deprecated) Compress if number of
-        bytes in payload is above this threshold. (Default: 64K)
-    :type compression_threshold: int
 
     Usage::
 
@@ -94,41 +88,26 @@ class Client(object):
     PAYLOAD_TYPE = ""
     HOST = ""
     URL = "/"
-    GZIP_HEADER = {"Content-Encoding": "gzip"}
     HEADERS = urllib3.make_headers(
         keep_alive=True, accept_encoding=True, user_agent=USER_AGENT
     )
 
-    def __init__(
-        self, insert_key, host=None, compression_threshold=DEFAULT_COMPRESSION
-    ):
+    def __init__(self, insert_key, host=None):
         host = host or self.HOST
-        if compression_threshold is not DEFAULT_COMPRESSION:
-            warnings.warn(
-                "The compression_threshold option will be removed in an "
-                "upcoming release. All payloads will be gzip compressed in a "
-                "future release.",
-                DeprecationWarning,
-            )
-            self.compression_threshold = compression_threshold
-        else:
-            self.compression_threshold = 64 * 1024
         headers = self.HEADERS.copy()
         headers.update(
             {
                 "Api-Key": insert_key,
-                "Content-Encoding": "identity",
+                "Content-Encoding": "gzip",
                 "Content-Type": "application/json",
             }
         )
         retries = urllib3.Retry(
             total=False, connect=None, read=None, redirect=0, status=None
         )
-        self._pool = pool = self.POOL_CLS(
+        self._pool = self.POOL_CLS(
             host=host, port=443, retries=retries, headers=headers, strict=True
         )
-        self._gzip_headers = gzip_headers = pool.headers.copy()
-        gzip_headers.update(self.GZIP_HEADER)
 
     def add_version_info(self, product, product_version):
         """Adds product and version information to a User-Agent header
@@ -143,7 +122,6 @@ class Client(object):
         """
         product_ua_header = " {}/{}".format(product, product_version)
         self._pool.headers["user-agent"] += product_ua_header
-        self._gzip_headers["user-agent"] += product_ua_header
 
     @staticmethod
     def _compress_payload(payload):
@@ -182,12 +160,9 @@ class Client(object):
         if not isinstance(payload, bytes):
             payload = payload.encode("utf-8")
 
-        headers = None
-        if len(payload) > self.compression_threshold:
-            payload = self._compress_payload(payload)
-            headers = self._gzip_headers
+        payload = self._compress_payload(payload)
 
-        return self._pool.urlopen("POST", self.URL, body=payload, headers=headers)
+        return self._pool.urlopen("POST", self.URL, body=payload)
 
 
 class SpanClient(Client):
@@ -199,9 +174,6 @@ class SpanClient(Client):
     :type insert_key: str
     :param host: (optional) Override the host for the span API endpoint.
     :type host: str
-    :param compression_threshold: (optional-deprecated) Compress if number of
-        bytes in payload is above this threshold. (Default: 64K)
-    :type compression_threshold: int
 
     Usage::
 
@@ -226,9 +198,6 @@ class MetricClient(Client):
     :param host: (optional) Override the host for the metric API
         endpoint.
     :type host: str
-    :param compression_threshold: (optional-deprecated) Compress if number of
-        bytes in payload is above this threshold. (Default: 64K)
-    :type compression_threshold: int
 
     Usage::
 
@@ -253,9 +222,6 @@ class EventClient(Client):
     :param host: (optional) Override the host for the event API
         endpoint.
     :type host: str
-    :param compression_threshold: (optional-deprecated) Compress if number of
-        bytes in payload is above this threshold. (Default: 64K)
-    :type compression_threshold: int
 
     Usage::
 
@@ -280,9 +246,6 @@ class EventClient(Client):
         if not isinstance(payload, bytes):
             payload = payload.encode("utf-8")
 
-        headers = None
-        if len(payload) > self.compression_threshold:
-            payload = self._compress_payload(payload)
-            headers = self._gzip_headers
+        payload = self._compress_payload(payload)
 
-        return self._pool.urlopen("POST", self.URL, body=payload, headers=headers)
+        return self._pool.urlopen("POST", self.URL, body=payload)
