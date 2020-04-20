@@ -317,6 +317,7 @@ def test_event_endpoint_batch(event_client):
 )
 def test_defaults(cls, host):
     assert cls.HOST == host
+    assert cls(None)._pool.port == 443
 
 
 def test_metric_add_version_info(metric_client):
