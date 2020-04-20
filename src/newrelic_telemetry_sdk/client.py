@@ -23,7 +23,7 @@ except ImportError:  # pragma: no cover
 
 USER_AGENT = "NewRelic-Python-TelemetrySDK/{}".format(__version__)
 
-__all__ = ("SpanClient", "MetricClient", "HTTPError", "HTTPResponse")
+__all__ = ("SpanClient", "MetricClient", "EventClient", "HTTPError", "HTTPResponse")
 
 
 class HTTPError(ValueError):
