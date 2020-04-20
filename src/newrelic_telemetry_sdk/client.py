@@ -90,7 +90,7 @@ class Client(object):
     POOL_CLS = HTTPSConnectionPool
     PAYLOAD_TYPE = ""
     HOST = ""
-    URL = "/"
+    PATH = "/"
     HEADERS = urllib3.make_headers(
         keep_alive=True, accept_encoding=True, user_agent=USER_AGENT
     )
@@ -165,7 +165,7 @@ class Client(object):
 
         payload = self._compress_payload(payload)
 
-        return self._pool.urlopen("POST", self.URL, body=payload)
+        return self._pool.urlopen("POST", self.PATH, body=payload)
 
 
 class SpanClient(Client):
@@ -190,7 +190,7 @@ class SpanClient(Client):
     """
 
     HOST = "trace-api.newrelic.com"
-    URL = "/trace/v1"
+    PATH = "/trace/v1"
     PAYLOAD_TYPE = "spans"
 
 
@@ -217,7 +217,7 @@ class MetricClient(Client):
     """
 
     HOST = "metric-api.newrelic.com"
-    URL = "/metric/v1"
+    PATH = "/metric/v1"
     PAYLOAD_TYPE = "metrics"
 
 
@@ -244,7 +244,7 @@ class EventClient(Client):
     """
 
     HOST = "insights-collector.newrelic.com"
-    URL = "/v1/accounts/events"
+    PATH = "/v1/accounts/events"
 
     def send_batch(self, items):
         """Send a batch of items
@@ -260,4 +260,4 @@ class EventClient(Client):
 
         payload = self._compress_payload(payload)
 
-        return self._pool.urlopen("POST", self.URL, body=payload)
+        return self._pool.urlopen("POST", self.PATH, body=payload)
