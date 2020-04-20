@@ -324,6 +324,81 @@ item.</p></li>
 
 </dd></dl>
 
+<dl class="py class">
+<dt id="newrelic_telemetry_sdk.client.EventClient">
+<em class="property">class </em><code class="sig-prename descclassname">newrelic_telemetry_sdk.client.</code><code class="sig-name descname">EventClient</code><span class="sig-paren">(</span><em class="sig-param">insert_key</em>, <em class="sig-param">host=None</em>, <em class="sig-param">compression_threshold=&lt;object object&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newrelic_telemetry_sdk/client.html#EventClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.client.EventClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP Client for interacting with the New Relic Event API</p>
+<p>This class is used to send events to the New Relic Event API over HTTP.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>insert_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Insights insert key</p></li>
+<li><p><strong>host</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – (optional) Override the host for the event API
+endpoint.</p></li>
+<li><p><strong>compression_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – (optional-deprecated) Compress if number of
+bytes in payload is above this threshold. (Default: 64K)</p></li>
+</ul>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">os</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">insert_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;NEW_RELIC_INSERT_KEY&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">event_client</span> <span class="o">=</span> <span class="n">EventClient</span><span class="p">(</span><span class="n">insert_key</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">event_client</span><span class="o">.</span><span class="n">send</span><span class="p">({})</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt id="newrelic_telemetry_sdk.client.EventClient.POOL_CLS">
+<code class="sig-name descname">POOL_CLS</code><a class="headerlink" href="#newrelic_telemetry_sdk.client.EventClient.POOL_CLS" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPSConnectionPool</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="newrelic_telemetry_sdk.client.EventClient.add_version_info">
+<code class="sig-name descname">add_version_info</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">product</span></em>, <em class="sig-param"><span class="n">product_version</span></em><span class="sig-paren">)</span><a class="headerlink" href="#newrelic_telemetry_sdk.client.EventClient.add_version_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds product and version information to a User-Agent header</p>
+<p>This method implements
+<a class="reference external" href="https://tools.ietf.org/html/rfc7231#section-5.5.3">https://tools.ietf.org/html/rfc7231#section-5.5.3</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>product</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The product name using the SDK</p></li>
+<li><p><strong>product_version</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The version string of the product in use</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="newrelic_telemetry_sdk.client.EventClient.send">
+<code class="sig-name descname">send</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">item</span></em><span class="sig-paren">)</span><a class="headerlink" href="#newrelic_telemetry_sdk.client.EventClient.send" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send a single item</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>item</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – The object to send</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#newrelic_telemetry_sdk.client.HTTPResponse" title="newrelic_telemetry_sdk.client.HTTPResponse">HTTPResponse</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="newrelic_telemetry_sdk.client.EventClient.send_batch">
+<code class="sig-name descname">send_batch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">items</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newrelic_telemetry_sdk/client.html#EventClient.send_batch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.client.EventClient.send_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send a batch of items</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>items</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a>) – An iterable of items to send to New Relic.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#newrelic_telemetry_sdk.client.HTTPResponse" title="newrelic_telemetry_sdk.client.HTTPResponse">HTTPResponse</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py exception">
 <dt id="newrelic_telemetry_sdk.client.HTTPError">
 <em class="property">exception </em><code class="sig-prename descclassname">newrelic_telemetry_sdk.client.</code><code class="sig-name descname">HTTPError</code><a class="reference internal" href="_modules/newrelic_telemetry_sdk/client.html#HTTPError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.client.HTTPError" title="Permalink to this definition">¶</a></dt>

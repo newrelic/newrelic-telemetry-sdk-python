@@ -179,7 +179,7 @@
 
 <span class="n">USER_AGENT</span> <span class="o">=</span> <span class="s2">&quot;NewRelic-Python-TelemetrySDK/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__version__</span><span class="p">)</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;SpanClient&quot;</span><span class="p">,</span> <span class="s2">&quot;MetricClient&quot;</span><span class="p">,</span> <span class="s2">&quot;HTTPError&quot;</span><span class="p">,</span> <span class="s2">&quot;HTTPResponse&quot;</span><span class="p">)</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;SpanClient&quot;</span><span class="p">,</span> <span class="s2">&quot;MetricClient&quot;</span><span class="p">,</span> <span class="s2">&quot;EventClient&quot;</span><span class="p">,</span> <span class="s2">&quot;HTTPError&quot;</span><span class="p">,</span> <span class="s2">&quot;HTTPResponse&quot;</span><span class="p">)</span>
 
 <span class="n">DEFAULT_COMPRESSION</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
 
@@ -398,7 +398,7 @@
     <span class="n">PAYLOAD_TYPE</span> <span class="o">=</span> <span class="s2">&quot;metrics&quot;</span></div>
 
 
-<span class="k">class</span> <span class="nc">EventClient</span><span class="p">(</span><span class="n">Client</span><span class="p">):</span>
+<div class="viewcode-block" id="EventClient"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.EventClient">[docs]</a><span class="k">class</span> <span class="nc">EventClient</span><span class="p">(</span><span class="n">Client</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;HTTP Client for interacting with the New Relic Event API</span>
 
 <span class="sd">    This class is used to send events to the New Relic Event API over HTTP.</span>
@@ -423,7 +423,7 @@
     <span class="n">HOST</span> <span class="o">=</span> <span class="s2">&quot;insights-collector.newrelic.com&quot;</span>
     <span class="n">URL</span> <span class="o">=</span> <span class="s2">&quot;/v1/accounts/events&quot;</span>
 
-    <span class="k">def</span> <span class="nf">send_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
+<div class="viewcode-block" id="EventClient.send_batch"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.EventClient.send_batch">[docs]</a>    <span class="k">def</span> <span class="nf">send_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Send a batch of items</span>
 
 <span class="sd">        :param items: An iterable of items to send to New Relic.</span>
@@ -440,7 +440,7 @@
             <span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compress_payload</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
             <span class="n">headers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gzip_headers</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">URL</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">URL</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>
