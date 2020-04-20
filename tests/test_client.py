@@ -278,6 +278,7 @@ def validate_event_request(request, items):
         ),
     ),
 )
+@pytest.mark.filterwarnings("ignore:.*compression_threshold.*:DeprecationWarning")
 def test_span_endpoint_compression(compressed, span_client):
     response = span_client.send(SPAN)
     request = response.request
@@ -297,6 +298,7 @@ def test_span_endpoint_compression(compressed, span_client):
         ),
     ),
 )
+@pytest.mark.filterwarnings("ignore:.*compression_threshold.*:DeprecationWarning")
 def test_metric_endpoint_compression(compressed, metric_client):
     response = metric_client.send(METRIC)
     request = response.request
@@ -316,6 +318,7 @@ def test_metric_endpoint_compression(compressed, metric_client):
         ),
     ),
 )
+@pytest.mark.filterwarnings("ignore:.*compression_threshold.*:DeprecationWarning")
 def test_event_endpoint_compression(compressed, event_client):
     response = event_client.send(EVENT)
     request = response.request
@@ -384,6 +387,7 @@ def test_defaults(cls, host):
         pytest.param(marks=pytest.mark.client_args(compression_threshold=float("inf"))),
     ),
 )
+@pytest.mark.filterwarnings("ignore:.*compression_threshold.*:DeprecationWarning")
 def test_metric_add_version_info(metric_client):
     metric_client.add_version_info("foo", "0.1")
     metric_client.add_version_info("bar", "0.2")
@@ -401,6 +405,7 @@ def test_metric_add_version_info(metric_client):
         pytest.param(marks=pytest.mark.client_args(compression_threshold=float("inf"))),
     ),
 )
+@pytest.mark.filterwarnings("ignore:.*compression_threshold.*:DeprecationWarning")
 def test_span_add_version_info(span_client):
     span_client.add_version_info("foo", "0.1")
     span_client.add_version_info("bar", "0.2")
@@ -418,6 +423,7 @@ def test_span_add_version_info(span_client):
         pytest.param(marks=pytest.mark.client_args(compression_threshold=float("inf"))),
     ),
 )
+@pytest.mark.filterwarnings("ignore:.*compression_threshold.*:DeprecationWarning")
 def test_event_add_version_info(event_client):
     event_client.add_version_info("foo", "0.1")
     event_client.add_version_info("bar", "0.2")
