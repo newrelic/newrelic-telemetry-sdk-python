@@ -269,66 +269,6 @@ def validate_event_request(request, items):
     assert payload == items
 
 
-@pytest.mark.parametrize(
-    "compressed",
-    (
-        pytest.param(True, marks=pytest.mark.client_args(compression_threshold=0)),
-        pytest.param(
-            False, marks=pytest.mark.client_args(compression_threshold=float("inf"))
-        ),
-    ),
-)
-@pytest.mark.filterwarnings("ignore:.*compression_threshold.*:DeprecationWarning")
-def test_span_endpoint_compression(compressed, span_client):
-    response = span_client.send(SPAN)
-    request = response.request
-    if compressed:
-        assert request.headers["Content-Encoding"] == "gzip"
-    else:
-        assert request.headers["Content-Encoding"] == "identity"
-    validate_span_request(request, [SPAN])
-
-
-@pytest.mark.parametrize(
-    "compressed",
-    (
-        pytest.param(True, marks=pytest.mark.client_args(compression_threshold=0)),
-        pytest.param(
-            False, marks=pytest.mark.client_args(compression_threshold=float("inf"))
-        ),
-    ),
-)
-@pytest.mark.filterwarnings("ignore:.*compression_threshold.*:DeprecationWarning")
-def test_metric_endpoint_compression(compressed, metric_client):
-    response = metric_client.send(METRIC)
-    request = response.request
-    if compressed:
-        assert request.headers["Content-Encoding"] == "gzip"
-    else:
-        assert request.headers["Content-Encoding"] == "identity"
-    validate_metric_request(request, [METRIC])
-
-
-@pytest.mark.parametrize(
-    "compressed",
-    (
-        pytest.param(True, marks=pytest.mark.client_args(compression_threshold=0)),
-        pytest.param(
-            False, marks=pytest.mark.client_args(compression_threshold=float("inf"))
-        ),
-    ),
-)
-@pytest.mark.filterwarnings("ignore:.*compression_threshold.*:DeprecationWarning")
-def test_event_endpoint_compression(compressed, event_client):
-    response = event_client.send(EVENT)
-    request = response.request
-    if compressed:
-        assert request.headers["Content-Encoding"] == "gzip"
-    else:
-        assert request.headers["Content-Encoding"] == "identity"
-    validate_event_request(request, [EVENT])
-
-
 def test_metric_endpoint_batch(metric_client):
     metrics = [{"name": "testing", "type": "count", "value": 1}]
     tags = {"hostname": "localhost"}
@@ -377,57 +317,35 @@ def test_event_endpoint_batch(event_client):
 )
 def test_defaults(cls, host):
     assert cls.HOST == host
-    assert cls(None).compression_threshold == 64 * 1024
 
 
-@pytest.mark.parametrize(
-    "",
-    (
-        pytest.param(marks=pytest.mark.client_args(compression_threshold=0)),
-        pytest.param(marks=pytest.mark.client_args(compression_threshold=float("inf"))),
-    ),
-)
-@pytest.mark.filterwarnings("ignore:.*compression_threshold.*:DeprecationWarning")
 def test_metric_add_version_info(metric_client):
     metric_client.add_version_info("foo", "0.1")
     metric_client.add_version_info("bar", "0.2")
     response = metric_client.send(METRIC)
+    validate_metric_request(response.request, [METRIC])
     request = response.request
 
     user_agent = request.headers["user-agent"]
     assert user_agent.endswith(" foo/0.1 bar/0.2"), user_agent
 
 
-@pytest.mark.parametrize(
-    "",
-    (
-        pytest.param(marks=pytest.mark.client_args(compression_threshold=0)),
-        pytest.param(marks=pytest.mark.client_args(compression_threshold=float("inf"))),
-    ),
-)
-@pytest.mark.filterwarnings("ignore:.*compression_threshold.*:DeprecationWarning")
 def test_span_add_version_info(span_client):
     span_client.add_version_info("foo", "0.1")
     span_client.add_version_info("bar", "0.2")
     response = span_client.send(SPAN)
+    validate_span_request(response.request, [SPAN])
     request = response.request
 
     user_agent = request.headers["user-agent"]
     assert user_agent.endswith(" foo/0.1 bar/0.2"), user_agent
 
 
-@pytest.mark.parametrize(
-    "",
-    (
-        pytest.param(marks=pytest.mark.client_args(compression_threshold=0)),
-        pytest.param(marks=pytest.mark.client_args(compression_threshold=float("inf"))),
-    ),
-)
-@pytest.mark.filterwarnings("ignore:.*compression_threshold.*:DeprecationWarning")
 def test_event_add_version_info(event_client):
     event_client.add_version_info("foo", "0.1")
     event_client.add_version_info("bar", "0.2")
     response = event_client.send(EVENT)
+    validate_event_request(response.request, [EVENT])
     request = response.request
 
     user_agent = request.headers["user-agent"]
