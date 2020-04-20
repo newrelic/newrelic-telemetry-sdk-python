@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>newrelic_telemetry_sdk.client &mdash; newrelic-telemetry-sdk 0.2.5 documentation</title>
+  <title>newrelic_telemetry_sdk.client &mdash; newrelic-telemetry-sdk 0.3.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.2
+                0.3
               </div>
             
           
@@ -169,7 +169,6 @@
 
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">urllib3</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">import</span> <span class="nn">zlib</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -180,8 +179,6 @@
 <span class="n">USER_AGENT</span> <span class="o">=</span> <span class="s2">&quot;NewRelic-Python-TelemetrySDK/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__version__</span><span class="p">)</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;SpanClient&quot;</span><span class="p">,</span> <span class="s2">&quot;MetricClient&quot;</span><span class="p">,</span> <span class="s2">&quot;EventClient&quot;</span><span class="p">,</span> <span class="s2">&quot;HTTPError&quot;</span><span class="p">,</span> <span class="s2">&quot;HTTPResponse&quot;</span><span class="p">)</span>
-
-<span class="n">DEFAULT_COMPRESSION</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="HTTPError"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.HTTPError">[docs]</a><span class="k">class</span> <span class="nc">HTTPError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
@@ -233,9 +230,9 @@
 <span class="sd">    :type insert_key: str</span>
 <span class="sd">    :param host: (optional) Override the host for the client.</span>
 <span class="sd">    :type host: str</span>
-<span class="sd">    :param compression_threshold: (optional-deprecated) Compress if number of</span>
-<span class="sd">        bytes in payload is above this threshold. (Default: 64K)</span>
-<span class="sd">    :type compression_threshold: int</span>
+<span class="sd">    :param port: (optional) Override the port for the client.</span>
+<span class="sd">        Default: 443</span>
+<span class="sd">    :type port: int</span>
 
 <span class="sd">    Usage::</span>
 
@@ -248,42 +245,27 @@
     <span class="n">POOL_CLS</span> <span class="o">=</span> <span class="n">HTTPSConnectionPool</span>
     <span class="n">PAYLOAD_TYPE</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="n">HOST</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-    <span class="n">URL</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span>
-    <span class="n">GZIP_HEADER</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Content-Encoding&quot;</span><span class="p">:</span> <span class="s2">&quot;gzip&quot;</span><span class="p">}</span>
+    <span class="n">PATH</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span>
     <span class="n">HEADERS</span> <span class="o">=</span> <span class="n">urllib3</span><span class="o">.</span><span class="n">make_headers</span><span class="p">(</span>
         <span class="n">keep_alive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">accept_encoding</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">user_agent</span><span class="o">=</span><span class="n">USER_AGENT</span>
     <span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">insert_key</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compression_threshold</span><span class="o">=</span><span class="n">DEFAULT_COMPRESSION</span>
-    <span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">insert_key</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">443</span><span class="p">):</span>
         <span class="n">host</span> <span class="o">=</span> <span class="n">host</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">HOST</span>
-        <span class="k">if</span> <span class="n">compression_threshold</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">DEFAULT_COMPRESSION</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;The compression_threshold option will be removed in an &quot;</span>
-                <span class="s2">&quot;upcoming release. All payloads will be gzip compressed in a &quot;</span>
-                <span class="s2">&quot;future release.&quot;</span><span class="p">,</span>
-                <span class="ne">DeprecationWarning</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">compression_threshold</span> <span class="o">=</span> <span class="n">compression_threshold</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">compression_threshold</span> <span class="o">=</span> <span class="mi">64</span> <span class="o">*</span> <span class="mi">1024</span>
         <span class="n">headers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">HEADERS</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">headers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="p">{</span>
                 <span class="s2">&quot;Api-Key&quot;</span><span class="p">:</span> <span class="n">insert_key</span><span class="p">,</span>
-                <span class="s2">&quot;Content-Encoding&quot;</span><span class="p">:</span> <span class="s2">&quot;identity&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Content-Encoding&quot;</span><span class="p">:</span> <span class="s2">&quot;gzip&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
             <span class="p">}</span>
         <span class="p">)</span>
         <span class="n">retries</span> <span class="o">=</span> <span class="n">urllib3</span><span class="o">.</span><span class="n">Retry</span><span class="p">(</span>
             <span class="n">total</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">connect</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">redirect</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="kc">None</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span> <span class="o">=</span> <span class="n">pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">POOL_CLS</span><span class="p">(</span>
-            <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">443</span><span class="p">,</span> <span class="n">retries</span><span class="o">=</span><span class="n">retries</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">POOL_CLS</span><span class="p">(</span>
+            <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="n">retries</span><span class="o">=</span><span class="n">retries</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_gzip_headers</span> <span class="o">=</span> <span class="n">gzip_headers</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">gzip_headers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GZIP_HEADER</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">add_version_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product</span><span class="p">,</span> <span class="n">product_version</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Adds product and version information to a User-Agent header</span>
@@ -298,7 +280,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">product_ua_header</span> <span class="o">=</span> <span class="s2">&quot; </span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">product</span><span class="p">,</span> <span class="n">product_version</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;user-agent&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">product_ua_header</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_gzip_headers</span><span class="p">[</span><span class="s2">&quot;user-agent&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">product_ua_header</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_compress_payload</span><span class="p">(</span><span class="n">payload</span><span class="p">):</span>
@@ -337,12 +318,9 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="n">payload</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
 
-        <span class="n">headers</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">compression_threshold</span><span class="p">:</span>
-            <span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compress_payload</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-            <span class="n">headers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gzip_headers</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compress_payload</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">URL</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">PATH</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="SpanClient"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.SpanClient">[docs]</a><span class="k">class</span> <span class="nc">SpanClient</span><span class="p">(</span><span class="n">Client</span><span class="p">):</span>
@@ -354,9 +332,9 @@
 <span class="sd">    :type insert_key: str</span>
 <span class="sd">    :param host: (optional) Override the host for the span API endpoint.</span>
 <span class="sd">    :type host: str</span>
-<span class="sd">    :param compression_threshold: (optional-deprecated) Compress if number of</span>
-<span class="sd">        bytes in payload is above this threshold. (Default: 64K)</span>
-<span class="sd">    :type compression_threshold: int</span>
+<span class="sd">    :param port: (optional) Override the port for the client.</span>
+<span class="sd">        Default: 443</span>
+<span class="sd">    :type port: int</span>
 
 <span class="sd">    Usage::</span>
 
@@ -367,7 +345,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">HOST</span> <span class="o">=</span> <span class="s2">&quot;trace-api.newrelic.com&quot;</span>
-    <span class="n">URL</span> <span class="o">=</span> <span class="s2">&quot;/trace/v1&quot;</span>
+    <span class="n">PATH</span> <span class="o">=</span> <span class="s2">&quot;/trace/v1&quot;</span>
     <span class="n">PAYLOAD_TYPE</span> <span class="o">=</span> <span class="s2">&quot;spans&quot;</span></div>
 
 
@@ -381,9 +359,9 @@
 <span class="sd">    :param host: (optional) Override the host for the metric API</span>
 <span class="sd">        endpoint.</span>
 <span class="sd">    :type host: str</span>
-<span class="sd">    :param compression_threshold: (optional-deprecated) Compress if number of</span>
-<span class="sd">        bytes in payload is above this threshold. (Default: 64K)</span>
-<span class="sd">    :type compression_threshold: int</span>
+<span class="sd">    :param port: (optional) Override the port for the client.</span>
+<span class="sd">        Default: 443</span>
+<span class="sd">    :type port: int</span>
 
 <span class="sd">    Usage::</span>
 
@@ -394,7 +372,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">HOST</span> <span class="o">=</span> <span class="s2">&quot;metric-api.newrelic.com&quot;</span>
-    <span class="n">URL</span> <span class="o">=</span> <span class="s2">&quot;/metric/v1&quot;</span>
+    <span class="n">PATH</span> <span class="o">=</span> <span class="s2">&quot;/metric/v1&quot;</span>
     <span class="n">PAYLOAD_TYPE</span> <span class="o">=</span> <span class="s2">&quot;metrics&quot;</span></div>
 
 
@@ -408,9 +386,9 @@
 <span class="sd">    :param host: (optional) Override the host for the event API</span>
 <span class="sd">        endpoint.</span>
 <span class="sd">    :type host: str</span>
-<span class="sd">    :param compression_threshold: (optional-deprecated) Compress if number of</span>
-<span class="sd">        bytes in payload is above this threshold. (Default: 64K)</span>
-<span class="sd">    :type compression_threshold: int</span>
+<span class="sd">    :param port: (optional) Override the port for the client.</span>
+<span class="sd">        Default: 443</span>
+<span class="sd">    :type port: int</span>
 
 <span class="sd">    Usage::</span>
 
@@ -421,7 +399,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">HOST</span> <span class="o">=</span> <span class="s2">&quot;insights-collector.newrelic.com&quot;</span>
-    <span class="n">URL</span> <span class="o">=</span> <span class="s2">&quot;/v1/accounts/events&quot;</span>
+    <span class="n">PATH</span> <span class="o">=</span> <span class="s2">&quot;/v1/accounts/events&quot;</span>
 
 <div class="viewcode-block" id="EventClient.send_batch"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.EventClient.send_batch">[docs]</a>    <span class="k">def</span> <span class="nf">send_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Send a batch of items</span>
@@ -435,12 +413,9 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="n">payload</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
 
-        <span class="n">headers</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">compression_threshold</span><span class="p">:</span>
-            <span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compress_payload</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-            <span class="n">headers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gzip_headers</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compress_payload</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">URL</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">PATH</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

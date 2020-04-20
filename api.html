@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; newrelic-telemetry-sdk 0.2.5 documentation</title>
+  <title>API Reference &mdash; newrelic-telemetry-sdk 0.3.0 documentation</title>
   
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                0.2
+                0.3
               </div>
             
           
@@ -169,7 +169,7 @@
 <span id="new-relic-http-clients"></span><h2>New Relic HTTP Clients<a class="headerlink" href="#module-newrelic_telemetry_sdk.client" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="newrelic_telemetry_sdk.client.SpanClient">
-<em class="property">class </em><code class="sig-prename descclassname">newrelic_telemetry_sdk.client.</code><code class="sig-name descname">SpanClient</code><span class="sig-paren">(</span><em class="sig-param">insert_key</em>, <em class="sig-param">host=None</em>, <em class="sig-param">compression_threshold=&lt;object object&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newrelic_telemetry_sdk/client.html#SpanClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.client.SpanClient" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">newrelic_telemetry_sdk.client.</code><code class="sig-name descname">SpanClient</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">insert_key</span></em>, <em class="sig-param"><span class="n">host</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">port</span><span class="o">=</span><span class="default_value">443</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newrelic_telemetry_sdk/client.html#SpanClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.client.SpanClient" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP Client for interacting with the New Relic Span API</p>
 <p>This class is used to send spans to the New Relic Span API over HTTP.</p>
 <dl class="field-list simple">
@@ -177,8 +177,8 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>insert_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Insights insert key</p></li>
 <li><p><strong>host</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – (optional) Override the host for the span API endpoint.</p></li>
-<li><p><strong>compression_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – (optional-deprecated) Compress if number of
-bytes in payload is above this threshold. (Default: 64K)</p></li>
+<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – (optional) Override the port for the client.
+Default: 443</p></li>
 </ul>
 </dd>
 </dl>
@@ -247,7 +247,7 @@ item.</p></li>
 
 <dl class="py class">
 <dt id="newrelic_telemetry_sdk.client.MetricClient">
-<em class="property">class </em><code class="sig-prename descclassname">newrelic_telemetry_sdk.client.</code><code class="sig-name descname">MetricClient</code><span class="sig-paren">(</span><em class="sig-param">insert_key</em>, <em class="sig-param">host=None</em>, <em class="sig-param">compression_threshold=&lt;object object&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newrelic_telemetry_sdk/client.html#MetricClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.client.MetricClient" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">newrelic_telemetry_sdk.client.</code><code class="sig-name descname">MetricClient</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">insert_key</span></em>, <em class="sig-param"><span class="n">host</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">port</span><span class="o">=</span><span class="default_value">443</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newrelic_telemetry_sdk/client.html#MetricClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.client.MetricClient" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP Client for interacting with the New Relic Metric API</p>
 <p>This class is used to send metrics to the New Relic Metric API over HTTP.</p>
 <dl class="field-list simple">
@@ -256,8 +256,8 @@ item.</p></li>
 <li><p><strong>insert_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Insights insert key</p></li>
 <li><p><strong>host</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – (optional) Override the host for the metric API
 endpoint.</p></li>
-<li><p><strong>compression_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – (optional-deprecated) Compress if number of
-bytes in payload is above this threshold. (Default: 64K)</p></li>
+<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – (optional) Override the port for the client.
+Default: 443</p></li>
 </ul>
 </dd>
 </dl>
@@ -326,7 +326,7 @@ item.</p></li>
 
 <dl class="py class">
 <dt id="newrelic_telemetry_sdk.client.EventClient">
-<em class="property">class </em><code class="sig-prename descclassname">newrelic_telemetry_sdk.client.</code><code class="sig-name descname">EventClient</code><span class="sig-paren">(</span><em class="sig-param">insert_key</em>, <em class="sig-param">host=None</em>, <em class="sig-param">compression_threshold=&lt;object object&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newrelic_telemetry_sdk/client.html#EventClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.client.EventClient" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">newrelic_telemetry_sdk.client.</code><code class="sig-name descname">EventClient</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">insert_key</span></em>, <em class="sig-param"><span class="n">host</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">port</span><span class="o">=</span><span class="default_value">443</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newrelic_telemetry_sdk/client.html#EventClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.client.EventClient" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP Client for interacting with the New Relic Event API</p>
 <p>This class is used to send events to the New Relic Event API over HTTP.</p>
 <dl class="field-list simple">
@@ -335,8 +335,8 @@ item.</p></li>
 <li><p><strong>insert_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Insights insert key</p></li>
 <li><p><strong>host</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – (optional) Override the host for the event API
 endpoint.</p></li>
-<li><p><strong>compression_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – (optional-deprecated) Compress if number of
-bytes in payload is above this threshold. (Default: 64K)</p></li>
+<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – (optional) Override the port for the client.
+Default: 443</p></li>
 </ul>
 </dd>
 </dl>
