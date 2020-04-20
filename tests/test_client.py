@@ -320,6 +320,11 @@ def test_defaults(cls, host):
     assert cls(None)._pool.port == 443
 
 
+@pytest.mark.parametrize("cls", (SpanClient, MetricClient, EventClient))
+def test_port_override(cls):
+    assert cls(None, port=8000)._pool.port == 8000
+
+
 def test_metric_add_version_info(metric_client):
     metric_client.add_version_info("foo", "0.1")
     metric_client.add_version_info("bar", "0.2")
