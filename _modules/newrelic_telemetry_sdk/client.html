@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>newrelic_telemetry_sdk.client &mdash; newrelic-telemetry-sdk 0.2.4 documentation</title>
+  <title>newrelic_telemetry_sdk.client &mdash; newrelic-telemetry-sdk 0.2.5 documentation</title>
   
 
   
@@ -169,6 +169,7 @@
 
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">urllib3</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">import</span> <span class="nn">zlib</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -179,6 +180,8 @@
 <span class="n">USER_AGENT</span> <span class="o">=</span> <span class="s2">&quot;NewRelic-Python-TelemetrySDK/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__version__</span><span class="p">)</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;SpanClient&quot;</span><span class="p">,</span> <span class="s2">&quot;MetricClient&quot;</span><span class="p">,</span> <span class="s2">&quot;HTTPError&quot;</span><span class="p">,</span> <span class="s2">&quot;HTTPResponse&quot;</span><span class="p">)</span>
+
+<span class="n">DEFAULT_COMPRESSION</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="HTTPError"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.HTTPError">[docs]</a><span class="k">class</span> <span class="nc">HTTPError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
@@ -230,8 +233,8 @@
 <span class="sd">    :type insert_key: str</span>
 <span class="sd">    :param host: (optional) Override the host for the client.</span>
 <span class="sd">    :type host: str</span>
-<span class="sd">    :param compression_threshold: (optional) Compress if number of bytes in</span>
-<span class="sd">        payload is above this threshold. (Default: 64K)</span>
+<span class="sd">    :param compression_threshold: (optional-deprecated) Compress if number of</span>
+<span class="sd">        bytes in payload is above this threshold. (Default: 64K)</span>
 <span class="sd">    :type compression_threshold: int</span>
 
 <span class="sd">    Usage::</span>
@@ -251,9 +254,20 @@
         <span class="n">keep_alive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">accept_encoding</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">user_agent</span><span class="o">=</span><span class="n">USER_AGENT</span>
     <span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">insert_key</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compression_threshold</span><span class="o">=</span><span class="mi">64</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">insert_key</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compression_threshold</span><span class="o">=</span><span class="n">DEFAULT_COMPRESSION</span>
+    <span class="p">):</span>
         <span class="n">host</span> <span class="o">=</span> <span class="n">host</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">HOST</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">compression_threshold</span> <span class="o">=</span> <span class="n">compression_threshold</span>
+        <span class="k">if</span> <span class="n">compression_threshold</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">DEFAULT_COMPRESSION</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;The compression_threshold option will be removed in an &quot;</span>
+                <span class="s2">&quot;upcoming release. All payloads will be gzip compressed in a &quot;</span>
+                <span class="s2">&quot;future release.&quot;</span><span class="p">,</span>
+                <span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compression_threshold</span> <span class="o">=</span> <span class="n">compression_threshold</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compression_threshold</span> <span class="o">=</span> <span class="mi">64</span> <span class="o">*</span> <span class="mi">1024</span>
         <span class="n">headers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">HEADERS</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">headers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="p">{</span>
@@ -340,8 +354,8 @@
 <span class="sd">    :type insert_key: str</span>
 <span class="sd">    :param host: (optional) Override the host for the span API endpoint.</span>
 <span class="sd">    :type host: str</span>
-<span class="sd">    :param compression_threshold: (optional) Compress if number of bytes in</span>
-<span class="sd">        payload is above this threshold. (Default: 64K)</span>
+<span class="sd">    :param compression_threshold: (optional-deprecated) Compress if number of</span>
+<span class="sd">        bytes in payload is above this threshold. (Default: 64K)</span>
 <span class="sd">    :type compression_threshold: int</span>
 
 <span class="sd">    Usage::</span>
@@ -367,8 +381,8 @@
 <span class="sd">    :param host: (optional) Override the host for the metric API</span>
 <span class="sd">        endpoint.</span>
 <span class="sd">    :type host: str</span>
-<span class="sd">    :param compression_threshold: (optional) Compress if number of bytes in</span>
-<span class="sd">        payload is above this threshold. (Default: 64K)</span>
+<span class="sd">    :param compression_threshold: (optional-deprecated) Compress if number of</span>
+<span class="sd">        bytes in payload is above this threshold. (Default: 64K)</span>
 <span class="sd">    :type compression_threshold: int</span>
 
 <span class="sd">    Usage::</span>
@@ -394,8 +408,8 @@
 <span class="sd">    :param host: (optional) Override the host for the event API</span>
 <span class="sd">        endpoint.</span>
 <span class="sd">    :type host: str</span>
-<span class="sd">    :param compression_threshold: (optional) Compress if number of bytes in</span>
-<span class="sd">        payload is above this threshold. (Default: 64K)</span>
+<span class="sd">    :param compression_threshold: (optional-deprecated) Compress if number of</span>
+<span class="sd">        bytes in payload is above this threshold. (Default: 64K)</span>
 <span class="sd">    :type compression_threshold: int</span>
 
 <span class="sd">    Usage::</span>
