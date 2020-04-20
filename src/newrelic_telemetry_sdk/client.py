@@ -14,6 +14,7 @@
 
 import json
 import urllib3
+import warnings
 import zlib
 
 try:
@@ -24,6 +25,8 @@ except ImportError:  # pragma: no cover
 USER_AGENT = "NewRelic-Python-TelemetrySDK/{}".format(__version__)
 
 __all__ = ("SpanClient", "MetricClient", "HTTPError", "HTTPResponse")
+
+DEFAULT_COMPRESSION = object()
 
 
 class HTTPError(ValueError):
@@ -75,8 +78,8 @@ class Client(object):
     :type insert_key: str
     :param host: (optional) Override the host for the client.
     :type host: str
-    :param compression_threshold: (optional) Compress if number of bytes in
-        payload is above this threshold. (Default: 64K)
+    :param compression_threshold: (optional-deprecated) Compress if number of
+        bytes in payload is above this threshold. (Default: 64K)
     :type compression_threshold: int
 
     Usage::
@@ -96,9 +99,20 @@ class Client(object):
         keep_alive=True, accept_encoding=True, user_agent=USER_AGENT
     )
 
-    def __init__(self, insert_key, host=None, compression_threshold=64 * 1024):
+    def __init__(
+        self, insert_key, host=None, compression_threshold=DEFAULT_COMPRESSION
+    ):
         host = host or self.HOST
-        self.compression_threshold = compression_threshold
+        if compression_threshold is not DEFAULT_COMPRESSION:
+            warnings.warn(
+                "The compression_threshold option will be removed in an "
+                "upcoming release. All payloads will be gzip compressed in a "
+                "future release.",
+                DeprecationWarning,
+            )
+            self.compression_threshold = compression_threshold
+        else:
+            self.compression_threshold = 64 * 1024
         headers = self.HEADERS.copy()
         headers.update(
             {
@@ -185,8 +199,8 @@ class SpanClient(Client):
     :type insert_key: str
     :param host: (optional) Override the host for the span API endpoint.
     :type host: str
-    :param compression_threshold: (optional) Compress if number of bytes in
-        payload is above this threshold. (Default: 64K)
+    :param compression_threshold: (optional-deprecated) Compress if number of
+        bytes in payload is above this threshold. (Default: 64K)
     :type compression_threshold: int
 
     Usage::
@@ -212,8 +226,8 @@ class MetricClient(Client):
     :param host: (optional) Override the host for the metric API
         endpoint.
     :type host: str
-    :param compression_threshold: (optional) Compress if number of bytes in
-        payload is above this threshold. (Default: 64K)
+    :param compression_threshold: (optional-deprecated) Compress if number of
+        bytes in payload is above this threshold. (Default: 64K)
     :type compression_threshold: int
 
     Usage::
@@ -239,8 +253,8 @@ class EventClient(Client):
     :param host: (optional) Override the host for the event API
         endpoint.
     :type host: str
-    :param compression_threshold: (optional) Compress if number of bytes in
-        payload is above this threshold. (Default: 64K)
+    :param compression_threshold: (optional-deprecated) Compress if number of
+        bytes in payload is above this threshold. (Default: 64K)
     :type compression_threshold: int
 
     Usage::
