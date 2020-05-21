@@ -82,7 +82,8 @@ def test_run_once(harvester, client):
     item = object()
     harvester.record(item)
 
-    harvester.run()
+    harvester.start()
+    harvester.stop(timeout=0.1)
 
     assert client.sent == [((item,), None)]
 
@@ -95,7 +96,8 @@ def test_run_flushes_data_on_shutdown(harvester, batch, client):
     harvester._shutdown.set()
 
     assert not client.sent
-    harvester.run()
+    harvester.start()
+    harvester.stop(timeout=0.1)
     assert client.sent == [((item,), None)]
 
 
@@ -103,7 +105,8 @@ def test_empty_items_not_sent(harvester, client):
     # Set shutdown event
     harvester._shutdown.set()
 
-    harvester.run()
+    harvester.start()
+    harvester.stop(timeout=0.1)
 
     # Send is never called if the batch is empty
     assert not client.sent
@@ -132,7 +135,8 @@ def test_harvester_handles_send_exception(caplog, batch):
 
     harvester.record(None)
     harvester._shutdown.set()
-    harvester.run()
+    harvester.start()
+    harvester.stop(timeout=0.1)
 
     assert (
         "newrelic_telemetry_sdk.harvester",
@@ -147,7 +151,8 @@ def test_harvester_send_failed(caplog, harvester, client):
 
     harvester.record(None)
     harvester._shutdown.set()
-    harvester.run()
+    harvester.start()
+    harvester.stop(timeout=0.1)
 
     assert (
         "newrelic_telemetry_sdk.harvester",
