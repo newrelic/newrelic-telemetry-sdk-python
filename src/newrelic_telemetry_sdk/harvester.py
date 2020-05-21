@@ -61,11 +61,11 @@ class Harvester(threading.Thread):
         self._harvest_interval_start = 0
         self._shutdown = self.EVENT_CLS()
 
-    def _send(self, items, common=None):
+    def _send(self, items, *args):
         """Send items through the harvester client, handling any exceptions"""
         if items:
             try:
-                response = self._client.send_batch(items, common=common)
+                response = self._client.send_batch(items, *args)
                 if not response.ok:
                     _logger.error(
                         "New Relic send_batch failed with status code: %r",
