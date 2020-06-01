@@ -96,16 +96,6 @@ class Harvester(threading.Thread):
         # deallocate batch
         self.batch = self._client = None
 
-    def record(self, item):
-        """Add an item to the batch to be harvested
-
-        Calling record with an item will merge it into the batch maintained by
-        this harvester.
-
-        :param item: A metric or span to be merged into a batch.
-        """
-        self._batch.record(item)
-
     def stop(self, timeout=None):
         """Terminate the harvester.
 
