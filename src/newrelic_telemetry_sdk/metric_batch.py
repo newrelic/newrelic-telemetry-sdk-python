@@ -14,9 +14,6 @@
 
 import threading
 import time
-import warnings
-
-from newrelic_telemetry_sdk.metric import GaugeMetric, CountMetric, SummaryMetric
 
 
 class MetricBatch(object):
@@ -35,29 +32,28 @@ class MetricBatch(object):
         self._interval_start = int(time.time() * 1000.0)
         self._lock = self.LOCK_CLS()
         self._batch = {}
+        self._timestamps = {}
         tags = tags and dict(tags)
         self._common = {}
         if tags:
             self._common["attributes"] = tags
 
     @staticmethod
-    def create_identity(metric):
+    def create_identity(name, tags=None, typ=None):
         """Creates a deterministic hashable identity for a metric
 
-        :param metric: A New Relic metric object
-        :type metric: newrelic_telemetry_sdk.metric.Metric
-
-        >>> from newrelic_telemetry_sdk import GaugeMetric
-        >>> foo_0 = GaugeMetric('foo', 0, tags={'units': 'C'})
-        >>> foo_1 = GaugeMetric('foo', 1, tags={'units': 'C'})
-        >>> MetricBatch.create_identity(foo_0) == MetricBatch.create_identity(foo_1)
-        True
+        :param name: The name of the metric.
+        :type name: str
+        :param tags: (optional) A set of tags that can be used to
+            filter this metric in the New Relic UI.
+        :type tags: dict
+        :param typ: (optional) The metric type. One of "summary", "count",
+            "gauge" or None. Default: None (gauge type).
+        :type typ: str
         """
-        tags = metric.tags
         if tags:
             tags = frozenset(tags.items())
-        identity = (type(metric), metric.name, tags)
-        return identity
+        return (typ, name, tags)
 
     def record_gauge(self, name, value, tags=None):
         """Records a gauge metric
@@ -70,7 +66,10 @@ class MetricBatch(object):
             filter this metric in the New Relic UI.
         :type tags: dict
         """
-        return self._record(GaugeMetric(name, value, tags))
+        identity = self.create_identity(name, tags)
+        with self._lock:
+            self._batch[identity] = value
+            self._timestamps[identity] = int(time.time() * 1000.0)
 
     def record_count(self, name, value, tags=None):
         """Records a count metric
@@ -83,7 +82,9 @@ class MetricBatch(object):
             filter this metric in the New Relic UI.
         :type tags: dict
         """
-        return self._record(CountMetric(name, value, tags, interval_ms=None))
+        identity = self.create_identity(name, tags, "count")
+        with self._lock:
+            self._batch[identity] = self._batch.get(identity, 0) + value
 
     def record_summary(self, name, value, tags=None):
         """Records a summary metric
@@ -96,48 +97,17 @@ class MetricBatch(object):
             filter this metric in the New Relic UI.
         :type tags: dict
         """
-        return self._record(
-            SummaryMetric(name, 1, value, value, value, tags, interval_ms=None)
-        )
-
-    def record(self, item):
-        """Merge a metric into the batch
-
-        :param item: The metric to merge into the batch.
-        :type item: newrelic_telemetry_sdk.metric.Metric
-        """
-        warnings.warn(
-            "MetricBatch.record will be removed in a future release. "
-            "Please use the MetricBatch.record_gauge, "
-            "MetricBatch.record_count, or "
-            "MetricBatch.record_summary interfaces.",
-            DeprecationWarning,
-        )
-        return self._record(item)
-
-    def _record(self, item):
-        identity = self.create_identity(item)
-
+        identity = self.create_identity(name, tags, "summary")
         with self._lock:
             if identity in self._batch:
-                merged = self._batch[identity]
-                value = item["value"]
-
-                if isinstance(item, SummaryMetric):
-                    merged_value = merged["value"]
-                    merged_value["count"] += value["count"]
-                    merged_value["sum"] += value["sum"]
-                    merged_value["min"] = min(value["min"], merged_value["min"])
-                    merged_value["max"] = max(value["max"], merged_value["max"])
-                elif isinstance(item, CountMetric):
-                    merged["value"] += value
-                else:
-                    merged["value"] = value
-
+                merged_value = self._batch[identity]
+                merged_value["count"] += 1
+                merged_value["sum"] += value
+                merged_value["min"] = min(value, merged_value["min"])
+                merged_value["max"] = max(value, merged_value["max"])
             else:
-                item = self._batch[identity] = item.copy()
-                # Timestamp will now be tracked as part of the batch
-                item.pop("timestamp")
+                value = {"count": 1, "sum": value, "min": value, "max": value}
+                self._batch[identity] = value
 
     def flush(self):
         """Flush all metrics from the batch
@@ -155,8 +125,28 @@ class MetricBatch(object):
         """
         with self._lock:
             batch = self._batch
-            items = tuple(batch.values())
+            timestamps = self._timestamps
+
+            items = []
+            for identity, value in batch.items():
+                metric = {}
+                typ, name, tags = identity
+                metric["name"] = name
+                if typ:
+                    metric["type"] = typ
+                else:
+                    metric["timestamp"] = timestamps[identity]
+
+                if tags:
+                    metric["attributes"] = dict(tags)
+
+                metric["value"] = value
+                items.append(metric)
+
+            items = tuple(items)
+
             batch.clear()
+            timestamps.clear()
 
             common = self._common.copy()
             common["timestamp"] = self._interval_start
