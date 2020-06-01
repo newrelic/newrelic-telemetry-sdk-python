@@ -85,6 +85,7 @@ class Client(object):
         >>> insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
         >>> client = Client(insert_key, host="metric-api.newrelic.com")
         >>> response = client.send({})
+        >>> client.close()
     """
 
     POOL_CLS = HTTPSConnectionPool
@@ -125,6 +126,10 @@ class Client(object):
         """
         product_ua_header = " {}/{}".format(product, product_version)
         self._pool.headers["user-agent"] += product_ua_header
+
+    def close(self):
+        """Close all open connections and disable internal connection pool."""
+        self._pool.close()
 
     @staticmethod
     def _compress_payload(payload):
@@ -187,6 +192,7 @@ class SpanClient(Client):
         >>> insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
         >>> span_client = SpanClient(insert_key)
         >>> response = span_client.send({})
+        >>> span_client.close()
     """
 
     HOST = "trace-api.newrelic.com"
@@ -214,6 +220,7 @@ class MetricClient(Client):
         >>> insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
         >>> metric_client = MetricClient(insert_key)
         >>> response = metric_client.send({})
+        >>> metric_client.close()
     """
 
     HOST = "metric-api.newrelic.com"
@@ -241,6 +248,7 @@ class EventClient(Client):
         >>> insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
         >>> event_client = EventClient(insert_key)
         >>> response = event_client.send({})
+        >>> event_client.close()
     """
 
     HOST = "insights-collector.newrelic.com"
