@@ -15,7 +15,6 @@
 import logging
 import time
 import threading
-import warnings
 
 _logger = logging.getLogger(__name__)
 
@@ -56,9 +55,9 @@ class Harvester(threading.Thread):
     def __init__(self, client, batch, harvest_interval=5):
         super(Harvester, self).__init__()
         self.daemon = True
+        self.batch = batch
         self.harvest_interval = harvest_interval
         self._client = client
-        self.batch = batch
         self._harvest_interval_start = 0
         self._shutdown = self.EVENT_CLS()
 
@@ -72,6 +71,7 @@ class Harvester(threading.Thread):
                         "New Relic send_batch failed with status code: %r",
                         response.status,
                     )
+                return response
             except Exception:
                 _logger.exception("New Relic send_batch failed with an exception.")
 
@@ -104,14 +104,7 @@ class Harvester(threading.Thread):
 
         :param item: A metric or span to be merged into a batch.
         """
-        warnings.warn(
-            (
-                "Harvester.record will be removed in a future release. "
-                "Please use Harvester.batch.record or batch.record."
-            ),
-            DeprecationWarning,
-        )
-        self.batch.record(item)
+        self._batch.record(item)
 
     def stop(self, timeout=None):
         """Terminate the harvester.
