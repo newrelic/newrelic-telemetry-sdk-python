@@ -13,8 +13,6 @@
 # limitations under the License.
 
 import time
-import warnings
-
 
 DEFAULT = object()
 
@@ -22,40 +20,22 @@ DEFAULT = object()
 class Metric(dict):
     """Base Metric type
 
-    Includes common method definitions and implementations for metrics.
-
-    :param name: The name of the metric.
-    :type name: str
-    :param value: The metric value.
-    :type value: int or float
-    :param tags: (optional) A set of tags that can be used to filter this
-        metric in the New Relic UI.
-    :type tags: dict
-    :param interval_ms: (optional) The interval of time in milliseconds over which
-        the metric was recorded.
-    :type interval_ms: int
-    :param end_time_ms: (optional) A unix timestamp in milliseconds representing the
-        end time_ms of the metric. Defaults to time.time() * 1000
-    :type end_time_ms: int
+    Includes common method definitions for metrics.
     """
 
-    def __init__(self, name, value, tags=None, interval_ms=None, end_time_ms=None):
+    def __init__(self, name, value, interval_ms, tags=None, end_time_ms=DEFAULT):
         self["name"] = name
         self["value"] = value
 
-        if interval_ms is DEFAULT:
-            warnings.warn(
-                "interval_ms will be required for CountMetric and "
-                "SummaryMetric in a future SDK release.",
-                DeprecationWarning,
-            )
-            interval = 0
-        elif interval_ms is not None:
-            interval = self["interval.ms"] = int(interval_ms)
+        if interval_ms is not None:
+            interval_ms = self["interval.ms"] = int(interval_ms)
         else:
-            interval = 0
+            interval_ms = 0
 
-        self["timestamp"] = int(end_time_ms or (time.time() * 1000)) - interval
+        if end_time_ms is DEFAULT:
+            self["timestamp"] = int(time.time() * 1000.0) - interval_ms
+        elif end_time_ms is not None:
+            self["timestamp"] = int(end_time_ms) - interval_ms
 
         if tags:
             self["attributes"] = dict(tags)
@@ -85,34 +65,18 @@ class Metric(dict):
     @property
     def start_time_ms(self):
         """Metric timestamp"""
-        return self["timestamp"]
+        return self.get("timestamp")
 
     @property
     def end_time_ms(self):
         """Metric timestamp"""
-        return self["timestamp"] + self.get("interval.ms", 0)
+        if "timestamp" in self:
+            return self["timestamp"] + self.get("interval.ms", 0)
 
     @property
     def tags(self):
         """Metric Tags"""
         return self.get("attributes")
-
-    @classmethod
-    def from_value(cls, name, value, tags=None, interval_ms=None, end_time_ms=None):
-        warnings.warn(
-            (
-                "Metric.from_value will be removed in a future release. "
-                "Please use the contructor for the metric you are creating."
-            ),
-            DeprecationWarning,
-        )
-        return cls(
-            name=name,
-            value=value,
-            tags=tags,
-            interval_ms=interval_ms,
-            end_time_ms=end_time_ms,
-        )
 
 
 class GaugeMetric(Metric):
@@ -127,9 +91,6 @@ class GaugeMetric(Metric):
     :param tags: (optional) A set of tags that can be used to filter this
         metric in the New Relic UI.
     :type tags: dict
-    :param interval_ms: (optional) The interval of time in milliseconds over which
-        the metric was recorded.
-    :type interval_ms: int
     :param end_time_ms: (optional) A unix timestamp in milliseconds representing the
         end time of the metric. Defaults to time.time() * 1000
     :type end_time_ms: int
@@ -142,6 +103,9 @@ class GaugeMetric(Metric):
         20
     """
 
+    def __init__(self, name, value, tags=None, end_time_ms=DEFAULT):
+        super(GaugeMetric, self).__init__(name, value, None, tags, end_time_ms)
+
 
 class CountMetric(Metric):
     """Count Metric
@@ -153,12 +117,12 @@ class CountMetric(Metric):
     :type name: str
     :param value: The metric count value.
     :type value: int or float
+    :param interval_ms: The interval of time in milliseconds over which the
+        metric was recorded.
+    :type interval_ms: int
     :param tags: (optional) A set of tags that can be used to filter this
         metric in the New Relic UI.
     :type tags: dict
-    :param interval_ms: (optional) The interval of time in milliseconds over which
-        the metric was recorded.
-    :type interval_ms: int
     :param end_time_ms: (optional) A unix timestamp in milliseconds representing the
         end time of the metric. Defaults to time.time() * 1000
     :type end_time_ms: int
@@ -166,15 +130,13 @@ class CountMetric(Metric):
     Usage::
 
         >>> from newrelic_telemetry_sdk import CountMetric
-        >>> metric = CountMetric('response_status', 0,
-        ...     tags={'code': 200}, interval_ms=1)
+        >>> metric = CountMetric('response_code', 1, interval_ms=1, tags={'code': 200})
         >>> metric.value
-        0
+        1
     """
 
-    def __init__(self, name, value, tags=None, interval_ms=DEFAULT, end_time_ms=None):
-        super(CountMetric, self).__init__(name, value, tags, interval_ms, end_time_ms)
-
+    def __init__(self, name, value, interval_ms, tags=None, end_time_ms=DEFAULT):
+        super(CountMetric, self).__init__(name, value, interval_ms, tags, end_time_ms)
         self["type"] = "count"
 
 
@@ -195,12 +157,12 @@ class SummaryMetric(Metric):
     :type min: int or float
     :param max: The maximum value in the summary metric.
     :type max: int or float
+    :param interval_ms: The interval of time in milliseconds over which the
+        metric was recorded.
+    :type interval_ms: int
     :param tags: (optional) A set of tags that can be used to filter this
         metric in the New Relic UI.
     :type tags: dict
-    :param interval_ms: (optional) The interval of time in milliseconds over which
-        the metric was recorded.
-    :type interval_ms: int
     :param end_time_ms: (optional) A unix timestamp in milliseconds representing the
         end time of the metric. Defaults to time.time() * 1000
     :type end_time_ms: int
@@ -215,52 +177,8 @@ class SummaryMetric(Metric):
     """
 
     def __init__(
-        self,
-        name,
-        count,
-        sum,
-        min,
-        max,
-        tags=None,
-        interval_ms=DEFAULT,
-        end_time_ms=None,
+        self, name, count, sum, min, max, interval_ms, tags=None, end_time_ms=DEFAULT
     ):
         value = {"count": count, "sum": sum, "min": min, "max": max}
-        super(SummaryMetric, self).__init__(name, value, tags, interval_ms, end_time_ms)
+        super(SummaryMetric, self).__init__(name, value, interval_ms, tags, end_time_ms)
         self["type"] = "summary"
-
-    @classmethod
-    def from_value(cls, name, value, tags=None, interval_ms=None, end_time_ms=None):
-        """Create a SummaryMetric with a single value
-
-        :param name: The name of the metric.
-        :type name: str
-        :param value: The metric value.
-        :type value: int or float
-        :param tags: (optional) A set of tags that can be used to filter this
-            metric in the New Relic UI.
-        :type tags: dict
-        :param interval_ms: (optional) The interval of time in milliseconds over which
-            the metric was recorded.
-        :type interval_ms: int
-        :param end_time_ms: (optional) A unix timestamp in milliseconds representing
-            the end time of the metric. Defaults to time.time() * 1000
-        :type end_time_ms: int
-        """
-        warnings.warn(
-            (
-                "Metric.from_value will be removed in a future release. "
-                "Please use the contructor for the metric you are creating."
-            ),
-            DeprecationWarning,
-        )
-        return cls(
-            name=name,
-            count=1,
-            sum=value,
-            min=value,
-            max=value,
-            tags=tags,
-            interval_ms=interval_ms,
-            end_time_ms=end_time_ms,
-        )
