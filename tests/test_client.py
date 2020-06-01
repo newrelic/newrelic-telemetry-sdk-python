@@ -132,7 +132,8 @@ def span_client(request, monkeypatch):
         client = SpanClient(insert_key, host)
 
     assert client._pool.port == 443
-    return client
+    yield client
+    client.close()
 
 
 @pytest.fixture
@@ -157,7 +158,8 @@ def metric_client(request, monkeypatch):
         client = MetricClient(insert_key, host)
 
     assert client._pool.port == 443
-    return client
+    yield client
+    client.close()
 
 
 @pytest.fixture
@@ -182,7 +184,8 @@ def event_client(request, monkeypatch):
         client = EventClient(insert_key, host)
 
     assert client._pool.port == 443
-    return client
+    yield client
+    client.close()
 
 
 def ensure_str(s):
@@ -356,3 +359,18 @@ def test_event_add_version_info(event_client):
 
     user_agent = request.headers["user-agent"]
     assert user_agent.endswith(" foo/0.1 bar/0.2"), user_agent
+
+
+def test_metric_client_close(metric_client):
+    metric_client.close()
+    assert metric_client._pool.pool is None
+
+
+def test_event_client_close(event_client):
+    event_client.close()
+    assert event_client._pool.pool is None
+
+
+def test_span_client_close(span_client):
+    span_client.close()
+    assert span_client._pool.pool is None
