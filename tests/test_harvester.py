@@ -42,14 +42,12 @@ class FakeClient(object):
         self.sent = []
         self.response = Response()
 
+    def close(self):
+        pass
+
     def send_batch(self, items, common=None):
         self.sent.append((items, common))
         return self.response
-
-
-class ExceptionalClient(object):
-    def send_batch(self, *args, **kwargs):
-        raise RuntimeError("oops")
 
 
 class FakeEventBatch(FakeBatch):
@@ -63,6 +61,14 @@ class FakeEventClient(FakeClient):
         return super(FakeEventClient, self).send_batch(items)
 
 
+class ExceptionalClient(object):
+    def close(self):
+        pass
+
+    def send_batch(self, *args, **kwargs):
+        raise RuntimeError("oops")
+
+
 @pytest.fixture(params=((FakeClient, FakeBatch), (FakeEventClient, FakeEventBatch)))
 def harvester_args(request):
     client_cls, event_cls = request.param
@@ -73,13 +79,6 @@ def harvester_args(request):
 def harvester(harvester_args):
     harvester = Harvester(*harvester_args)
     return harvester
-
-
-@pytest.mark.filterwarnings("ignore:.*Harvester.record.*:DeprecationWarning")
-def test_record(harvester):
-    item = object()
-    harvester.record(item)
-    assert harvester.batch.contents == [item]
 
 
 def test_run_once(harvester):
@@ -153,9 +152,9 @@ def test_harvester_handles_send_exception(caplog):
     batch = FakeBatch()
 
     # Cause an exception to be raised since send_batch doesn't exist on object
-    harvester = Harvester(object(), batch)
+    harvester = Harvester(ExceptionalClient(), batch)
 
-    harvester.batch.record(None)
+    batch.record(None)
     harvester._shutdown.set()
     harvester.start()
     harvester.stop(timeout=0.1)
