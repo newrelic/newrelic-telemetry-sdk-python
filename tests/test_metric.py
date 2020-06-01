@@ -13,50 +13,51 @@
 # limitations under the License.
 
 import pytest
-from newrelic_telemetry_sdk.metric import Metric, CountMetric, SummaryMetric
+from newrelic_telemetry_sdk.metric import (
+    Metric,
+    GaugeMetric,
+    CountMetric,
+    SummaryMetric,
+)
 from utils import CustomMapping
 
 
-@pytest.mark.filterwarnings("ignore:.*Metric.from_value.*:DeprecationWarning")
-@pytest.mark.parametrize("method", (None, "from_value"))
-def test_metric_defaults(method, freeze_time):
-    new = Metric
-    if method:
-        new = getattr(new, method)
-    metric = new("name", 0)
+def test_gauge_metric_defaults(freeze_time):
+    metric = GaugeMetric("name", 0)
     assert metric["name"] == "name"
     assert metric["value"] == 0
     assert metric["timestamp"] == 2000
     assert type(metric["timestamp"]) is int
 
-    assert "attributes" not in metric
+    assert "type" not in metric
     assert "interval.ms" not in metric
+    assert "attributes" not in metric
 
 
-@pytest.mark.filterwarnings("ignore:.*interval_ms.*:DeprecationWarning")
 def test_count_metric_defaults(freeze_time):
-    metric = CountMetric("name", 0)
+    metric = CountMetric("name", 0, 0)
     assert metric["type"] == "count"
     assert metric["name"] == "name"
     assert metric["value"] == 0
+    assert metric["interval.ms"] == 0
+    assert type(metric["interval.ms"]) is int
     assert metric["timestamp"] == 2000
     assert type(metric["timestamp"]) is int
 
     assert "attributes" not in metric
-    assert "interval.ms" not in metric
 
 
-@pytest.mark.filterwarnings("ignore:.*interval_ms.*:DeprecationWarning")
 def test_summary_metric_defaults(freeze_time):
-    metric = SummaryMetric("name", 0, 0, 0, 0)
+    metric = SummaryMetric("name", 0, 0, 0, 0, 0)
     assert metric["type"] == "summary"
     assert metric["name"] == "name"
     assert metric["value"] == {"count": 0, "sum": 0, "min": 0, "max": 0}
+    assert metric["interval.ms"] == 0
+    assert type(metric["interval.ms"]) is int
     assert metric["timestamp"] == 2000
     assert type(metric["timestamp"]) is int
 
     assert "attributes" not in metric
-    assert "interval.ms" not in metric
 
 
 @pytest.mark.parametrize(
@@ -64,17 +65,39 @@ def test_summary_metric_defaults(freeze_time):
     (
         ("tags", {"foo": "bar"}, "attributes", {"foo": "bar"}),
         ("tags", CustomMapping(), "attributes", {"foo": "bar"}),
-        ("interval_ms", 2000, "interval.ms", 2000),
         ("end_time_ms", 1000, "timestamp", 1000),
     ),
 )
 def test_metric_optional(arg_name, arg_value, metric_key, metric_value):
     kwargs = {arg_name: arg_value}
-    metric = Metric("foo", 3, **kwargs)
+    metric = Metric("foo", 3, 0, **kwargs)
     assert metric.name == "foo"
     assert metric.value == 3
+    assert metric.interval_ms == 0
     assert metric[metric_key] == metric_value
     assert type(metric[metric_key]) is type(metric_value)
+
+
+@pytest.mark.parametrize(
+    "kwargs, metric_key, attribute_name",
+    (
+        ({"name": "a", "value": 0, "interval_ms": None}, "interval.ms", "interval_ms"),
+        (
+            {"name": "a", "value": 0, "interval_ms": 0, "end_time_ms": None},
+            "timestamp",
+            "start_time_ms",
+        ),
+        (
+            {"name": "a", "value": 0, "interval_ms": 0, "end_time_ms": None},
+            "timestamp",
+            "end_time_ms",
+        ),
+    ),
+)
+def test_metric_none(kwargs, metric_key, attribute_name):
+    metric = Metric(**kwargs)
+    assert metric_key not in metric
+    assert getattr(metric, attribute_name) is None
 
 
 @pytest.mark.parametrize(
@@ -95,7 +118,7 @@ def test_metric_accessors(attribute_name, attribute_value):
     else:
         interval = 1000
 
-    metric = Metric(
+    metric = CountMetric(
         "foo", 8, tags={"tag": "value"}, interval_ms=interval, end_time_ms=2000
     )
     value = getattr(metric, attribute_name)
@@ -108,17 +131,8 @@ def test_metric_accessors(attribute_name, attribute_value):
 
 
 def test_metric_copy():
-    original = Metric("foo", "bar")
+    original = GaugeMetric("foo", "bar")
+
     copy = original.copy()
     assert copy == original
     assert copy is not original
-
-
-@pytest.mark.filterwarnings("ignore:.*Metric.from_value.*:DeprecationWarning")
-def test_summary_metric_from_value():
-    metric = SummaryMetric.from_value("foo", 3)
-    assert len(metric["value"]) == 4
-    assert metric["value"]["count"] == 1
-    assert metric["value"]["sum"] == 3
-    assert metric["value"]["min"] == 3
-    assert metric["value"]["max"] == 3
