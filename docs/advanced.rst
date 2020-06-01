@@ -34,9 +34,7 @@ Example
     metric_batch = MetricBatch()
 
     # Record that there have been 5 errors
-    # Interval is not required since the metric will be placed in a batch!
-    errors = CountMetric(name="errors", value=5)
-    metric_batch.record(errors)
+    metric_batch.record_count("errors", 5)
 
     # Calling flush will clear the batch and reset the interval start time
     items, common = metric_batch.flush()
@@ -50,8 +48,6 @@ Harvester
 A :class:`Harvester <newrelic_telemetry_sdk.harvester.Harvester>` flushes a batch and sends data through a client at a fixed harvest interval.
 
 The :class:`Harvester <newrelic_telemetry_sdk.harvester.Harvester>` class is a :class:`threading.Thread` and has :meth:`start <newrelic_telemetry_sdk.harvester.Harvester.start>` and :meth:`stop <newrelic_telemetry_sdk.harvester.Harvester.stop>` methods.
-
-The :meth:`record <newrelic_telemetry_sdk.harvester.Harvester.record>` method intentionally has the same signature as a batch's record method. For all intents and purposes, the harvester can be treated as a batch that will be periodically flushed and sent to New Relic.
 
 Example
 ^^^^^^^
@@ -77,5 +73,4 @@ The example code assumes you've set the following environment variables:
 
     # Data is now recorded through the harvester
     # The data will buffer and send every 5 seconds or at process exit
-    temperature = GaugeMetric("temperature", 78.6, {"units": "Farenheit"})
-    metric_harvester.record(temperature)
+    metric_harvester.record_gauge("temperature", 78.6, {"units": "Farenheit"})
