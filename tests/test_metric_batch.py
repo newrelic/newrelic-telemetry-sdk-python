@@ -14,7 +14,6 @@
 
 import time
 import pytest
-from newrelic_telemetry_sdk.metric import GaugeMetric, CountMetric, SummaryMetric
 from newrelic_telemetry_sdk.metric_batch import MetricBatch
 from utils import CustomMapping
 
@@ -62,64 +61,55 @@ class VerifyLockMetricBatch(MetricBatch):
 
 @pytest.mark.parametrize("tags", (None, {"foo": "bar"}))
 def test_create_identity(tags):
-    metric = GaugeMetric("name", 1000, tags=tags)
-
     expected_tags = frozenset(tags.items()) if tags else None
-    identity = MetricBatch.create_identity(metric)
+    identity = MetricBatch.create_identity("name", tags)
     assert len(identity) == 3
-    assert identity[0] is GaugeMetric
+    assert identity[0] is None
     assert identity[1] == "name"
     assert identity[2] == expected_tags
 
 
 @pytest.mark.parametrize(
-    "metric_a, metric_b, expected_value",
+    "record_method, value_1, value_2, final_value",
     (
-        (GaugeMetric("name", 1), GaugeMetric("name", 2), 2),
-        (
-            CountMetric("name", 1, interval_ms=None),
-            CountMetric("name", 2, interval_ms=None),
-            3,
-        ),
-        (
-            SummaryMetric("name", 1, 1, 1, 1, interval_ms=None),
-            SummaryMetric("name", 1, 2, 2, 2, interval_ms=None),
-            {"count": 2, "max": 2, "min": 1, "sum": 3},
-        ),
+        ("record_gauge", 1, 2, 2),
+        ("record_count", 1, 2, 3),
+        ("record_summary", 1, 2, {"count": 2, "max": 2, "min": 1, "sum": 3}),
     ),
 )
-@pytest.mark.filterwarnings("ignore:.*MetricBatch.record.*:DeprecationWarning")
-def test_merge_metric(metric_a, metric_b, expected_value):
+def test_merge_metric(record_method, value_1, value_2, final_value):
     batch = VerifyLockMetricBatch()
 
-    batch.record(metric_a)
-    batch.record(metric_b)
-
-    assert metric_a.start_time_ms
-    assert metric_b.start_time_ms
+    record_method = getattr(batch, record_method)
+    record_method("name", value_1)
+    record_method("name", value_2)
 
     assert len(batch._internal_batch) == 1
-    _, metric = batch._internal_batch.popitem()
+    identity, value = batch._internal_batch.popitem()
 
-    assert metric.name == "name"
-    assert metric.value == expected_value
-    assert "timestamp" not in metric
+    assert identity[1] == "name"
+    assert value == final_value
 
 
 @pytest.mark.parametrize(
     "metric_a, metric_b",
     (
-        (GaugeMetric("name", 1), CountMetric("name", 1, interval_ms=None)),
-        (GaugeMetric("foo", 1), GaugeMetric("bar", 1)),
-        (GaugeMetric("foo", 1, {"foo": 1}), GaugeMetric("foo", 1, {"foo": 2})),
+        (("record_gauge", "name", 1, None), ("record_count", "name", 1, None)),
+        (("record_gauge", "foo", 1, None), ("record_gauge", "bar", 1, None)),
+        (
+            ("record_gauge", "foo", 1, {"foo": 1}),
+            ("record_gauge", "foo", 1, {"foo": 2}),
+        ),
     ),
 )
-@pytest.mark.filterwarnings("ignore:.*MetricBatch.record.*:DeprecationWarning")
 def test_different_metric(metric_a, metric_b):
     batch = VerifyLockMetricBatch()
 
-    batch.record(metric_a)
-    batch.record(metric_b)
+    record_method_a = getattr(batch, metric_a[0])
+    record_method_b = getattr(batch, metric_b[0])
+
+    record_method_a(*metric_a[1:])
+    record_method_b(*metric_b[1:])
 
     assert len(batch._internal_batch) == 2
 
@@ -136,7 +126,10 @@ def test_flush(monkeypatch, tags):
 
     monkeypatch.setattr(time, "time", _time, raising=True)
 
+    # NOTE: calls time.time() to record start time
+    # t = 4
     batch = VerifyLockMetricBatch(tags)
+    batch.record_count("count", 1, tags={"foo": "bar"})
 
     # Timestamp starts at 4
     assert batch._internal_interval_start == 4000
@@ -149,7 +142,19 @@ def test_flush(monkeypatch, tags):
     # t = 64
     metrics, common = batch.flush()
 
-    assert len(metrics) == 1
+    assert len(metrics) == 2
+    for metric in metrics:
+        if metric["name"] == "gauge":
+            assert "type" not in metric
+            assert metric["timestamp"] == 16000
+            assert metric["value"] == 8
+        elif metric["name"] == "count":
+            assert "timestamp" not in metric
+            assert metric["type"] == "count"
+            assert metric["attributes"] == {"foo": "bar"}
+            assert metric["value"] == 1
+        else:
+            assert False, metric
 
     assert common["timestamp"] == 4000
     assert common["interval.ms"] == 60000
@@ -164,14 +169,3 @@ def test_flush(monkeypatch, tags):
 
     # Verify that we don't return the same objects twice
     assert batch.flush()[1] is not common
-
-
-@pytest.mark.parametrize("metric_type", ("gauge", "count", "summary"))
-def test_record_interfaces(metric_type):
-    batch = VerifyLockMetricBatch()
-
-    method = getattr(batch, "record_" + metric_type)
-    method("foo", 1, {"bar": True})
-    method("bar", 1)
-
-    assert len(batch._internal_batch) == 2
