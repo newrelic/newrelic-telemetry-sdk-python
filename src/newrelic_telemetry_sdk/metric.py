@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import time
+import warnings
 
 
 class Metric(dict):
@@ -88,6 +89,13 @@ class Metric(dict):
 
     @classmethod
     def from_value(cls, name, value, tags=None, interval_ms=None, end_time_ms=None):
+        warnings.warn(
+            (
+                "Metric.from_value will be removed in a future release. "
+                "Please use the contructor for the metric you are creating."
+            ),
+            DeprecationWarning,
+        )
         return cls(
             name=name,
             value=value,
@@ -189,7 +197,8 @@ class SummaryMetric(Metric):
     Usage::
 
         >>> from newrelic_telemetry_sdk import SummaryMetric
-        >>> metric = SummaryMetric.from_value('response_time', 0.2)
+        >>> metric = SummaryMetric('response_time',
+        ...     count=1, sum=0.2, min=0.2, max=0.2, interval_ms=1)
         >>> sorted(metric.value.items())
         [('count', 1), ('max', 0.2), ('min', 0.2), ('sum', 0.2)]
     """
@@ -219,6 +228,13 @@ class SummaryMetric(Metric):
             the end time of the metric. Defaults to time.time() * 1000
         :type end_time_ms: int
         """
+        warnings.warn(
+            (
+                "Metric.from_value will be removed in a future release. "
+                "Please use the contructor for the metric you are creating."
+            ),
+            DeprecationWarning,
+        )
         return cls(
             name=name,
             count=1,

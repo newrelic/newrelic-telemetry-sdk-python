@@ -17,6 +17,7 @@ from newrelic_telemetry_sdk.metric import Metric, CountMetric, SummaryMetric
 from utils import CustomMapping
 
 
+@pytest.mark.filterwarnings("ignore:.*Metric.from_value.*:DeprecationWarning")
 @pytest.mark.parametrize("method", (None, "from_value"))
 def test_metric_defaults(method, freeze_time):
     new = Metric
@@ -111,6 +112,7 @@ def test_metric_copy():
     assert copy is not original
 
 
+@pytest.mark.filterwarnings("ignore:.*Metric.from_value.*:DeprecationWarning")
 def test_summary_metric_from_value():
     metric = SummaryMetric.from_value("foo", 3)
     assert len(metric["value"]) == 4
