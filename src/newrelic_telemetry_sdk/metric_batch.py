@@ -14,8 +14,9 @@
 
 import threading
 import time
+import warnings
 
-from newrelic_telemetry_sdk.metric import CountMetric, SummaryMetric
+from newrelic_telemetry_sdk.metric import GaugeMetric, CountMetric, SummaryMetric
 
 
 class MetricBatch(object):
@@ -58,12 +59,60 @@ class MetricBatch(object):
         identity = (type(metric), metric.name, tags)
         return identity
 
+    def record_gauge(self, name, value, tags=None):
+        """Records a gauge metric
+        :param name: The name of the metric.
+        :type name: str
+        :param value: The metric value.
+        :type value: int or float
+        :param tags: (optional) A set of tags that can be used to
+            filter this metric in the New Relic UI.
+        :type tags: dict
+        """
+        return self._record(GaugeMetric(name, value, tags))
+
+    def record_count(self, name, value, tags=None):
+        """Records a count metric
+        :param name: The name of the metric.
+        :type name: str
+        :param value: The metric value.
+        :type value: int or float
+        :param tags: (optional) A set of tags that can be used to
+            filter this metric in the New Relic UI.
+        :type tags: dict
+        """
+        return self._record(CountMetric(name, value, tags, interval_ms=None))
+
+    def record_summary(self, name, value, tags=None):
+        """Records a summary metric
+        :param name: The name of the metric.
+        :type name: str
+        :param value: The metric value.
+        :type value: int or float
+        :param tags: (optional) A set of tags that can be used to
+            filter this metric in the New Relic UI.
+        :type tags: dict
+        """
+        return self._record(
+            SummaryMetric(name, 1, value, value, value, tags, interval_ms=None)
+        )
+
     def record(self, item):
         """Merge a metric into the batch
 
         :param item: The metric to merge into the batch.
         :type item: newrelic_telemetry_sdk.metric.Metric
         """
+        warnings.warn(
+            "MetricBatch.record will be removed in a future release. "
+            "Please use the MetricBatch.record_gauge, "
+            "MetricBatch.record_count, or "
+            "MetricBatch.record_summary interfaces.",
+            DeprecationWarning,
+        )
+        return self._record(item)
+
+    def _record(self, item):
         identity = self.create_identity(item)
 
         with self._lock:
