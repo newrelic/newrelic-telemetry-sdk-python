@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>newrelic_telemetry_sdk.metric &mdash; newrelic-telemetry-sdk 0.3.0 documentation</title>
+  <title>newrelic_telemetry_sdk.metric &mdash; newrelic-telemetry-sdk 0.3.1 documentation</title>
   
 
   
@@ -168,6 +168,10 @@
 <span class="c1"># limitations under the License.</span>
 
 <span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+
+<span class="n">DEFAULT</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
 
 
 <span class="k">class</span> <span class="nc">Metric</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
@@ -194,7 +198,14 @@
         <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
-        <span class="k">if</span> <span class="n">interval_ms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">interval_ms</span> <span class="ow">is</span> <span class="n">DEFAULT</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;interval_ms will be required for CountMetric and &quot;</span>
+                <span class="s2">&quot;SummaryMetric in a future SDK release.&quot;</span><span class="p">,</span>
+                <span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">interval</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="n">interval_ms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">interval</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;interval.ms&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">interval_ms</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">interval</span> <span class="o">=</span> <span class="mi">0</span>
@@ -243,6 +254,13 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="s2">&quot;Metric.from_value will be removed in a future release. &quot;</span>
+                <span class="s2">&quot;Please use the contructor for the metric you are creating.&quot;</span>
+            <span class="p">),</span>
+            <span class="ne">DeprecationWarning</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
             <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span>
@@ -303,12 +321,13 @@
 <span class="sd">    Usage::</span>
 
 <span class="sd">        &gt;&gt;&gt; from newrelic_telemetry_sdk import CountMetric</span>
-<span class="sd">        &gt;&gt;&gt; metric = CountMetric(&#39;response_status&#39;, 0, tags={&#39;code&#39;: 200})</span>
+<span class="sd">        &gt;&gt;&gt; metric = CountMetric(&#39;response_status&#39;, 0,</span>
+<span class="sd">        ...     tags={&#39;code&#39;: 200}, interval_ms=1)</span>
 <span class="sd">        &gt;&gt;&gt; metric.value</span>
 <span class="sd">        0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval_ms</span><span class="o">=</span><span class="n">DEFAULT</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">CountMetric</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">interval_ms</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;count&quot;</span></div>
@@ -344,13 +363,22 @@
 <span class="sd">    Usage::</span>
 
 <span class="sd">        &gt;&gt;&gt; from newrelic_telemetry_sdk import SummaryMetric</span>
-<span class="sd">        &gt;&gt;&gt; metric = SummaryMetric.from_value(&#39;response_time&#39;, 0.2)</span>
+<span class="sd">        &gt;&gt;&gt; metric = SummaryMetric(&#39;response_time&#39;,</span>
+<span class="sd">        ...     count=1, sum=0.2, min=0.2, max=0.2, interval_ms=1)</span>
 <span class="sd">        &gt;&gt;&gt; sorted(metric.value.items())</span>
 <span class="sd">        [(&#39;count&#39;, 1), (&#39;max&#39;, 0.2), (&#39;min&#39;, 0.2), (&#39;sum&#39;, 0.2)]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="nb">sum</span><span class="p">,</span> <span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">,</span>
+        <span class="n">count</span><span class="p">,</span>
+        <span class="nb">sum</span><span class="p">,</span>
+        <span class="nb">min</span><span class="p">,</span>
+        <span class="nb">max</span><span class="p">,</span>
+        <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">interval_ms</span><span class="o">=</span><span class="n">DEFAULT</span><span class="p">,</span>
+        <span class="n">end_time_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="n">value</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="n">count</span><span class="p">,</span> <span class="s2">&quot;sum&quot;</span><span class="p">:</span> <span class="nb">sum</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">:</span> <span class="nb">min</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">:</span> <span class="nb">max</span><span class="p">}</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">SummaryMetric</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">interval_ms</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="p">)</span>
@@ -374,6 +402,13 @@
 <span class="sd">            the end time of the metric. Defaults to time.time() * 1000</span>
 <span class="sd">        :type end_time_ms: int</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="s2">&quot;Metric.from_value will be removed in a future release. &quot;</span>
+                <span class="s2">&quot;Please use the contructor for the metric you are creating.&quot;</span>
+            <span class="p">),</span>
+            <span class="ne">DeprecationWarning</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
             <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>

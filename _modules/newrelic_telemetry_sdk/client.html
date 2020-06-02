@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>newrelic_telemetry_sdk.client &mdash; newrelic-telemetry-sdk 0.3.0 documentation</title>
+  <title>newrelic_telemetry_sdk.client &mdash; newrelic-telemetry-sdk 0.3.1 documentation</title>
   
 
   
@@ -240,6 +240,7 @@
 <span class="sd">        &gt;&gt;&gt; insert_key = os.environ.get(&quot;NEW_RELIC_INSERT_KEY&quot;, &quot;&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; client = Client(insert_key, host=&quot;metric-api.newrelic.com&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; response = client.send({})</span>
+<span class="sd">        &gt;&gt;&gt; client.close()</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">POOL_CLS</span> <span class="o">=</span> <span class="n">HTTPSConnectionPool</span>
@@ -280,6 +281,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">product_ua_header</span> <span class="o">=</span> <span class="s2">&quot; </span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">product</span><span class="p">,</span> <span class="n">product_version</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;user-agent&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">product_ua_header</span>
+
+    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Close all open connections and disable internal connection pool.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_compress_payload</span><span class="p">(</span><span class="n">payload</span><span class="p">):</span>
@@ -342,6 +347,7 @@
 <span class="sd">        &gt;&gt;&gt; insert_key = os.environ.get(&quot;NEW_RELIC_INSERT_KEY&quot;, &quot;&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; span_client = SpanClient(insert_key)</span>
 <span class="sd">        &gt;&gt;&gt; response = span_client.send({})</span>
+<span class="sd">        &gt;&gt;&gt; span_client.close()</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">HOST</span> <span class="o">=</span> <span class="s2">&quot;trace-api.newrelic.com&quot;</span>
@@ -369,6 +375,7 @@
 <span class="sd">        &gt;&gt;&gt; insert_key = os.environ.get(&quot;NEW_RELIC_INSERT_KEY&quot;, &quot;&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; metric_client = MetricClient(insert_key)</span>
 <span class="sd">        &gt;&gt;&gt; response = metric_client.send({})</span>
+<span class="sd">        &gt;&gt;&gt; metric_client.close()</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">HOST</span> <span class="o">=</span> <span class="s2">&quot;metric-api.newrelic.com&quot;</span>
@@ -396,6 +403,7 @@
 <span class="sd">        &gt;&gt;&gt; insert_key = os.environ.get(&quot;NEW_RELIC_INSERT_KEY&quot;, &quot;&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; event_client = EventClient(insert_key)</span>
 <span class="sd">        &gt;&gt;&gt; response = event_client.send({})</span>
+<span class="sd">        &gt;&gt;&gt; event_client.close()</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">HOST</span> <span class="o">=</span> <span class="s2">&quot;insights-collector.newrelic.com&quot;</span>

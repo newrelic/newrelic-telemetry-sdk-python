@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; newrelic-telemetry-sdk 0.3.0 documentation</title>
+  <title>API Reference &mdash; newrelic-telemetry-sdk 0.3.1 documentation</title>
   
 
   
@@ -187,6 +187,7 @@ Default: 443</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">insert_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;NEW_RELIC_INSERT_KEY&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">span_client</span> <span class="o">=</span> <span class="n">SpanClient</span><span class="p">(</span><span class="n">insert_key</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">span_client</span><span class="o">.</span><span class="n">send</span><span class="p">({})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">span_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
 <dl class="py attribute">
@@ -209,6 +210,12 @@ Default: 443</p></li>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="newrelic_telemetry_sdk.client.SpanClient.close">
+<code class="sig-name descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#newrelic_telemetry_sdk.client.SpanClient.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close all open connections and disable internal connection pool.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -266,6 +273,7 @@ Default: 443</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">insert_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;NEW_RELIC_INSERT_KEY&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">metric_client</span> <span class="o">=</span> <span class="n">MetricClient</span><span class="p">(</span><span class="n">insert_key</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">metric_client</span><span class="o">.</span><span class="n">send</span><span class="p">({})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metric_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
 <dl class="py attribute">
@@ -288,6 +296,12 @@ Default: 443</p></li>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="newrelic_telemetry_sdk.client.MetricClient.close">
+<code class="sig-name descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#newrelic_telemetry_sdk.client.MetricClient.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close all open connections and disable internal connection pool.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -345,6 +359,7 @@ Default: 443</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">insert_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;NEW_RELIC_INSERT_KEY&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">event_client</span> <span class="o">=</span> <span class="n">EventClient</span><span class="p">(</span><span class="n">insert_key</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">event_client</span><span class="o">.</span><span class="n">send</span><span class="p">({})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">event_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
 <dl class="py attribute">
@@ -367,6 +382,12 @@ Default: 443</p></li>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="newrelic_telemetry_sdk.client.EventClient.close">
+<code class="sig-name descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#newrelic_telemetry_sdk.client.EventClient.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close all open connections and disable internal connection pool.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -465,7 +486,7 @@ set self.__traceback__ to tb and return self.</p>
 <span id="metrics"></span><h2>Metrics<a class="headerlink" href="#module-newrelic_telemetry_sdk.metric" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="newrelic_telemetry_sdk.metric.CountMetric">
-<em class="property">class </em><code class="sig-prename descclassname">newrelic_telemetry_sdk.metric.</code><code class="sig-name descname">CountMetric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">tags</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">interval_ms</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end_time_ms</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newrelic_telemetry_sdk/metric.html#CountMetric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.metric.CountMetric" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">newrelic_telemetry_sdk.metric.</code><code class="sig-name descname">CountMetric</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">value</em>, <em class="sig-param">tags=None</em>, <em class="sig-param">interval_ms=&lt;object object&gt;</em>, <em class="sig-param">end_time_ms=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newrelic_telemetry_sdk/metric.html#CountMetric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.metric.CountMetric" title="Permalink to this definition">¶</a></dt>
 <dd><p>Count Metric</p>
 <p>This metric is of a “count” type. The metric holds an integer indicating a
 count of events which have taken place.</p>
@@ -485,7 +506,8 @@ end time of the metric. Defaults to time.time() * 1000</p></li>
 </dl>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">newrelic_telemetry_sdk</span> <span class="kn">import</span> <span class="n">CountMetric</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">metric</span> <span class="o">=</span> <span class="n">CountMetric</span><span class="p">(</span><span class="s1">&#39;response_status&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metric</span> <span class="o">=</span> <span class="n">CountMetric</span><span class="p">(</span><span class="s1">&#39;response_status&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">tags</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">},</span> <span class="n">interval_ms</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">metric</span><span class="o">.</span><span class="n">value</span>
 <span class="go">0</span>
 </pre></div>
@@ -522,7 +544,7 @@ end time of the metric. Defaults to time.time() * 1000</p></li>
 
 <dl class="py class">
 <dt id="newrelic_telemetry_sdk.metric.SummaryMetric">
-<em class="property">class </em><code class="sig-prename descclassname">newrelic_telemetry_sdk.metric.</code><code class="sig-name descname">SummaryMetric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">count</span></em>, <em class="sig-param"><span class="n">sum</span></em>, <em class="sig-param"><span class="n">min</span></em>, <em class="sig-param"><span class="n">max</span></em>, <em class="sig-param"><span class="n">tags</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">interval_ms</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end_time_ms</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newrelic_telemetry_sdk/metric.html#SummaryMetric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.metric.SummaryMetric" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">newrelic_telemetry_sdk.metric.</code><code class="sig-name descname">SummaryMetric</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">count</em>, <em class="sig-param">sum</em>, <em class="sig-param">min</em>, <em class="sig-param">max</em>, <em class="sig-param">tags=None</em>, <em class="sig-param">interval_ms=&lt;object object&gt;</em>, <em class="sig-param">end_time_ms=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newrelic_telemetry_sdk/metric.html#SummaryMetric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.metric.SummaryMetric" title="Permalink to this definition">¶</a></dt>
 <dd><p>Summary Metric</p>
 <p>This metric is of a “summary” type. It tracks the count, sum, min, and
 max values when recording values. These values can be used to compute
@@ -546,7 +568,8 @@ end time of the metric. Defaults to time.time() * 1000</p></li>
 </dl>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">newrelic_telemetry_sdk</span> <span class="kn">import</span> <span class="n">SummaryMetric</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">metric</span> <span class="o">=</span> <span class="n">SummaryMetric</span><span class="o">.</span><span class="n">from_value</span><span class="p">(</span><span class="s1">&#39;response_time&#39;</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metric</span> <span class="o">=</span> <span class="n">SummaryMetric</span><span class="p">(</span><span class="s1">&#39;response_time&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">sum</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">interval_ms</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">sorted</span><span class="p">(</span><span class="n">metric</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
 <span class="go">[(&#39;count&#39;, 1), (&#39;max&#39;, 0.2), (&#39;min&#39;, 0.2), (&#39;sum&#39;, 0.2)]</span>
 </pre></div>
@@ -719,6 +742,54 @@ subsequent calls to flush.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>item</strong> (<em>newrelic_telemetry_sdk.metric.Metric</em>) – The metric to merge into the batch.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="newrelic_telemetry_sdk.metric_batch.MetricBatch.record_count">
+<code class="sig-name descname">record_count</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">tags</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newrelic_telemetry_sdk/metric_batch.html#MetricBatch.record_count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.metric_batch.MetricBatch.record_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Records a count metric</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the metric.</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The metric value.</p></li>
+<li><p><strong>tags</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – (optional) A set of tags that can be used to
+filter this metric in the New Relic UI.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="newrelic_telemetry_sdk.metric_batch.MetricBatch.record_gauge">
+<code class="sig-name descname">record_gauge</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">tags</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newrelic_telemetry_sdk/metric_batch.html#MetricBatch.record_gauge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.metric_batch.MetricBatch.record_gauge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Records a gauge metric</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the metric.</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The metric value.</p></li>
+<li><p><strong>tags</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – (optional) A set of tags that can be used to
+filter this metric in the New Relic UI.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="newrelic_telemetry_sdk.metric_batch.MetricBatch.record_summary">
+<code class="sig-name descname">record_summary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">tags</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/newrelic_telemetry_sdk/metric_batch.html#MetricBatch.record_summary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#newrelic_telemetry_sdk.metric_batch.MetricBatch.record_summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Records a summary metric</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the metric.</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The metric value.</p></li>
+<li><p><strong>tags</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – (optional) A set of tags that can be used to
+filter this metric in the New Relic UI.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
