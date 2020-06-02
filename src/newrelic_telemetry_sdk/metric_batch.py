@@ -61,6 +61,7 @@ class MetricBatch(object):
 
     def record_gauge(self, name, value, tags=None):
         """Records a gauge metric
+
         :param name: The name of the metric.
         :type name: str
         :param value: The metric value.
@@ -73,6 +74,7 @@ class MetricBatch(object):
 
     def record_count(self, name, value, tags=None):
         """Records a count metric
+
         :param name: The name of the metric.
         :type name: str
         :param value: The metric value.
@@ -85,6 +87,7 @@ class MetricBatch(object):
 
     def record_summary(self, name, value, tags=None):
         """Records a summary metric
+
         :param name: The name of the metric.
         :type name: str
         :param value: The metric value.
