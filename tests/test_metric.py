@@ -33,6 +33,7 @@ def test_metric_defaults(method, freeze_time):
     assert "interval.ms" not in metric
 
 
+@pytest.mark.filterwarnings("ignore:.*interval_ms.*:DeprecationWarning")
 def test_count_metric_defaults(freeze_time):
     metric = CountMetric("name", 0)
     assert metric["type"] == "count"
@@ -45,6 +46,7 @@ def test_count_metric_defaults(freeze_time):
     assert "interval.ms" not in metric
 
 
+@pytest.mark.filterwarnings("ignore:.*interval_ms.*:DeprecationWarning")
 def test_summary_metric_defaults(freeze_time):
     metric = SummaryMetric("name", 0, 0, 0, 0)
     assert metric["type"] == "summary"

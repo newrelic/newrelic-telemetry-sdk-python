@@ -16,6 +16,9 @@ import time
 import warnings
 
 
+DEFAULT = object()
+
+
 class Metric(dict):
     """Base Metric type
 
@@ -40,7 +43,14 @@ class Metric(dict):
         self["name"] = name
         self["value"] = value
 
-        if interval_ms is not None:
+        if interval_ms is DEFAULT:
+            warnings.warn(
+                "interval_ms will be required for CountMetric and "
+                "SummaryMetric in a future SDK release.",
+                DeprecationWarning,
+            )
+            interval = 0
+        elif interval_ms is not None:
             interval = self["interval.ms"] = int(interval_ms)
         else:
             interval = 0
@@ -156,12 +166,13 @@ class CountMetric(Metric):
     Usage::
 
         >>> from newrelic_telemetry_sdk import CountMetric
-        >>> metric = CountMetric('response_status', 0, tags={'code': 200})
+        >>> metric = CountMetric('response_status', 0,
+        ...     tags={'code': 200}, interval_ms=1)
         >>> metric.value
         0
     """
 
-    def __init__(self, name, value, tags=None, interval_ms=None, end_time_ms=None):
+    def __init__(self, name, value, tags=None, interval_ms=DEFAULT, end_time_ms=None):
         super(CountMetric, self).__init__(name, value, tags, interval_ms, end_time_ms)
 
         self["type"] = "count"
@@ -204,7 +215,15 @@ class SummaryMetric(Metric):
     """
 
     def __init__(
-        self, name, count, sum, min, max, tags=None, interval_ms=None, end_time_ms=None
+        self,
+        name,
+        count,
+        sum,
+        min,
+        max,
+        tags=None,
+        interval_ms=DEFAULT,
+        end_time_ms=None,
     ):
         value = {"count": count, "sum": sum, "min": min, "max": max}
         super(SummaryMetric, self).__init__(name, value, tags, interval_ms, end_time_ms)
