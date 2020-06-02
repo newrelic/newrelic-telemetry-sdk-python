@@ -92,6 +92,9 @@ class Harvester(threading.Thread):
         # Flush any remaining data and send it prior to shutting down
         self._send(*self.batch.flush())
 
+        # Close client
+        self._client.close()
+
         # Clear all references to client and batch to close connections and
         # deallocate batch
         self.batch = self._client = None

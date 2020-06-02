@@ -39,13 +39,16 @@ class FakeBatch(object):
 
 class FakeClient(object):
     def __init__(self):
+        self.closed = False
         self.sent = []
         self.response = Response()
 
     def close(self):
-        pass
+        assert not self.closed, "Attempt to close client twice."
+        self.closed = True
 
     def send_batch(self, items, common=None):
+        assert not self.closed, "Attempt to send to a closed client."
         self.sent.append((items, common))
         return self.response
 
@@ -61,24 +64,24 @@ class FakeEventClient(FakeClient):
         return super(FakeEventClient, self).send_batch(items)
 
 
-class ExceptionalClient(object):
-    def close(self):
-        pass
-
+class ExceptionalClient(FakeClient):
     def send_batch(self, *args, **kwargs):
         raise RuntimeError("oops")
 
 
 @pytest.fixture(params=((FakeClient, FakeBatch), (FakeEventClient, FakeEventBatch)))
 def harvester_args(request):
-    client_cls, event_cls = request.param
-    return client_cls(), event_cls()
+    client_cls, batch_cls = request.param
+    return client_cls(), batch_cls()
 
 
 @pytest.fixture
 def harvester(harvester_args):
     harvester = Harvester(*harvester_args)
-    return harvester
+    client = harvester._client
+    yield harvester
+    if harvester._shutdown.isSet():
+        assert client.closed, "Client is not closed."
 
 
 def test_run_once(harvester):
