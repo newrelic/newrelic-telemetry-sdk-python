@@ -75,10 +75,11 @@ def harvester(harvester_args):
     return harvester
 
 
+@pytest.mark.filterwarnings("ignore:.*Harvester.record.*:DeprecationWarning")
 def test_record(harvester):
     item = object()
     harvester.record(item)
-    assert harvester._batch.contents == [item]
+    assert harvester.batch.contents == [item]
 
 
 def test_run_once(harvester):
@@ -93,7 +94,7 @@ def test_run_once(harvester):
 
     client.send_batch = shutdown_after_send
     item = object()
-    harvester.record(item)
+    harvester.batch.record(item)
 
     harvester.start()
     harvester.stop(timeout=0.1)
@@ -105,7 +106,7 @@ def test_run_flushes_data_on_shutdown(harvester):
     client = harvester._client
 
     item = object()
-    harvester.record(item)
+    harvester.batch.record(item)
 
     # Set shutdown event
     harvester._shutdown.set()
@@ -140,7 +141,7 @@ def test_harvester_terminates_at_shutdown(harvester):
     assert harvester.is_alive()
 
     item = object()
-    harvester.record(item)
+    harvester.batch.record(item)
 
     assert not client.sent
     harvester.stop(0.1)
@@ -154,7 +155,7 @@ def test_harvester_handles_send_exception(caplog):
     # Cause an exception to be raised since send_batch doesn't exist on object
     harvester = Harvester(object(), batch)
 
-    harvester.record(None)
+    harvester.batch.record(None)
     harvester._shutdown.set()
     harvester.start()
     harvester.stop(timeout=0.1)
@@ -171,7 +172,7 @@ def test_harvester_send_failed(caplog, harvester):
     client.response.status = 500
     client.response.ok = False
 
-    harvester.record(None)
+    harvester.batch.record(None)
     harvester._shutdown.set()
     harvester.start()
     harvester.stop(timeout=0.1)

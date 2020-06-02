@@ -15,6 +15,7 @@
 import logging
 import time
 import threading
+import warnings
 
 _logger = logging.getLogger(__name__)
 
@@ -57,7 +58,7 @@ class Harvester(threading.Thread):
         self.daemon = True
         self.harvest_interval = harvest_interval
         self._client = client
-        self._batch = batch
+        self.batch = batch
         self._harvest_interval_start = 0
         self._shutdown = self.EVENT_CLS()
 
@@ -86,14 +87,14 @@ class Harvester(threading.Thread):
     def run(self):
         """Main loop of the harvester thread"""
         while not self._wait_for_harvest():
-            self._send(*self._batch.flush())
+            self._send(*self.batch.flush())
 
         # Flush any remaining data and send it prior to shutting down
-        self._send(*self._batch.flush())
+        self._send(*self.batch.flush())
 
         # Clear all references to client and batch to close connections and
         # deallocate batch
-        self._batch = self._client = None
+        self.batch = self._client = None
 
     def record(self, item):
         """Add an item to the batch to be harvested
@@ -103,7 +104,14 @@ class Harvester(threading.Thread):
 
         :param item: A metric or span to be merged into a batch.
         """
-        self._batch.record(item)
+        warnings.warn(
+            (
+                "Harvester.record will be removed in a future release. "
+                "Please use Harvester.batch.record or batch.record."
+            ),
+            DeprecationWarning,
+        )
+        self.batch.record(item)
 
     def stop(self, timeout=None):
         """Terminate the harvester.
