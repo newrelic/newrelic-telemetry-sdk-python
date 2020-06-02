@@ -42,3 +42,8 @@ jobs:
       env:
         TOXENV: lint
       if: matrix.python-version == 3.8
+    - name: Docs
+      run: tox -vv
+      env:
+        TOXENV: docs
+      if: matrix.python-version == 3.8
