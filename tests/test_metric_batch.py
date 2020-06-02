@@ -78,8 +78,8 @@ def test_create_identity(tags):
         (GaugeMetric("name", 1), GaugeMetric("name", 2), 2),
         (CountMetric("name", 1), CountMetric("name", 2), 3),
         (
-            SummaryMetric.from_value("name", 1),
-            SummaryMetric.from_value("name", 2),
+            SummaryMetric("name", 1, 1, 1, 1),
+            SummaryMetric("name", 1, 2, 2, 2),
             {"count": 2, "max": 2, "min": 1, "sum": 3},
         ),
     ),
