@@ -78,7 +78,7 @@ def harvester_args(request):
 @pytest.fixture
 def harvester(harvester_args):
     harvester = Harvester(*harvester_args)
-    client = harvester._client
+    client = harvester.client
     yield harvester
     if harvester._shutdown.is_set():
         assert client.closed, "Client is not closed."
@@ -86,7 +86,7 @@ def harvester(harvester_args):
 
 def test_run_once(harvester):
     harvester.harvest_interval = 0
-    client = harvester._client
+    client = harvester.client
     send_batch = client.send_batch
 
     def shutdown_after_send(*args, **kwargs):
@@ -105,7 +105,7 @@ def test_run_once(harvester):
 
 
 def test_run_flushes_data_on_shutdown(harvester):
-    client = harvester._client
+    client = harvester.client
 
     item = object()
     harvester.batch.record(item)
@@ -120,7 +120,7 @@ def test_run_flushes_data_on_shutdown(harvester):
 
 
 def test_empty_items_not_sent(harvester):
-    client = harvester._client
+    client = harvester.client
 
     # Set shutdown event
     harvester._shutdown.set()
@@ -133,7 +133,7 @@ def test_empty_items_not_sent(harvester):
 
 
 def test_harvester_terminates_at_shutdown(harvester):
-    client = harvester._client
+    client = harvester.client
 
     # Set the interval high enough so that send is never called unless shutdown
     # occurs
@@ -170,7 +170,7 @@ def test_harvester_handles_send_exception(caplog):
 
 
 def test_harvester_send_failed(caplog, harvester):
-    client = harvester._client
+    client = harvester.client
     client.response.status = 500
     client.response.ok = False
 
