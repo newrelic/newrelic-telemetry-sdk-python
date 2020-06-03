@@ -32,11 +32,17 @@ class Harvester(threading.Thread):
     * New Relic errors
 
     :param client: The client instance to call in order to send data.
-    :type client: newrelic_sdk.client.Client
+    :type client: MetricClient or EventClient or SpanClient
     :param batch: A batch with record and flush interfaces.
+    :type batch: MetricBatch or EventBatch or SpanBatch
     :param harvest_interval: (optional) The interval in seconds at which data
         will be reported. (default 5)
     :type harvest_interval: int or float
+
+    :ivar client: The telemetry SDK client where the harvester sends data.
+    :vartype client: Client
+    :ivar batch: The telemetry SDK batch where data is flushed from.
+    :vartype batch: MetricBatch or EventBatch or SpanBatch
 
     Example::
 

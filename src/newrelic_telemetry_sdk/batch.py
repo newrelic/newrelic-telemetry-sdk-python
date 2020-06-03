@@ -36,7 +36,7 @@ class Batch(object):
         """Merge a span into the batch
 
         :param item: The span to merge into the batch.
-        :type item: newrelic_telemetry_sdk.metric.Span
+        :type item: Span
         """
         with self._lock:
             self._batch.append(item)
