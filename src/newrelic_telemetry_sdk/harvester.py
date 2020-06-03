@@ -61,11 +61,12 @@ class Harvester(threading.Thread):
         self._harvest_interval_start = 0
         self._shutdown = self.EVENT_CLS()
 
-    def _send(self, items, *args):
+    def _send(self):
         """Send items through the harvester client, handling any exceptions"""
-        if items:
+        flush_result = self.batch.flush()
+        if flush_result and flush_result[0]:
             try:
-                response = self.client.send_batch(items, *args)
+                response = self.client.send_batch(*flush_result)
                 if not response.ok:
                     _logger.error(
                         "New Relic send_batch failed with status code: %r",
@@ -87,10 +88,10 @@ class Harvester(threading.Thread):
     def run(self):
         """Main loop of the harvester thread"""
         while not self._wait_for_harvest():
-            self._send(*self.batch.flush())
+            self._send()
 
         # Flush any remaining data and send it prior to shutting down
-        self._send(*self.batch.flush())
+        self._send()
 
         # Close client
         self.client.close()
