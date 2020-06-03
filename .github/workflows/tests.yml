@@ -41,9 +41,9 @@ jobs:
       run: tox -vv
       env:
         TOXENV: lint
-      if: matrix.python-version == 3.8
+      if: matrix.python-version == 3.8 && matrix.os == 'ubuntu-latest'
     - name: Docs
       run: tox -vv
       env:
         TOXENV: docs
-      if: matrix.python-version == 3.8
+      if: matrix.python-version == 3.8 && matrix.os == 'ubuntu-latest'
