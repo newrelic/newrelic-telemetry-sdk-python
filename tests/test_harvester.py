@@ -80,7 +80,7 @@ def harvester(harvester_args):
     harvester = Harvester(*harvester_args)
     client = harvester._client
     yield harvester
-    if harvester._shutdown.isSet():
+    if harvester._shutdown.is_set():
         assert client.closed, "Client is not closed."
 
 
