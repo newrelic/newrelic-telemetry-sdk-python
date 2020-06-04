@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import base64
 import json
 import urllib3
 import zlib
@@ -125,6 +126,7 @@ class Client(object):
 
         proxies = getproxies()
         proxy = proxies.get("https", None)
+        proxy_headers = None
         if proxy:
             proxy = parse_url(proxy)
             _logger.info(
@@ -136,6 +138,25 @@ class Client(object):
                     "{} proxies is not supported.".format(proxy.scheme)
                 )
                 proxy = None
+            elif proxy.auth:
+                # https://tools.ietf.org/html/rfc7617
+                #
+                # The username/password encoding is not specified by a standard.
+                # "this specification continues to leave the default encoding undefined"
+                #
+                # parse_url will encode non-ascii characters into a
+                # percent-encoded string. As a result, we make the assumption
+                # that anything returned from parse_url is utf-8 encoded.
+                #
+                # This is, of course, not guaranteed to be interpreted
+                # correctly by the proxy server, but the failure mode will
+                # hopefully be interpreted as an incorrect username/password
+                # combination rather than causing a security issue where
+                # information may be leaked (control characters, etc.)
+                basic_auth = base64.b64encode(proxy.auth.encode("utf-8"))
+                proxy_headers = {
+                    "Proxy-Authorization": "Basic " + basic_auth.decode("utf-8")
+                }
 
         self._pool = self.POOL_CLS(
             host=host,
@@ -144,6 +165,7 @@ class Client(object):
             headers=headers,
             strict=True,
             _proxy=proxy,
+            _proxy_headers=proxy_headers,
         )
 
     def add_version_info(self, product, product_version):

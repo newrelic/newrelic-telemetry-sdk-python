@@ -125,6 +125,29 @@ def test_http_proxy_connection(client_class, http_proxy, monkeypatch, caplog):
 
 
 @pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient))
+def test_http_proxy_connection_with_auth(client_class, http_proxy, monkeypatch, caplog):
+    monkeypatch.setattr(HTTPConnectionPool, "urlopen", URLOPEN)
+    monkeypatch.setenv(
+        "https_proxy",
+        "http://username:password@{}:{}".format(http_proxy.host, http_proxy.port),
+    )
+
+    with caplog.at_level(logging.INFO):
+        client = client_class("test-key", "test-host")
+    log_record = caplog.records[-1]
+    assert log_record.msg == "Using proxy host={0!r} port={1!r}".format(
+        http_proxy.host, http_proxy.port
+    )
+    client.send({})
+    assert http_proxy.connect_host == "test-host"
+    assert http_proxy.connect_port == "443"
+    assert "proxy-authorization" in http_proxy.headers
+
+    # dXNlcm5hbWU6cGFzc3dvcmQ= is "username:password" base64 encoded
+    assert http_proxy.headers["proxy-authorization"] == "Basic dXNlcm5hbWU6cGFzc3dvcmQ="
+
+
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient))
 def test_https_proxy_no_connection(monkeypatch, client_class, caplog):
     proxy_host = "random"
     proxy_port = 1234
