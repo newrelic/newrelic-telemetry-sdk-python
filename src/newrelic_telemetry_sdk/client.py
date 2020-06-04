@@ -15,6 +15,16 @@
 import json
 import urllib3
 import zlib
+import logging
+
+try:
+    from urllib.request import getproxies
+except ImportError:
+    from urllib import getproxies
+
+from urllib3.util import parse_url
+
+_logger = logging.getLogger(__name__)
 
 try:
     from newrelic_telemetry_sdk.version import version as __version__
@@ -109,8 +119,31 @@ class Client(object):
         retries = urllib3.Retry(
             total=False, connect=None, read=None, redirect=0, status=None
         )
+
+        # Check if https traffic should be proxied and pass the proxy
+        # information to the connectionpool
+
+        proxies = getproxies()
+        proxy = proxies.get("https", None)
+        if proxy:
+            proxy = parse_url(proxy)
+            _logger.info(
+                "Using proxy host={0!r} port={1!r}".format(proxy.host, proxy.port)
+            )
+            if proxy.scheme.lower() != "http":
+                _logger.warning(
+                    "Contacting https destinations through "
+                    "{} proxies is not supported.".format(proxy.scheme)
+                )
+                proxy = None
+
         self._pool = self.POOL_CLS(
-            host=host, port=port, retries=retries, headers=headers, strict=True
+            host=host,
+            port=port,
+            retries=retries,
+            headers=headers,
+            strict=True,
+            _proxy=proxy,
         )
 
     def add_version_info(self, product, product_version):
