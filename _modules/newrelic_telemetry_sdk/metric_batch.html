@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>newrelic_telemetry_sdk.metric_batch &mdash; newrelic-telemetry-sdk 0.3.1 documentation</title>
+  <title>newrelic_telemetry_sdk.metric_batch &mdash; newrelic-telemetry-sdk 0.4.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.3
+                0.4
               </div>
             
           
@@ -87,6 +87,9 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../advanced.html">Advanced Usage</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../proxy.html">Proxy Support</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
@@ -169,9 +172,6 @@
 
 <span class="kn">import</span> <span class="nn">threading</span>
 <span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-
-<span class="kn">from</span> <span class="nn">newrelic_telemetry_sdk.metric</span> <span class="kn">import</span> <span class="n">GaugeMetric</span><span class="p">,</span> <span class="n">CountMetric</span><span class="p">,</span> <span class="n">SummaryMetric</span>
 
 
 <div class="viewcode-block" id="MetricBatch"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.metric_batch.MetricBatch">[docs]</a><span class="k">class</span> <span class="nc">MetricBatch</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -190,29 +190,28 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_interval_start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1000.0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">LOCK_CLS</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_timestamps</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">tags</span> <span class="o">=</span> <span class="n">tags</span> <span class="ow">and</span> <span class="nb">dict</span><span class="p">(</span><span class="n">tags</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_common</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">tags</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_common</span><span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tags</span>
 
 <div class="viewcode-block" id="MetricBatch.create_identity"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.metric_batch.MetricBatch.create_identity">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">create_identity</span><span class="p">(</span><span class="n">metric</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">create_identity</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">typ</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Creates a deterministic hashable identity for a metric</span>
 
-<span class="sd">        :param metric: A New Relic metric object</span>
-<span class="sd">        :type metric: newrelic_telemetry_sdk.metric.Metric</span>
-
-<span class="sd">        &gt;&gt;&gt; from newrelic_telemetry_sdk import GaugeMetric</span>
-<span class="sd">        &gt;&gt;&gt; foo_0 = GaugeMetric(&#39;foo&#39;, 0, tags={&#39;units&#39;: &#39;C&#39;})</span>
-<span class="sd">        &gt;&gt;&gt; foo_1 = GaugeMetric(&#39;foo&#39;, 1, tags={&#39;units&#39;: &#39;C&#39;})</span>
-<span class="sd">        &gt;&gt;&gt; MetricBatch.create_identity(foo_0) == MetricBatch.create_identity(foo_1)</span>
-<span class="sd">        True</span>
+<span class="sd">        :param name: The name of the metric.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param tags: (optional) A set of tags that can be used to</span>
+<span class="sd">            filter this metric in the New Relic UI.</span>
+<span class="sd">        :type tags: dict</span>
+<span class="sd">        :param typ: (optional) The metric type. One of &quot;summary&quot;, &quot;count&quot;,</span>
+<span class="sd">            &quot;gauge&quot; or None. Default: None (gauge type).</span>
+<span class="sd">        :type typ: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">tags</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">tags</span>
         <span class="k">if</span> <span class="n">tags</span><span class="p">:</span>
             <span class="n">tags</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">tags</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
-        <span class="n">identity</span> <span class="o">=</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">metric</span><span class="p">),</span> <span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">tags</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">identity</span></div>
+        <span class="k">return</span> <span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">tags</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MetricBatch.record_gauge"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.metric_batch.MetricBatch.record_gauge">[docs]</a>    <span class="k">def</span> <span class="nf">record_gauge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Records a gauge metric</span>
@@ -225,7 +224,10 @@
 <span class="sd">            filter this metric in the New Relic UI.</span>
 <span class="sd">        :type tags: dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">(</span><span class="n">GaugeMetric</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="p">))</span></div>
+        <span class="n">identity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_identity</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tags</span><span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="p">[</span><span class="n">identity</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_timestamps</span><span class="p">[</span><span class="n">identity</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1000.0</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MetricBatch.record_count"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.metric_batch.MetricBatch.record_count">[docs]</a>    <span class="k">def</span> <span class="nf">record_count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Records a count metric</span>
@@ -238,7 +240,9 @@
 <span class="sd">            filter this metric in the New Relic UI.</span>
 <span class="sd">        :type tags: dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">(</span><span class="n">CountMetric</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">interval_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">))</span></div>
+        <span class="n">identity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_identity</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="p">[</span><span class="n">identity</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">identity</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">value</span></div>
 
 <div class="viewcode-block" id="MetricBatch.record_summary"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.metric_batch.MetricBatch.record_summary">[docs]</a>    <span class="k">def</span> <span class="nf">record_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Records a summary metric</span>
@@ -251,48 +255,17 @@
 <span class="sd">            filter this metric in the New Relic UI.</span>
 <span class="sd">        :type tags: dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">(</span>
-            <span class="n">SummaryMetric</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">interval_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-        <span class="p">)</span></div>
-
-<div class="viewcode-block" id="MetricBatch.record"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.metric_batch.MetricBatch.record">[docs]</a>    <span class="k">def</span> <span class="nf">record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Merge a metric into the batch</span>
-
-<span class="sd">        :param item: The metric to merge into the batch.</span>
-<span class="sd">        :type item: newrelic_telemetry_sdk.metric.Metric</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="s2">&quot;MetricBatch.record will be removed in a future release. &quot;</span>
-            <span class="s2">&quot;Please use the MetricBatch.record_gauge, &quot;</span>
-            <span class="s2">&quot;MetricBatch.record_count, or &quot;</span>
-            <span class="s2">&quot;MetricBatch.record_summary interfaces.&quot;</span><span class="p">,</span>
-            <span class="ne">DeprecationWarning</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
-
-    <span class="k">def</span> <span class="nf">_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="n">identity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_identity</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-
+        <span class="n">identity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_identity</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="s2">&quot;summary&quot;</span><span class="p">)</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">identity</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="p">:</span>
-                <span class="n">merged</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="p">[</span><span class="n">identity</span><span class="p">]</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
-
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">SummaryMetric</span><span class="p">):</span>
-                    <span class="n">merged_value</span> <span class="o">=</span> <span class="n">merged</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
-                    <span class="n">merged_value</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">value</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">]</span>
-                    <span class="n">merged_value</span><span class="p">[</span><span class="s2">&quot;sum&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">value</span><span class="p">[</span><span class="s2">&quot;sum&quot;</span><span class="p">]</span>
-                    <span class="n">merged_value</span><span class="p">[</span><span class="s2">&quot;min&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s2">&quot;min&quot;</span><span class="p">],</span> <span class="n">merged_value</span><span class="p">[</span><span class="s2">&quot;min&quot;</span><span class="p">])</span>
-                    <span class="n">merged_value</span><span class="p">[</span><span class="s2">&quot;max&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s2">&quot;max&quot;</span><span class="p">],</span> <span class="n">merged_value</span><span class="p">[</span><span class="s2">&quot;max&quot;</span><span class="p">])</span>
-                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">CountMetric</span><span class="p">):</span>
-                    <span class="n">merged</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">value</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">merged</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-
+                <span class="n">merged_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="p">[</span><span class="n">identity</span><span class="p">]</span>
+                <span class="n">merged_value</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">merged_value</span><span class="p">[</span><span class="s2">&quot;sum&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">value</span>
+                <span class="n">merged_value</span><span class="p">[</span><span class="s2">&quot;min&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">merged_value</span><span class="p">[</span><span class="s2">&quot;min&quot;</span><span class="p">])</span>
+                <span class="n">merged_value</span><span class="p">[</span><span class="s2">&quot;max&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">merged_value</span><span class="p">[</span><span class="s2">&quot;max&quot;</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="p">[</span><span class="n">identity</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                <span class="c1"># Timestamp will now be tracked as part of the batch</span>
-                <span class="n">item</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;sum&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="p">[</span><span class="n">identity</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
 
 <div class="viewcode-block" id="MetricBatch.flush"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.metric_batch.MetricBatch.flush">[docs]</a>    <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Flush all metrics from the batch</span>
@@ -310,8 +283,28 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="n">batch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span>
-            <span class="n">items</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">batch</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="n">timestamps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timestamps</span>
+
+            <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">identity</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">batch</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">metric</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">typ</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">tags</span> <span class="o">=</span> <span class="n">identity</span>
+                <span class="n">metric</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+                <span class="k">if</span> <span class="n">typ</span><span class="p">:</span>
+                    <span class="n">metric</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">typ</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">metric</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">timestamps</span><span class="p">[</span><span class="n">identity</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">tags</span><span class="p">:</span>
+                    <span class="n">metric</span><span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">tags</span><span class="p">)</span>
+
+                <span class="n">metric</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+
+            <span class="n">items</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+
             <span class="n">batch</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="n">timestamps</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
             <span class="n">common</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_common</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="n">common</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval_start</span>

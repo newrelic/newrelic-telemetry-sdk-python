@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>newrelic_telemetry_sdk.batch &mdash; newrelic-telemetry-sdk 0.3.1 documentation</title>
+  <title>newrelic_telemetry_sdk.batch &mdash; newrelic-telemetry-sdk 0.4.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.3
+                0.4
               </div>
             
           
@@ -87,6 +87,9 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../advanced.html">Advanced Usage</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../proxy.html">Proxy Support</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
@@ -191,7 +194,7 @@
         <span class="sd">&quot;&quot;&quot;Merge a span into the batch</span>
 
 <span class="sd">        :param item: The span to merge into the batch.</span>
-<span class="sd">        :type item: newrelic_telemetry_sdk.metric.Span</span>
+<span class="sd">        :type item: Span</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>

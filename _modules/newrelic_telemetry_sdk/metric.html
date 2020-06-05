@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>newrelic_telemetry_sdk.metric &mdash; newrelic-telemetry-sdk 0.3.1 documentation</title>
+  <title>newrelic_telemetry_sdk.metric &mdash; newrelic-telemetry-sdk 0.4.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.3
+                0.4
               </div>
             
           
@@ -87,6 +87,9 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../advanced.html">Advanced Usage</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../proxy.html">Proxy Support</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
@@ -168,8 +171,6 @@
 <span class="c1"># limitations under the License.</span>
 
 <span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-
 
 <span class="n">DEFAULT</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
 
@@ -177,40 +178,22 @@
 <span class="k">class</span> <span class="nc">Metric</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Base Metric type</span>
 
-<span class="sd">    Includes common method definitions and implementations for metrics.</span>
-
-<span class="sd">    :param name: The name of the metric.</span>
-<span class="sd">    :type name: str</span>
-<span class="sd">    :param value: The metric value.</span>
-<span class="sd">    :type value: int or float</span>
-<span class="sd">    :param tags: (optional) A set of tags that can be used to filter this</span>
-<span class="sd">        metric in the New Relic UI.</span>
-<span class="sd">    :type tags: dict</span>
-<span class="sd">    :param interval_ms: (optional) The interval of time in milliseconds over which</span>
-<span class="sd">        the metric was recorded.</span>
-<span class="sd">    :type interval_ms: int</span>
-<span class="sd">    :param end_time_ms: (optional) A unix timestamp in milliseconds representing the</span>
-<span class="sd">        end time_ms of the metric. Defaults to time.time() * 1000</span>
-<span class="sd">    :type end_time_ms: int</span>
+<span class="sd">    Includes common method definitions for metrics.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">interval_ms</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="o">=</span><span class="n">DEFAULT</span><span class="p">):</span>
         <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
-        <span class="k">if</span> <span class="n">interval_ms</span> <span class="ow">is</span> <span class="n">DEFAULT</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;interval_ms will be required for CountMetric and &quot;</span>
-                <span class="s2">&quot;SummaryMetric in a future SDK release.&quot;</span><span class="p">,</span>
-                <span class="ne">DeprecationWarning</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="n">interval</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">elif</span> <span class="n">interval_ms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">interval</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;interval.ms&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">interval_ms</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">interval_ms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">interval_ms</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;interval.ms&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">interval_ms</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">interval</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">interval_ms</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">end_time_ms</span> <span class="ow">or</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">))</span> <span class="o">-</span> <span class="n">interval</span>
+        <span class="k">if</span> <span class="n">end_time_ms</span> <span class="ow">is</span> <span class="n">DEFAULT</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1000.0</span><span class="p">)</span> <span class="o">-</span> <span class="n">interval_ms</span>
+        <span class="k">elif</span> <span class="n">end_time_ms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">end_time_ms</span><span class="p">)</span> <span class="o">-</span> <span class="n">interval_ms</span>
 
         <span class="k">if</span> <span class="n">tags</span><span class="p">:</span>
             <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">tags</span><span class="p">)</span>
@@ -240,34 +223,18 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">start_time_ms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Metric timestamp&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">end_time_ms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Metric timestamp&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;interval.ms&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;timestamp&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;interval.ms&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">tags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Metric Tags&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;attributes&quot;</span><span class="p">)</span>
-
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="p">(</span>
-                <span class="s2">&quot;Metric.from_value will be removed in a future release. &quot;</span>
-                <span class="s2">&quot;Please use the contructor for the metric you are creating.&quot;</span>
-            <span class="p">),</span>
-            <span class="ne">DeprecationWarning</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-            <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span>
-            <span class="n">tags</span><span class="o">=</span><span class="n">tags</span><span class="p">,</span>
-            <span class="n">interval_ms</span><span class="o">=</span><span class="n">interval_ms</span><span class="p">,</span>
-            <span class="n">end_time_ms</span><span class="o">=</span><span class="n">end_time_ms</span><span class="p">,</span>
-        <span class="p">)</span>
 
 
 <div class="viewcode-block" id="GaugeMetric"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.metric.GaugeMetric">[docs]</a><span class="k">class</span> <span class="nc">GaugeMetric</span><span class="p">(</span><span class="n">Metric</span><span class="p">):</span>
@@ -282,9 +249,6 @@
 <span class="sd">    :param tags: (optional) A set of tags that can be used to filter this</span>
 <span class="sd">        metric in the New Relic UI.</span>
 <span class="sd">    :type tags: dict</span>
-<span class="sd">    :param interval_ms: (optional) The interval of time in milliseconds over which</span>
-<span class="sd">        the metric was recorded.</span>
-<span class="sd">    :type interval_ms: int</span>
 <span class="sd">    :param end_time_ms: (optional) A unix timestamp in milliseconds representing the</span>
 <span class="sd">        end time of the metric. Defaults to time.time() * 1000</span>
 <span class="sd">    :type end_time_ms: int</span>
@@ -295,7 +259,10 @@
 <span class="sd">        &gt;&gt;&gt; metric = GaugeMetric(&#39;temperature&#39;, 20, tags={&#39;units&#39;: &#39;C&#39;})</span>
 <span class="sd">        &gt;&gt;&gt; metric.value</span>
 <span class="sd">        20</span>
-<span class="sd">    &quot;&quot;&quot;</span></div>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="o">=</span><span class="n">DEFAULT</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GaugeMetric</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="CountMetric"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.metric.CountMetric">[docs]</a><span class="k">class</span> <span class="nc">CountMetric</span><span class="p">(</span><span class="n">Metric</span><span class="p">):</span>
@@ -308,12 +275,12 @@
 <span class="sd">    :type name: str</span>
 <span class="sd">    :param value: The metric count value.</span>
 <span class="sd">    :type value: int or float</span>
+<span class="sd">    :param interval_ms: The interval of time in milliseconds over which the</span>
+<span class="sd">        metric was recorded.</span>
+<span class="sd">    :type interval_ms: int</span>
 <span class="sd">    :param tags: (optional) A set of tags that can be used to filter this</span>
 <span class="sd">        metric in the New Relic UI.</span>
 <span class="sd">    :type tags: dict</span>
-<span class="sd">    :param interval_ms: (optional) The interval of time in milliseconds over which</span>
-<span class="sd">        the metric was recorded.</span>
-<span class="sd">    :type interval_ms: int</span>
 <span class="sd">    :param end_time_ms: (optional) A unix timestamp in milliseconds representing the</span>
 <span class="sd">        end time of the metric. Defaults to time.time() * 1000</span>
 <span class="sd">    :type end_time_ms: int</span>
@@ -321,15 +288,13 @@
 <span class="sd">    Usage::</span>
 
 <span class="sd">        &gt;&gt;&gt; from newrelic_telemetry_sdk import CountMetric</span>
-<span class="sd">        &gt;&gt;&gt; metric = CountMetric(&#39;response_status&#39;, 0,</span>
-<span class="sd">        ...     tags={&#39;code&#39;: 200}, interval_ms=1)</span>
+<span class="sd">        &gt;&gt;&gt; metric = CountMetric(&#39;response_code&#39;, 1, interval_ms=1, tags={&#39;code&#39;: 200})</span>
 <span class="sd">        &gt;&gt;&gt; metric.value</span>
-<span class="sd">        0</span>
+<span class="sd">        1</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval_ms</span><span class="o">=</span><span class="n">DEFAULT</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">CountMetric</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">interval_ms</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="p">)</span>
-
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">interval_ms</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="o">=</span><span class="n">DEFAULT</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CountMetric</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">interval_ms</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="p">)</span>
         <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;count&quot;</span></div>
 
 
@@ -350,12 +315,12 @@
 <span class="sd">    :type min: int or float</span>
 <span class="sd">    :param max: The maximum value in the summary metric.</span>
 <span class="sd">    :type max: int or float</span>
+<span class="sd">    :param interval_ms: The interval of time in milliseconds over which the</span>
+<span class="sd">        metric was recorded.</span>
+<span class="sd">    :type interval_ms: int</span>
 <span class="sd">    :param tags: (optional) A set of tags that can be used to filter this</span>
 <span class="sd">        metric in the New Relic UI.</span>
 <span class="sd">    :type tags: dict</span>
-<span class="sd">    :param interval_ms: (optional) The interval of time in milliseconds over which</span>
-<span class="sd">        the metric was recorded.</span>
-<span class="sd">    :type interval_ms: int</span>
 <span class="sd">    :param end_time_ms: (optional) A unix timestamp in milliseconds representing the</span>
 <span class="sd">        end time of the metric. Defaults to time.time() * 1000</span>
 <span class="sd">    :type end_time_ms: int</span>
@@ -370,55 +335,11 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">name</span><span class="p">,</span>
-        <span class="n">count</span><span class="p">,</span>
-        <span class="nb">sum</span><span class="p">,</span>
-        <span class="nb">min</span><span class="p">,</span>
-        <span class="nb">max</span><span class="p">,</span>
-        <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">interval_ms</span><span class="o">=</span><span class="n">DEFAULT</span><span class="p">,</span>
-        <span class="n">end_time_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="nb">sum</span><span class="p">,</span> <span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">,</span> <span class="n">interval_ms</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="o">=</span><span class="n">DEFAULT</span>
     <span class="p">):</span>
         <span class="n">value</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="n">count</span><span class="p">,</span> <span class="s2">&quot;sum&quot;</span><span class="p">:</span> <span class="nb">sum</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">:</span> <span class="nb">min</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">:</span> <span class="nb">max</span><span class="p">}</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">SummaryMetric</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">interval_ms</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="p">)</span>
-        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;summary&quot;</span>
-
-<div class="viewcode-block" id="SummaryMetric.from_value"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.metric.SummaryMetric.from_value">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Create a SummaryMetric with a single value</span>
-
-<span class="sd">        :param name: The name of the metric.</span>
-<span class="sd">        :type name: str</span>
-<span class="sd">        :param value: The metric value.</span>
-<span class="sd">        :type value: int or float</span>
-<span class="sd">        :param tags: (optional) A set of tags that can be used to filter this</span>
-<span class="sd">            metric in the New Relic UI.</span>
-<span class="sd">        :type tags: dict</span>
-<span class="sd">        :param interval_ms: (optional) The interval of time in milliseconds over which</span>
-<span class="sd">            the metric was recorded.</span>
-<span class="sd">        :type interval_ms: int</span>
-<span class="sd">        :param end_time_ms: (optional) A unix timestamp in milliseconds representing</span>
-<span class="sd">            the end time of the metric. Defaults to time.time() * 1000</span>
-<span class="sd">        :type end_time_ms: int</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="p">(</span>
-                <span class="s2">&quot;Metric.from_value will be removed in a future release. &quot;</span>
-                <span class="s2">&quot;Please use the contructor for the metric you are creating.&quot;</span>
-            <span class="p">),</span>
-            <span class="ne">DeprecationWarning</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-            <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="nb">sum</span><span class="o">=</span><span class="n">value</span><span class="p">,</span>
-            <span class="nb">min</span><span class="o">=</span><span class="n">value</span><span class="p">,</span>
-            <span class="nb">max</span><span class="o">=</span><span class="n">value</span><span class="p">,</span>
-            <span class="n">tags</span><span class="o">=</span><span class="n">tags</span><span class="p">,</span>
-            <span class="n">interval_ms</span><span class="o">=</span><span class="n">interval_ms</span><span class="p">,</span>
-            <span class="n">end_time_ms</span><span class="o">=</span><span class="n">end_time_ms</span><span class="p">,</span>
-        <span class="p">)</span></div></div>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SummaryMetric</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">interval_ms</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">end_time_ms</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;summary&quot;</span></div>
 </pre></div>
 
            </div>

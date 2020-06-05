@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>newrelic_telemetry_sdk.client &mdash; newrelic-telemetry-sdk 0.3.1 documentation</title>
+  <title>newrelic_telemetry_sdk.client &mdash; newrelic-telemetry-sdk 0.4.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.3
+                0.4
               </div>
             
           
@@ -87,6 +87,9 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../advanced.html">Advanced Usage</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../proxy.html">Proxy Support</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
@@ -167,9 +170,20 @@
 <span class="c1"># See the License for the specific language governing permissions and</span>
 <span class="c1"># limitations under the License.</span>
 
+<span class="kn">import</span> <span class="nn">base64</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">urllib3</span>
 <span class="kn">import</span> <span class="nn">zlib</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">urllib.request</span> <span class="kn">import</span> <span class="n">getproxies</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">urllib</span> <span class="kn">import</span> <span class="n">getproxies</span>
+
+<span class="kn">from</span> <span class="nn">urllib3.util</span> <span class="kn">import</span> <span class="n">parse_url</span>
+
+<span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">newrelic_telemetry_sdk.version</span> <span class="kn">import</span> <span class="n">version</span> <span class="k">as</span> <span class="n">__version__</span>
@@ -264,8 +278,52 @@
         <span class="n">retries</span> <span class="o">=</span> <span class="n">urllib3</span><span class="o">.</span><span class="n">Retry</span><span class="p">(</span>
             <span class="n">total</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">connect</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">redirect</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="kc">None</span>
         <span class="p">)</span>
+
+        <span class="c1"># Check if https traffic should be proxied and pass the proxy</span>
+        <span class="c1"># information to the connectionpool</span>
+
+        <span class="n">proxies</span> <span class="o">=</span> <span class="n">getproxies</span><span class="p">()</span>
+        <span class="n">proxy</span> <span class="o">=</span> <span class="n">proxies</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">proxy_headers</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">proxy</span><span class="p">:</span>
+            <span class="n">proxy</span> <span class="o">=</span> <span class="n">parse_url</span><span class="p">(</span><span class="n">proxy</span><span class="p">)</span>
+            <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;Using proxy host=</span><span class="si">{0!r}</span><span class="s2"> port=</span><span class="si">{1!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">proxy</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">proxy</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">proxy</span><span class="o">.</span><span class="n">scheme</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;http&quot;</span><span class="p">:</span>
+                <span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;Contacting https destinations through &quot;</span>
+                    <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> proxies is not supported.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">proxy</span><span class="o">.</span><span class="n">scheme</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">proxy</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">elif</span> <span class="n">proxy</span><span class="o">.</span><span class="n">auth</span><span class="p">:</span>
+                <span class="c1"># https://tools.ietf.org/html/rfc7617</span>
+                <span class="c1">#</span>
+                <span class="c1"># The username/password encoding is not specified by a standard.</span>
+                <span class="c1"># &quot;this specification continues to leave the default encoding undefined&quot;</span>
+                <span class="c1">#</span>
+                <span class="c1"># parse_url will encode non-ascii characters into a</span>
+                <span class="c1"># percent-encoded string. As a result, we make the assumption</span>
+                <span class="c1"># that anything returned from parse_url is utf-8 encoded.</span>
+                <span class="c1">#</span>
+                <span class="c1"># This is, of course, not guaranteed to be interpreted</span>
+                <span class="c1"># correctly by the proxy server, but the failure mode will</span>
+                <span class="c1"># hopefully be interpreted as an incorrect username/password</span>
+                <span class="c1"># combination rather than causing a security issue where</span>
+                <span class="c1"># information may be leaked (control characters, etc.)</span>
+                <span class="n">basic_auth</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">proxy</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+                <span class="n">proxy_headers</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;Proxy-Authorization&quot;</span><span class="p">:</span> <span class="s2">&quot;Basic &quot;</span> <span class="o">+</span> <span class="n">basic_auth</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+                <span class="p">}</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">POOL_CLS</span><span class="p">(</span>
-            <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="n">retries</span><span class="o">=</span><span class="n">retries</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span>
+            <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span>
+            <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span>
+            <span class="n">retries</span><span class="o">=</span><span class="n">retries</span><span class="p">,</span>
+            <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+            <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">_proxy</span><span class="o">=</span><span class="n">proxy</span><span class="p">,</span>
+            <span class="n">_proxy_headers</span><span class="o">=</span><span class="n">proxy_headers</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">add_version_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product</span><span class="p">,</span> <span class="n">product_version</span><span class="p">):</span>
