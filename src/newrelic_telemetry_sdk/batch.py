@@ -33,10 +33,9 @@ class Batch(object):
             self._common = None
 
     def record(self, item):
-        """Merge a span into the batch
+        """Merge an item into the batch
 
-        :param item: The span to merge into the batch.
-        :type item: Span
+        :param item: The item to merge into the batch.
         """
         with self._lock:
             self._batch.append(item)
