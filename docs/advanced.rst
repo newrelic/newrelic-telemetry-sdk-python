@@ -71,6 +71,5 @@ The example code assumes you've set the following environment variables:
     # Start the harvester background thread
     metric_harvester.start()
 
-    # Data is now recorded through the harvester
     # The data will buffer and send every 5 seconds or at process exit
-    metric_harvester.record_gauge("temperature", 78.6, {"units": "Farenheit"})
+    metric_batch.record_gauge("temperature", 78.6, {"units": "Farenheit"})
