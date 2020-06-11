@@ -242,9 +242,8 @@
 <span class="c1"># Start the harvester background thread</span>
 <span class="n">metric_harvester</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
-<span class="c1"># Data is now recorded through the harvester</span>
 <span class="c1"># The data will buffer and send every 5 seconds or at process exit</span>
-<span class="n">metric_harvester</span><span class="o">.</span><span class="n">record_gauge</span><span class="p">(</span><span class="s2">&quot;temperature&quot;</span><span class="p">,</span> <span class="mf">78.6</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;Farenheit&quot;</span><span class="p">})</span>
+<span class="n">metric_batch</span><span class="o">.</span><span class="n">record_gauge</span><span class="p">(</span><span class="s2">&quot;temperature&quot;</span><span class="p">,</span> <span class="mf">78.6</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;Farenheit&quot;</span><span class="p">})</span>
 </pre></div>
 </div>
 </div>

@@ -1579,15 +1579,7 @@
 
     <span class="c1"># fork() only copied the current thread; clear references to others.</span>
     <span class="n">new_active</span> <span class="o">=</span> <span class="p">{}</span>
-
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">current</span> <span class="o">=</span> <span class="n">_active</span><span class="p">[</span><span class="n">get_ident</span><span class="p">()]</span>
-    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-        <span class="c1"># fork() was called in a thread which was not spawned</span>
-        <span class="c1"># by threading.Thread. For example, a thread spawned</span>
-        <span class="c1"># by thread.start_new_thread().</span>
-        <span class="n">current</span> <span class="o">=</span> <span class="n">_MainThread</span><span class="p">()</span>
-
+    <span class="n">current</span> <span class="o">=</span> <span class="n">current_thread</span><span class="p">()</span>
     <span class="n">_main_thread</span> <span class="o">=</span> <span class="n">current</span>
 
     <span class="c1"># reset _shutdown() locks: threads re-register their _tstate_lock below</span>
