@@ -118,7 +118,7 @@ class Client(object):
             }
         )
         retries = urllib3.Retry(
-            total=False, connect=None, read=None, redirect=0, status=None
+            total=None, connect=1, read=None, redirect=0, status=None
         )
 
         # Check if https traffic should be proxied and pass the proxy
