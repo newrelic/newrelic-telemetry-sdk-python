@@ -197,6 +197,17 @@ class Client(object):
         payload += compressor.flush()
         return payload
 
+    def _create_payload(self, items, common):
+        payload = {self.PAYLOAD_TYPE: items}
+        if common:
+            payload["common"] = common
+
+        payload = json.dumps([payload], separators=(",", ":"))
+        if not isinstance(payload, bytes):
+            payload = payload.encode("utf-8")
+
+        return self._compress_payload(payload)
+
     def send(self, item):
         """Send a single item
 
@@ -225,16 +236,7 @@ class Client(object):
         # Generate a unique request ID for this request
         headers["x-request-id"] = str(uuid.uuid4())
 
-        payload = {self.PAYLOAD_TYPE: items}
-        if common:
-            payload["common"] = common
-
-        payload = json.dumps([payload])
-        if not isinstance(payload, bytes):
-            payload = payload.encode("utf-8")
-
-        payload = self._compress_payload(payload)
-
+        payload = self._create_payload(items, common)
         return self._pool.urlopen("POST", self.PATH, body=payload, headers=headers)
 
 
@@ -319,6 +321,13 @@ class EventClient(Client):
     HOST = "insights-collector.newrelic.com"
     PATH = "/v1/accounts/events"
 
+    def _create_payload(self, items, common):
+        payload = json.dumps(items)
+        if not isinstance(payload, bytes):
+            payload = payload.encode("utf-8")
+
+        return self._compress_payload(payload)
+
     def send_batch(self, items):
         """Send a batch of items
 
@@ -327,17 +336,4 @@ class EventClient(Client):
 
         :rtype: HTTPResponse
         """
-        # Specifying the headers argument overrides any base headers existing
-        # in the pool, so we must copy all existing headers
-        headers = self._headers.copy()
-
-        # Generate a unique request ID for this request
-        headers["x-request-id"] = str(uuid.uuid4())
-
-        payload = json.dumps(items)
-        if not isinstance(payload, bytes):
-            payload = payload.encode("utf-8")
-
-        payload = self._compress_payload(payload)
-
-        return self._pool.urlopen("POST", self.PATH, body=payload, headers=headers)
+        return super(EventClient, self).send_batch(items, None)
