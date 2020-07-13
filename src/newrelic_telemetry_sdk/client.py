@@ -14,16 +14,18 @@
 
 import base64
 import json
-import urllib3
-import zlib
 import logging
+import uuid
+import zlib
+
+import urllib3
+from urllib3.util import parse_url
 
 try:
     from urllib.request import getproxies
 except ImportError:
     from urllib import getproxies
 
-from urllib3.util import parse_url
 
 _logger = logging.getLogger(__name__)
 
@@ -167,6 +169,7 @@ class Client(object):
             _proxy=proxy,
             _proxy_headers=proxy_headers,
         )
+        self._headers = self._pool.headers
 
     def add_version_info(self, product, product_version):
         """Adds product and version information to a User-Agent header
@@ -180,7 +183,7 @@ class Client(object):
         :type product_version: str
         """
         product_ua_header = " {}/{}".format(product, product_version)
-        self._pool.headers["user-agent"] += product_ua_header
+        self._headers["user-agent"] += product_ua_header
 
     def close(self):
         """Close all open connections and disable internal connection pool."""
@@ -215,6 +218,13 @@ class Client(object):
 
         :rtype: HTTPResponse
         """
+        # Specifying the headers argument overrides any base headers existing
+        # in the pool, so we must copy all existing headers
+        headers = self._headers.copy()
+
+        # Generate a unique request ID for this request
+        headers["x-request-id"] = str(uuid.uuid4())
+
         payload = {self.PAYLOAD_TYPE: items}
         if common:
             payload["common"] = common
@@ -225,7 +235,7 @@ class Client(object):
 
         payload = self._compress_payload(payload)
 
-        return self._pool.urlopen("POST", self.PATH, body=payload)
+        return self._pool.urlopen("POST", self.PATH, body=payload, headers=headers)
 
 
 class SpanClient(Client):
@@ -317,10 +327,17 @@ class EventClient(Client):
 
         :rtype: HTTPResponse
         """
+        # Specifying the headers argument overrides any base headers existing
+        # in the pool, so we must copy all existing headers
+        headers = self._headers.copy()
+
+        # Generate a unique request ID for this request
+        headers["x-request-id"] = str(uuid.uuid4())
+
         payload = json.dumps(items)
         if not isinstance(payload, bytes):
             payload = payload.encode("utf-8")
 
         payload = self._compress_payload(payload)
 
-        return self._pool.urlopen("POST", self.PATH, body=payload)
+        return self._pool.urlopen("POST", self.PATH, body=payload, headers=headers)
