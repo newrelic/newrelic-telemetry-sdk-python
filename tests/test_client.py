@@ -14,20 +14,22 @@
 
 import functools
 import json
-import pytest
 import os
 import time
 import uuid
 import zlib
-from newrelic_telemetry_sdk.version import version
+
+import pytest
+from urllib3 import HTTPConnectionPool
+
 from newrelic_telemetry_sdk.client import (
-    SpanClient,
-    MetricClient,
     EventClient,
     HTTPError,
     HTTPResponse,
+    MetricClient,
+    SpanClient,
 )
-from urllib3 import HTTPConnectionPool
+from newrelic_telemetry_sdk.version import version
 
 try:
     string_types = basestring
@@ -218,6 +220,10 @@ def extract_and_validate_metadata(expected_url, request):
     user_agent = request.headers["user-agent"]
     assert user_agent.startswith("NewRelic-Python-TelemetrySDK/")
     assert version in user_agent
+
+    # Validate that the x-request-id header is present and is a valid UUID4
+    request_id = request.headers["x-request-id"]
+    assert uuid.UUID(request_id).version == 4
 
     # Validate payload is compressed JSON
     assert request.headers["Content-Type"] == "application/json"
