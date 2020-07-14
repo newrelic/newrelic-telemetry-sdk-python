@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import base64
 import json
 import logging
 import uuid
@@ -155,10 +154,7 @@ class Client(object):
                 # hopefully be interpreted as an incorrect username/password
                 # combination rather than causing a security issue where
                 # information may be leaked (control characters, etc.)
-                basic_auth = base64.b64encode(proxy.auth.encode("utf-8"))
-                proxy_headers = {
-                    "Proxy-Authorization": "Basic " + basic_auth.decode("utf-8")
-                }
+                proxy_headers = urllib3.make_headers(proxy_basic_auth=proxy.auth)
 
         self._pool = self.POOL_CLS(
             host=host,
