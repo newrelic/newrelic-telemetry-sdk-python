@@ -46,7 +46,10 @@ def test_event_optional(arg_name, arg_value, event_key, event_value):
 
 @pytest.mark.parametrize(
     "attribute_name,attribute_value",
-    (("event_type", "event"), ("timestamp_ms", 1000),),
+    (
+        ("event_type", "event"),
+        ("timestamp_ms", 1000),
+    ),
 )
 def test_event_attributes(attribute_name, attribute_value):
     event = Event("event", timestamp_ms=1000)
