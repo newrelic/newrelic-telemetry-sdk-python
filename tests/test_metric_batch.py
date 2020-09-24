@@ -114,7 +114,14 @@ def test_different_metric(metric_a, metric_b):
     assert len(batch._internal_batch) == 2
 
 
-@pytest.mark.parametrize("tags", (None, {"foo": "bar"}, CustomMapping(),))
+@pytest.mark.parametrize(
+    "tags",
+    (
+        None,
+        {"foo": "bar"},
+        CustomMapping(),
+    ),
+)
 def test_flush(monkeypatch, tags):
     DELTA = 4.0
     current_t = [1.0]
