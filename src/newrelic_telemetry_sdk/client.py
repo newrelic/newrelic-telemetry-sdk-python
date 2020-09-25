@@ -15,6 +15,7 @@
 import json
 import logging
 import uuid
+import warnings
 import zlib
 
 import urllib3
@@ -40,6 +41,10 @@ __all__ = ("SpanClient", "MetricClient", "EventClient", "HTTPError", "HTTPRespon
 
 class HTTPError(ValueError):
     """Unexpected HTTP Status"""
+
+
+class AlternativeWarning(UserWarning):
+    """Warns a user there is an alternative"""
 
 
 class HTTPResponse(urllib3.HTTPResponse):
@@ -333,3 +338,22 @@ class EventClient(Client):
         :rtype: HTTPResponse
         """
         return super(EventClient, self).send_batch(items, None)
+
+
+def extract_host_from_url(url):
+    """Returns the host component of a URL
+
+    .. warning::
+        A warning will be emitted if :py:meth:`extract_host_from_url` is used.
+
+        :py:meth:`extract_host_from_url` is not recommended for general use.
+        It is recommended that the host component be used directly rather than
+        in URL form.
+
+    :param url: The URL to parse.
+    :type url: str
+    """
+    host = parse_url(url).host
+    message = "Use host={!r} directly rather than extract_host_from_url.".format(host)
+    warnings.warn(message, AlternativeWarning)
+    return host

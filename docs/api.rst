@@ -50,3 +50,8 @@ Harvester
     :exclude-members: EVENT_CLS, run, daemon
     :show-inheritance:
     :inherited-members:
+
+
+Utilities
+---------
+.. autofunction:: newrelic_telemetry_sdk.client.extract_host_from_url

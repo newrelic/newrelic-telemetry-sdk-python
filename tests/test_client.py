@@ -23,11 +23,13 @@ import pytest
 from urllib3 import HTTPConnectionPool
 
 from newrelic_telemetry_sdk.client import (
+    Client,
     EventClient,
     HTTPError,
     HTTPResponse,
     MetricClient,
     SpanClient,
+    extract_host_from_url,
 )
 from newrelic_telemetry_sdk.version import version
 
@@ -70,6 +72,12 @@ class Request(object):
         instance.headers = headers
         instance.args = args
         instance.kwargs = kwargs
+
+
+class MockClient(Client):
+    def __init__(self, insert_key, host=None, port=443):
+        self.host = host
+        self.port = port
 
 
 def capture_request(fn):
@@ -380,3 +388,24 @@ def test_event_client_close(event_client):
 def test_span_client_close(span_client):
     span_client.close()
     assert span_client._pool.pool is None
+
+
+@pytest.mark.parametrize(
+    "url,host",
+    (
+        ("example.com:8000", "example.com"),
+        ("example.com", "example.com"),
+        ("https://example.com:443/foobar", "example.com"),
+    ),
+)
+def test_extract_host_from_url(url, host):
+    expected_message = (
+        "Use host={!r} directly rather than extract_host_from_url.".format(host)
+    )
+
+    with pytest.warns(UserWarning) as record:
+        result = extract_host_from_url(url)
+
+    assert result == host
+    assert len(record) == 1
+    assert record[0].message.args[0] == expected_message

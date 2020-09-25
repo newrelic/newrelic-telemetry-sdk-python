@@ -12,18 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from newrelic_telemetry_sdk.batch import EventBatch, SpanBatch
 from newrelic_telemetry_sdk.client import (
-    SpanClient,
-    MetricClient,
     EventClient,
     HTTPError,
+    MetricClient,
+    SpanClient,
+    extract_host_from_url,
 )
-from newrelic_telemetry_sdk.span import Span
-from newrelic_telemetry_sdk.metric import GaugeMetric, CountMetric, SummaryMetric
 from newrelic_telemetry_sdk.event import Event
-from newrelic_telemetry_sdk.metric_batch import MetricBatch
-from newrelic_telemetry_sdk.batch import SpanBatch, EventBatch
 from newrelic_telemetry_sdk.harvester import Harvester
+from newrelic_telemetry_sdk.metric import CountMetric, GaugeMetric, SummaryMetric
+from newrelic_telemetry_sdk.metric_batch import MetricBatch
+from newrelic_telemetry_sdk.span import Span
 
 try:
     from newrelic_telemetry_sdk.version import version as __version__
@@ -44,4 +45,5 @@ __all__ = (
     "SpanBatch",
     "EventBatch",
     "Harvester",
+    "extract_host_from_url",
 )
