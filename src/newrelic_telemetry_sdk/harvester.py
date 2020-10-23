@@ -13,8 +13,8 @@
 # limitations under the License.
 
 import logging
-import time
 import threading
+import time
 
 _logger = logging.getLogger(__name__)
 

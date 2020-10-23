@@ -333,3 +333,30 @@ class EventClient(Client):
         :rtype: HTTPResponse
         """
         return super(EventClient, self).send_batch(items, None)
+
+
+class LogClient(Client):
+    """HTTP Client for interacting with the New Relic Log API
+
+    This class is used to send log messages to the New Relic Log API over HTTP.
+    :param insert_key: Insights insert key
+    :type insert_key: str
+    :param host: (optional) Override the host for the metric API
+        endpoint.
+    :type host: str
+    :param port: (optional) Override the port for the client.
+        Default: 443
+    :type port: int
+
+    Usage::
+
+        >>> import os
+        >>> insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
+        >>> log_client = LogClient(insert_key)
+        >>> response = log_client.send({})
+        >>> log_client.close()
+    """
+
+    HOST = "log-api.newrelic.com"
+    PATH = "/log/v1"
+    PAYLOAD_TYPE = "logs"
