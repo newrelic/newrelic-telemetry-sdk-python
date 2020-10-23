@@ -26,6 +26,7 @@ from newrelic_telemetry_sdk.client import (
     EventClient,
     HTTPError,
     HTTPResponse,
+    LogClient,
     MetricClient,
     SpanClient,
 )
@@ -57,6 +58,11 @@ METRIC = {
 
 EVENT = {
     "eventType": "testing",
+}
+
+LOG = {
+    "timestamp": int(time.time() * 1000.0),
+    "message": "Hello world",
 }
 
 
@@ -158,6 +164,32 @@ def metric_client(request, monkeypatch):
         client = MetricClient(insert_key, host, *client_args.args, **client_args.kwargs)
     else:
         client = MetricClient(insert_key, host)
+
+    assert client._pool.port == 443
+    yield client
+    client.close()
+
+
+@pytest.fixture
+def log_client(request, monkeypatch):
+    host = os.environ.get("NEW_RELIC_HOST", "")
+    insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
+
+    if host.startswith("staging"):
+        host = "staging-log-api.newrelic.com"
+
+    if insert_key:
+        urlopen = getattr(HTTPConnectionPool, "urlopen")
+        monkeypatch.setattr(HTTPConnectionPool, "urlopen", capture_request(urlopen))
+    else:
+        monkeypatch.setattr(HTTPConnectionPool, "urlopen", disable_sending)
+
+    # Allow client_args to be specified by a marker
+    client_args = request.node.get_closest_marker("client_args")
+    if client_args:
+        client = LogClient(insert_key, host, *client_args.args, **client_args.kwargs)
+    else:
+        client = LogClient(insert_key, host)
 
     assert client._pool.port == 443
     yield client
@@ -273,6 +305,10 @@ def validate_metric_request(request, items, common=None):
     validate_request("/metric/v1", "metrics", request, items, common)
 
 
+def validate_log_request(request, items, common=None):
+    validate_request("/log/v1", "logs", request, items, common)
+
+
 def validate_event_request(request, items):
     payload = extract_and_validate_metadata("/v1/accounts/events", request)
     assert payload == items
@@ -288,6 +324,20 @@ def test_metric_endpoint_batch(metric_client):
 
     response = metric_client.send_batch(metrics, common=common)
     validate_metric_request(response.request, metrics, common)
+
+
+def test_log_endpoint_batch(log_client):
+    logs = [LOG, {"message": "foobar"}]
+    attributes = {"hostname": "localhost"}
+    timestamp_ms = (time.time() - 1) * 1000.0
+
+    common = {
+        "attributes": attributes,
+        "timestamp": timestamp_ms,
+    }
+
+    response = log_client.send_batch(logs, common=common)
+    validate_log_request(response.request, logs, common)
 
 
 def test_span_endpoint_batch(span_client):
@@ -322,6 +372,7 @@ def test_event_endpoint_batch(event_client):
         (SpanClient, "trace-api.newrelic.com"),
         (MetricClient, "metric-api.newrelic.com"),
         (EventClient, "insights-collector.newrelic.com"),
+        (LogClient, "log-api.newrelic.com"),
     ),
 )
 def test_defaults(cls, host):
@@ -329,7 +380,7 @@ def test_defaults(cls, host):
     assert cls(None)._pool.port == 443
 
 
-@pytest.mark.parametrize("cls", (SpanClient, MetricClient, EventClient))
+@pytest.mark.parametrize("cls", (SpanClient, MetricClient, EventClient, LogClient))
 def test_port_override(cls):
     assert cls(None, port=8000)._pool.port == 8000
 
@@ -367,6 +418,17 @@ def test_event_add_version_info(event_client):
     assert user_agent.endswith(" foo/0.1 bar/0.2"), user_agent
 
 
+def test_log_add_version_info(log_client):
+    log_client.add_version_info("foo", "0.1")
+    log_client.add_version_info("bar", "0.2")
+    response = log_client.send(LOG)
+    validate_log_request(response.request, [LOG])
+    request = response.request
+
+    user_agent = request.headers["user-agent"]
+    assert user_agent.endswith(" foo/0.1 bar/0.2"), user_agent
+
+
 def test_metric_client_close(metric_client):
     metric_client.close()
     assert metric_client._pool.pool is None
@@ -380,3 +442,8 @@ def test_event_client_close(event_client):
 def test_span_client_close(span_client):
     span_client.close()
     assert span_client._pool.pool is None
+
+
+def test_log_client_close(log_client):
+    log_client.close()
+    assert log_client._pool.pool is None
