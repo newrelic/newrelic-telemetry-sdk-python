@@ -67,6 +67,14 @@ class SpanBatch(Batch):
     """
 
 
+class LogBatch(Batch):
+    """Aggregates logs, providing a record / flush interface.
+
+    :param tags: (optional) A dictionary of tags to attach to all flushes.
+    :type tags: dict
+    """
+
+
 class EventBatch(Batch):
     """Aggregates events, providing a record / flush interface."""
 
