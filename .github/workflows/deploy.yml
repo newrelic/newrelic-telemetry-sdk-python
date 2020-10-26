@@ -38,17 +38,12 @@ jobs:
       with:
         python-version: '3.x'
         architecture: x64
-    - name: Setup SSH
-      uses: webfactory/ssh-agent@b6c65becb03b5d9487d1ddb2ab9f28bdffa1fa77
-      with:
-        ssh-private-key: ${{ secrets.SSH_DEPLOY_KEY }}
     - name: Prepare git directory for docs build
       run: |
-        git config --local user.name "bot"
-        git config --local user.email "bot@bot.localhost"
-        git remote add upstream git@github.com:${GITHUB_REPOSITORY}.git
-        git fetch upstream gh-pages && \
-        git worktree add --no-checkout -B gh-pages docs/_build upstream/gh-pages
+        git config --local user.name "github-actions[bot]"
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git fetch origin gh-pages && \
+        git worktree add --no-checkout -B gh-pages docs/_build origin/gh-pages
     - name: Install Dependencies
       run: |
         pip install -U pip
@@ -58,6 +53,6 @@ jobs:
     - name: Publish docs
       run: |
         git add --all
-        git commit -m "Publishing docs to gh-pages"
-        git push
+        git commit --amend --no-edit --date=now
+        git push -f
       working-directory: ./docs/_build
