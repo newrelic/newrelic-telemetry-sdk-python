@@ -1,15 +1,18 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Advanced Usage &mdash; newrelic-telemetry-sdk 0.4.0 documentation</title>
+  <title>Advanced Usage &mdash; newrelic-telemetry-sdk 0.4.2 documentation</title>
   
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
 
   
   
@@ -17,7 +20,9 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -29,10 +34,6 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Proxy Support" href="proxy.html" />
@@ -50,7 +51,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> newrelic-telemetry-sdk
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> newrelic-telemetry-sdk
           
 
           
@@ -77,6 +78,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -110,6 +112,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -148,7 +151,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Advanced Usage</li>
     
@@ -195,7 +198,10 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="api.html#newrelic_telemetry_sdk.event.Event" title="newrelic_telemetry_sdk.event.Event"><code class="xref py py-class docutils literal notranslate"><span class="pre">Event</span></code></a></p></td>
 <td><p><a class="reference internal" href="api.html#newrelic_telemetry_sdk.batch.EventBatch" title="newrelic_telemetry_sdk.batch.EventBatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventBatch</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="api.html#newrelic_telemetry_sdk.span.Span" title="newrelic_telemetry_sdk.span.Span"><code class="xref py py-class docutils literal notranslate"><span class="pre">Span</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="api.html#newrelic_telemetry_sdk.log.Log" title="newrelic_telemetry_sdk.log.Log"><code class="xref py py-class docutils literal notranslate"><span class="pre">Log</span></code></a></p></td>
+<td><p><a class="reference internal" href="api.html#newrelic_telemetry_sdk.batch.LogBatch" title="newrelic_telemetry_sdk.batch.LogBatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogBatch</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api.html#newrelic_telemetry_sdk.span.Span" title="newrelic_telemetry_sdk.span.Span"><code class="xref py py-class docutils literal notranslate"><span class="pre">Span</span></code></a></p></td>
 <td><p><a class="reference internal" href="api.html#newrelic_telemetry_sdk.batch.SpanBatch" title="newrelic_telemetry_sdk.batch.SpanBatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpanBatch</span></code></a></p></td>
 </tr>
 </tbody>
@@ -221,7 +227,7 @@
 <div class="section" id="harvester">
 <h2>Harvester<a class="headerlink" href="#harvester" title="Permalink to this headline">¶</a></h2>
 <p>A <a class="reference internal" href="api.html#newrelic_telemetry_sdk.harvester.Harvester" title="newrelic_telemetry_sdk.harvester.Harvester"><code class="xref py py-class docutils literal notranslate"><span class="pre">Harvester</span></code></a> flushes a batch and sends data through a client at a fixed harvest interval.</p>
-<p>The <a class="reference internal" href="api.html#newrelic_telemetry_sdk.harvester.Harvester" title="newrelic_telemetry_sdk.harvester.Harvester"><code class="xref py py-class docutils literal notranslate"><span class="pre">Harvester</span></code></a> class is a <a class="reference external" href="https://docs.python.org/3/library/threading.html#threading.Thread" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">threading.Thread</span></code></a> and has <a class="reference internal" href="api.html#newrelic_telemetry_sdk.harvester.Harvester.start" title="newrelic_telemetry_sdk.harvester.Harvester.start"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start</span></code></a> and <a class="reference internal" href="api.html#newrelic_telemetry_sdk.harvester.Harvester.stop" title="newrelic_telemetry_sdk.harvester.Harvester.stop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">stop</span></code></a> methods.</p>
+<p>The <a class="reference internal" href="api.html#newrelic_telemetry_sdk.harvester.Harvester" title="newrelic_telemetry_sdk.harvester.Harvester"><code class="xref py py-class docutils literal notranslate"><span class="pre">Harvester</span></code></a> class is a <a class="reference external" href="https://docs.python.org/3/library/threading.html#threading.Thread" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">threading.Thread</span></code></a> and has <a class="reference internal" href="api.html#newrelic_telemetry_sdk.harvester.Harvester.start" title="newrelic_telemetry_sdk.harvester.Harvester.start"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start</span></code></a> and <a class="reference internal" href="api.html#newrelic_telemetry_sdk.harvester.Harvester.stop" title="newrelic_telemetry_sdk.harvester.Harvester.stop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">stop</span></code></a> methods.</p>
 <div class="section" id="id1">
 <h3>Example<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <p>The example code assumes you’ve set the following environment variables:</p>
@@ -270,11 +276,19 @@
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2019, New Relic
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -285,7 +299,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

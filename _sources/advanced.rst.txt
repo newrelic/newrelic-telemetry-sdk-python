@@ -21,6 +21,8 @@ Batches are broken out by data type that they contain:
 +----------------------------------------------------------+---------------------------------------------------------------------------+
 | :class:`Event <newrelic_telemetry_sdk.event.Event>`      | :class:`EventBatch <newrelic_telemetry_sdk.batch.EventBatch>`             |
 +----------------------------------------------------------+---------------------------------------------------------------------------+
+| :class:`Log <newrelic_telemetry_sdk.log.Log>`            | :class:`LogBatch <newrelic_telemetry_sdk.batch.LogBatch>`                 |
++----------------------------------------------------------+---------------------------------------------------------------------------+
 | :class:`Span <newrelic_telemetry_sdk.span.Span>`         | :class:`SpanBatch <newrelic_telemetry_sdk.batch.SpanBatch>`               |
 +----------------------------------------------------------+---------------------------------------------------------------------------+
 
