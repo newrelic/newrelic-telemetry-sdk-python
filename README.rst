@@ -94,7 +94,8 @@ The example code assumes you've set the following environment variables:
         "responses", count=10, min=0.2, max=0.5, sum=4.7, interval_ms=2000
     )
 
-    response = metric_client.send_batch((temperature, errors, summary))
+    batch = [temperature, errors, summary]
+    response = metric_client.send_batch(batch)
     response.raise_for_status()
     print("Sent metrics successfully!")
 
