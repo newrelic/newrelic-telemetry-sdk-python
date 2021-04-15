@@ -91,3 +91,40 @@ class Span(dict):
 
     def __exit__(self, exc, value, tb):
         self.finish()
+
+    @staticmethod
+    def common(trace_id=None, tags=None, start_time_ms=None):
+        """Generate a common block for a Span batch
+
+        :param trace_id: (optional) A random identifier representing a group of
+            spans known as a "trace". Spans having the same trace_id are grouped
+            into a single view.
+        :type trace_id: str
+        :param tags: (optional) A set of tags that can be used to filter this span
+            in the New Relic UI.
+        :type tags: dict
+        :param start_time_ms: (optional) A unix timestamp in milliseconds
+            representing the start time of the span. Defaults to time.time() * 1000
+        :type start_time_ms: int
+
+        :rtype: dict
+
+        >>> import newrelic_telemetry_sdk
+        >>> newrelic_telemetry_sdk.Span.common(trace_id="my-trace-id")
+        {'trace.id': 'my-trace-id'}
+        >>> newrelic_telemetry_sdk.Span.common(tags={"foo": "bar"})
+        {'attributes': {'foo': 'bar'}}
+        >>> newrelic_telemetry_sdk.Span.common(start_time_ms=1000.0)
+        {'timestamp': 1000}
+        """
+        common = {}
+        if trace_id:
+            common["trace.id"] = trace_id
+
+        if tags:
+            common["attributes"] = tags
+
+        if start_time_ms:
+            common["timestamp"] = int(start_time_ms)
+
+        return common
