@@ -23,7 +23,7 @@ from newrelic_telemetry_sdk.client import (
 from newrelic_telemetry_sdk.event import Event
 from newrelic_telemetry_sdk.harvester import Harvester
 from newrelic_telemetry_sdk.log import Log, NewRelicLogFormatter
-from newrelic_telemetry_sdk.metric import CountMetric, GaugeMetric, SummaryMetric
+from newrelic_telemetry_sdk.metric import CountMetric, GaugeMetric, Metric, SummaryMetric
 from newrelic_telemetry_sdk.metric_batch import MetricBatch
 from newrelic_telemetry_sdk.span import Span
 
@@ -33,20 +33,21 @@ except ImportError:  # pragma: no cover
     __version__ = "unknown"  # pragma: no cover
 
 __all__ = (
-    "HTTPError",
-    "SpanClient",
-    "MetricClient",
-    "EventClient",
-    "LogClient",
-    "Span",
-    "GaugeMetric",
     "CountMetric",
-    "SummaryMetric",
     "Event",
-    "Log",
-    "NewRelicLogFormatter",
-    "MetricBatch",
-    "SpanBatch",
     "EventBatch",
+    "EventClient",
+    "GaugeMetric",
+    "HTTPError",
     "Harvester",
+    "Log",
+    "LogClient",
+    "Metric",
+    "MetricBatch",
+    "MetricClient",
+    "NewRelicLogFormatter",
+    "Span",
+    "SpanBatch",
+    "SpanClient",
+    "SummaryMetric",
 )

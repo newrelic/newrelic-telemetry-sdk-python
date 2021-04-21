@@ -78,6 +78,44 @@ class Metric(dict):
         """Metric Tags"""
         return self.get("attributes")
 
+    @staticmethod
+    def common(tags=None, end_time_ms=DEFAULT, interval_ms=None):
+        """Generate a common block for a Metric batch
+
+        :param tags: (optional) A set of tags that can be used to filter this
+            metric in the New Relic UI.
+        :type tags: dict
+        :param interval_ms: The interval of time in milliseconds over which the
+            metric was recorded.
+        :type interval_ms: int
+        :param end_time_ms: (optional) A unix timestamp in milliseconds representing the
+            end time of the metric.
+        :type end_time_ms: int
+
+        :rtype: dict
+
+        >>> import newrelic_telemetry_sdk
+        >>> newrelic_telemetry_sdk.Metric.common(tags={"foo": "bar"})
+        {'attributes': {'foo': 'bar'}}
+        >>> newrelic_telemetry_sdk.Metric.common(end_time_ms=1000.0)
+        {'timestamp': 1000}
+        >>> newrelic_telemetry_sdk.Metric.common(interval_ms=60000.0)
+        {'interval.ms': 60000}
+        """
+        common = {}
+        if interval_ms is not None:
+            interval_ms = common["interval.ms"] = int(interval_ms)
+        else:
+            interval_ms = 0
+
+        if end_time_ms is not None and end_time_ms is not DEFAULT:
+            common["timestamp"] = int(end_time_ms) - interval_ms
+
+        if tags:
+            common["attributes"] = dict(tags)
+
+        return common
+
 
 class GaugeMetric(Metric):
     """Basic Metric type

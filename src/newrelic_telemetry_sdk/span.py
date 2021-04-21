@@ -104,7 +104,7 @@ class Span(dict):
             in the New Relic UI.
         :type tags: dict
         :param start_time_ms: (optional) A unix timestamp in milliseconds
-            representing the start time of the span. Defaults to time.time() * 1000
+            representing the start time of the span.
         :type start_time_ms: int
 
         :rtype: dict
