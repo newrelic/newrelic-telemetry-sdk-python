@@ -204,17 +204,18 @@ class Client(object):
 
         return self._compress_payload(payload)
 
-    def send(self, item):
+    def send(self, item, timeout=None):
         """Send a single item
 
         :param item: The object to send
         :type item: dict
-
+        :param timeout: (optional)  a timeout in seconds for sending the request
+        :type timeout: int
         :rtype: HTTPResponse
         """
-        return self.send_batch((item,))
+        return self.send_batch((item,), timeout=timeout)
 
-    def send_batch(self, items, common=None):
+    def send_batch(self, items, common=None, timeout=None):
         """Send a batch of items
 
         :param items: An iterable of items to send to New Relic.
@@ -222,7 +223,8 @@ class Client(object):
         :param common: (optional) A map of attributes that will be set on each
             item.
         :type common: dict
-
+        :param timeout: (optional)  a timeout in seconds for sending the request
+        :type timeout: int
         :rtype: HTTPResponse
         """
         # Specifying the headers argument overrides any base headers existing
@@ -233,7 +235,7 @@ class Client(object):
         headers["x-request-id"] = str(uuid.uuid4())
 
         payload = self._create_payload(items, common)
-        return self._pool.urlopen("POST", self.PATH, body=payload, headers=headers)
+        return self._pool.urlopen("POST", self.PATH, body=payload, headers=headers, timeout=timeout)
 
 
 class SpanClient(Client):
