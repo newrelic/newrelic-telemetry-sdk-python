@@ -11,7 +11,7 @@ New Relic Telemetry SDK
 .. |ci| image:: https://github.com/newrelic/newrelic-telemetry-sdk-python/workflows/Tests/badge.svg
     :target: https://github.com/newrelic/newrelic-telemetry-sdk-python/actions?query=workflow%3ATests
 
-.. |coverage| image:: https://img.shields.io/codecov/c/github/newrelic/newrelic-telemetry-sdk-python/master
+.. |coverage| image:: https://img.shields.io/codecov/c/github/newrelic/newrelic-telemetry-sdk-python/main
     :target: https://codecov.io/gh/newrelic/newrelic-telemetry-sdk-python
 
 .. |docs| image:: https://img.shields.io/badge/docs-available-brightgreen.svg
