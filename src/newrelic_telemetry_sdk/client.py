@@ -326,7 +326,7 @@ class EventClient(Client):
 
         return self._compress_payload(payload)
 
-    def send_batch(self, items):
+    def send_batch(self, items, timeout=None):
         """Send a batch of items
 
         :param items: An iterable of items to send to New Relic.
@@ -334,7 +334,7 @@ class EventClient(Client):
 
         :rtype: HTTPResponse
         """
-        return super(EventClient, self).send_batch(items, None)
+        return super(EventClient, self).send_batch(items, None, timeout=timeout)
 
 
 class LogClient(Client):
