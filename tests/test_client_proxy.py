@@ -78,14 +78,12 @@ def force_response(fn):
     def wrapper(*args, **kwargs):
         # Make the actual call to urlopen so urllib3 will attempt a connect.
         # Since the proxy does not actually open a socket to the remote host we
-        # expect cPython to raise a ProxyError and PyPy will raise an SSLError.
-        # For testing these errors can be ignored, we just care that the
+        # expect cPython to raise a ProxyError and PyPy will raise an OSError or
+        # SSLError. For testing these errors can be ignored, we just care that the
         # connect occured with the proper request line.
         try:
             fn(*args, **kwargs)
-        except exceptions.ProxyError:
-            pass
-        except exceptions.SSLError:
+        except (exceptions.ProxyError, exceptions.SSLError, OSError):
             pass
 
         response = HTTPResponse(status=202)
