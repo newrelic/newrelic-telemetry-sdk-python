@@ -333,6 +333,8 @@ class EventClient(Client):
 
         :param items: An iterable of items to send to New Relic.
         :type items: list or tuple
+        :param timeout: (optional)  a timeout in seconds for sending the request
+        :type timeout: int
 
         :rtype: HTTPResponse
         """
