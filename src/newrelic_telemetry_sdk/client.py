@@ -235,7 +235,9 @@ class Client(object):
         headers["x-request-id"] = str(uuid.uuid4())
 
         payload = self._create_payload(items, common)
-        return self._pool.urlopen("POST", self.PATH, body=payload, headers=headers, timeout=timeout)
+        return self._pool.urlopen(
+            "POST", self.PATH, body=payload, headers=headers, timeout=timeout
+        )
 
 
 class SpanClient(Client):
