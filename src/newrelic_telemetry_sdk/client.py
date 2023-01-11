@@ -90,6 +90,8 @@ class Client(object):
     :param port: (optional) Override the port for the client.
         Default: 443
     :type port: int
+    :param proxy: (optional) Specify https proxy.
+    :type proxy: str
 
     Usage::
 
@@ -108,7 +110,7 @@ class Client(object):
         keep_alive=True, accept_encoding=True, user_agent=USER_AGENT
     )
 
-    def __init__(self, insert_key, host=None, port=443):
+    def __init__(self, insert_key, host=None, port=443, proxy=None):
         host = host or self.HOST
         headers = self.HEADERS.copy()
         headers.update(
@@ -124,10 +126,11 @@ class Client(object):
 
         # Check if https traffic should be proxied and pass the proxy
         # information to the connectionpool
-
-        proxies = getproxies()
-        proxy = proxies.get("https", None)
-        proxy_headers = None
+        if not proxy:
+            proxies = getproxies()
+            proxy = proxies.get("https", None)
+            proxy_headers = None
+        # We keep this conditional because `proxies.get()` can return None.
         if proxy:
             proxy = parse_url(proxy)
             _logger.info(
