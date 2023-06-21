@@ -94,7 +94,7 @@ class Client(object):
     Usage::
 
         >>> import os
-        >>> insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
+        >>> insert_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
         >>> client = Client(insert_key, host="metric-api.newrelic.com")
         >>> response = client.send({})
         >>> client.close()
@@ -252,7 +252,7 @@ class SpanClient(Client):
     Usage::
 
         >>> import os
-        >>> insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
+        >>> insert_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
         >>> span_client = SpanClient(insert_key)
         >>> response = span_client.send({})
         >>> span_client.close()
@@ -280,7 +280,7 @@ class MetricClient(Client):
     Usage::
 
         >>> import os
-        >>> insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
+        >>> insert_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
         >>> metric_client = MetricClient(insert_key)
         >>> response = metric_client.send({})
         >>> metric_client.close()
@@ -308,7 +308,7 @@ class EventClient(Client):
     Usage::
 
         >>> import os
-        >>> insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
+        >>> insert_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
         >>> event_client = EventClient(insert_key)
         >>> response = event_client.send({})
         >>> event_client.close()
@@ -351,7 +351,7 @@ class LogClient(Client):
     Usage::
 
         >>> import os
-        >>> insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
+        >>> insert_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
         >>> log_client = LogClient(insert_key)
         >>> response = log_client.send({})
         >>> log_client.close()

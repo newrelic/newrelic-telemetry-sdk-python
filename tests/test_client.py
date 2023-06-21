@@ -121,7 +121,7 @@ def test_response_raise_for_status_ok():
 @pytest.fixture
 def span_client(request, monkeypatch):
     host = os.environ.get("NEW_RELIC_HOST", "")
-    insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
+    insert_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
 
     if host.startswith("staging"):
         host = "staging-trace-api.newrelic.com"
@@ -147,7 +147,7 @@ def span_client(request, monkeypatch):
 @pytest.fixture
 def metric_client(request, monkeypatch):
     host = os.environ.get("NEW_RELIC_HOST", "")
-    insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
+    insert_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
 
     if host.startswith("staging"):
         host = "staging-metric-api.newrelic.com"
@@ -173,7 +173,7 @@ def metric_client(request, monkeypatch):
 @pytest.fixture
 def log_client(request, monkeypatch):
     host = os.environ.get("NEW_RELIC_HOST", "")
-    insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
+    insert_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
 
     if host.startswith("staging"):
         host = "staging-log-api.newrelic.com"
@@ -199,7 +199,7 @@ def log_client(request, monkeypatch):
 @pytest.fixture
 def event_client(request, monkeypatch):
     host = os.environ.get("NEW_RELIC_HOST", "")
-    insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
+    insert_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
 
     if host.startswith("staging"):
         host = "staging-insights-collector.newrelic.com"

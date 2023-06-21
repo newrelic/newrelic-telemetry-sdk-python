@@ -55,7 +55,7 @@ Example
 ^^^^^^^
 The example code assumes you've set the following environment variables:
 
-* ``NEW_RELIC_INSERT_KEY``
+* ``NEW_RELIC_LICENSE_KEY``
 
 .. code-block:: python
 
@@ -63,7 +63,7 @@ The example code assumes you've set the following environment variables:
     import os
     from newrelic_telemetry_sdk import GaugeMetric, MetricBatch, MetricClient, Harvester
 
-    metric_client = MetricClient(os.environ['NEW_RELIC_INSERT_KEY'])
+    metric_client = MetricClient(os.environ['NEW_RELIC_LICENSE_KEY'])
     metric_batch = MetricBatch()
     metric_harvester = Harvester(metric_client, metric_batch)
 

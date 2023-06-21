@@ -47,7 +47,7 @@ class Harvester(threading.Thread):
     Example::
 
         >>> import os
-        >>> insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
+        >>> insert_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
         >>> from newrelic_telemetry_sdk import MetricBatch, MetricClient
         >>> metric_client = MetricClient(insert_key)
         >>> metric_batch = MetricBatch()
