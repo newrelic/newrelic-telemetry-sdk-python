@@ -83,8 +83,8 @@ class Client(object):
     This class is used to send data to the New Relic APIs over HTTP. This class
     will automatically handle retries as needed.
 
-    :param insert_key: Insights insert key
-    :type insert_key: str
+    :param license_key: New Relic license key
+    :type license_key: str
     :param host: (optional) Override the host for the client.
     :type host: str
     :param port: (optional) Override the port for the client.
@@ -94,8 +94,8 @@ class Client(object):
     Usage::
 
         >>> import os
-        >>> insert_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
-        >>> client = Client(insert_key, host="metric-api.newrelic.com")
+        >>> license_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
+        >>> client = Client(license_key, host="metric-api.newrelic.com")
         >>> response = client.send({})
         >>> client.close()
     """
@@ -108,12 +108,12 @@ class Client(object):
         keep_alive=True, accept_encoding=True, user_agent=USER_AGENT
     )
 
-    def __init__(self, insert_key, host=None, port=443):
+    def __init__(self, license_key, host=None, port=443):
         host = host or self.HOST
         headers = self.HEADERS.copy()
         headers.update(
             {
-                "Api-Key": insert_key,
+                "Api-Key": license_key,
                 "Content-Encoding": "gzip",
                 "Content-Type": "application/json",
             }
@@ -245,8 +245,8 @@ class SpanClient(Client):
 
     This class is used to send spans to the New Relic Span API over HTTP.
 
-    :param insert_key: Insights insert key
-    :type insert_key: str
+    :param license_key: New Relic license key
+    :type license_key: str
     :param host: (optional) Override the host for the span API endpoint.
     :type host: str
     :param port: (optional) Override the port for the client.
@@ -256,8 +256,8 @@ class SpanClient(Client):
     Usage::
 
         >>> import os
-        >>> insert_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
-        >>> span_client = SpanClient(insert_key)
+        >>> license_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
+        >>> span_client = SpanClient(license_key)
         >>> response = span_client.send({})
         >>> span_client.close()
     """
@@ -272,8 +272,8 @@ class MetricClient(Client):
 
     This class is used to send metrics to the New Relic Metric API over HTTP.
 
-    :param insert_key: Insights insert key
-    :type insert_key: str
+    :param license_key: New Relic license key
+    :type license_key: str
     :param host: (optional) Override the host for the metric API
         endpoint.
     :type host: str
@@ -284,8 +284,8 @@ class MetricClient(Client):
     Usage::
 
         >>> import os
-        >>> insert_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
-        >>> metric_client = MetricClient(insert_key)
+        >>> license_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
+        >>> metric_client = MetricClient(license_key)
         >>> response = metric_client.send({})
         >>> metric_client.close()
     """
@@ -300,8 +300,8 @@ class EventClient(Client):
 
     This class is used to send events to the New Relic Event API over HTTP.
 
-    :param insert_key: Insights insert key
-    :type insert_key: str
+    :param license_key: New Relic license key
+    :type license_key: str
     :param host: (optional) Override the host for the event API
         endpoint.
     :type host: str
@@ -312,8 +312,8 @@ class EventClient(Client):
     Usage::
 
         >>> import os
-        >>> insert_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
-        >>> event_client = EventClient(insert_key)
+        >>> license_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
+        >>> event_client = EventClient(license_key)
         >>> response = event_client.send({})
         >>> event_client.close()
     """
@@ -345,8 +345,8 @@ class LogClient(Client):
     """HTTP Client for interacting with the New Relic Log API
 
     This class is used to send log messages to the New Relic Log API over HTTP.
-    :param insert_key: Insights insert key
-    :type insert_key: str
+    :param license_key: New Relic license key
+    :type license_key: str
     :param host: (optional) Override the host for the metric API
         endpoint.
     :type host: str
@@ -357,8 +357,8 @@ class LogClient(Client):
     Usage::
 
         >>> import os
-        >>> insert_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
-        >>> log_client = LogClient(insert_key)
+        >>> license_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
+        >>> log_client = LogClient(license_key)
         >>> response = log_client.send({})
         >>> log_client.close()
     """
