@@ -161,7 +161,9 @@ def metric_client(request, monkeypatch):
     # Allow client_args to be specified by a marker
     client_args = request.node.get_closest_marker("client_args")
     if client_args:
-        client = MetricClient(license_key, host, *client_args.args, **client_args.kwargs)
+        client = MetricClient(
+            license_key, host, *client_args.args, **client_args.kwargs
+        )
     else:
         client = MetricClient(license_key, host)
 
