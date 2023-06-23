@@ -121,12 +121,12 @@ def test_response_raise_for_status_ok():
 @pytest.fixture
 def span_client(request, monkeypatch):
     host = os.environ.get("NEW_RELIC_HOST", "")
-    insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
+    license_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
 
     if host.startswith("staging"):
         host = "staging-trace-api.newrelic.com"
 
-    if insert_key:
+    if license_key:
         urlopen = getattr(HTTPConnectionPool, "urlopen")
         monkeypatch.setattr(HTTPConnectionPool, "urlopen", capture_request(urlopen))
     else:
@@ -135,9 +135,9 @@ def span_client(request, monkeypatch):
     # Allow client_args to be specified by a marker
     client_args = request.node.get_closest_marker("client_args")
     if client_args:
-        client = SpanClient(insert_key, host, *client_args.args, **client_args.kwargs)
+        client = SpanClient(license_key, host, *client_args.args, **client_args.kwargs)
     else:
-        client = SpanClient(insert_key, host)
+        client = SpanClient(license_key, host)
 
     assert client._pool.port == 443
     yield client
@@ -147,12 +147,12 @@ def span_client(request, monkeypatch):
 @pytest.fixture
 def metric_client(request, monkeypatch):
     host = os.environ.get("NEW_RELIC_HOST", "")
-    insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
+    license_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
 
     if host.startswith("staging"):
         host = "staging-metric-api.newrelic.com"
 
-    if insert_key:
+    if license_key:
         urlopen = getattr(HTTPConnectionPool, "urlopen")
         monkeypatch.setattr(HTTPConnectionPool, "urlopen", capture_request(urlopen))
     else:
@@ -161,9 +161,11 @@ def metric_client(request, monkeypatch):
     # Allow client_args to be specified by a marker
     client_args = request.node.get_closest_marker("client_args")
     if client_args:
-        client = MetricClient(insert_key, host, *client_args.args, **client_args.kwargs)
+        client = MetricClient(
+            license_key, host, *client_args.args, **client_args.kwargs
+        )
     else:
-        client = MetricClient(insert_key, host)
+        client = MetricClient(license_key, host)
 
     assert client._pool.port == 443
     yield client
@@ -173,12 +175,12 @@ def metric_client(request, monkeypatch):
 @pytest.fixture
 def log_client(request, monkeypatch):
     host = os.environ.get("NEW_RELIC_HOST", "")
-    insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
+    license_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
 
     if host.startswith("staging"):
         host = "staging-log-api.newrelic.com"
 
-    if insert_key:
+    if license_key:
         urlopen = getattr(HTTPConnectionPool, "urlopen")
         monkeypatch.setattr(HTTPConnectionPool, "urlopen", capture_request(urlopen))
     else:
@@ -187,9 +189,9 @@ def log_client(request, monkeypatch):
     # Allow client_args to be specified by a marker
     client_args = request.node.get_closest_marker("client_args")
     if client_args:
-        client = LogClient(insert_key, host, *client_args.args, **client_args.kwargs)
+        client = LogClient(license_key, host, *client_args.args, **client_args.kwargs)
     else:
-        client = LogClient(insert_key, host)
+        client = LogClient(license_key, host)
 
     assert client._pool.port == 443
     yield client
@@ -199,12 +201,12 @@ def log_client(request, monkeypatch):
 @pytest.fixture
 def event_client(request, monkeypatch):
     host = os.environ.get("NEW_RELIC_HOST", "")
-    insert_key = os.environ.get("NEW_RELIC_INSERT_KEY", "")
+    license_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
 
     if host.startswith("staging"):
         host = "staging-insights-collector.newrelic.com"
 
-    if insert_key:
+    if license_key:
         urlopen = getattr(HTTPConnectionPool, "urlopen")
         monkeypatch.setattr(HTTPConnectionPool, "urlopen", capture_request(urlopen))
     else:
@@ -213,9 +215,9 @@ def event_client(request, monkeypatch):
     # Allow client_args to be specified by a marker
     client_args = request.node.get_closest_marker("client_args")
     if client_args:
-        client = EventClient(insert_key, host, *client_args.args, **client_args.kwargs)
+        client = EventClient(license_key, host, *client_args.args, **client_args.kwargs)
     else:
-        client = EventClient(insert_key, host)
+        client = EventClient(license_key, host)
 
     assert client._pool.port == 443
     yield client
