@@ -34,17 +34,30 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    
+
+    # Python version used by tox
     - uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python.version }}
         architecture: x64
-    
+
     - name: Install Dependencies
       run: |
         pip install -U pip
-        pip install -U wheel setuptools tox coverage
-    
+        pip install -U wheel setuptools
+
+    # Python version for tools
+    - uses: actions/setup-python@v4
+      with:
+        python-version: "3.12"
+        architecture: x64
+
+    - name: Install Tools
+      run: |
+        pip install -U pipx
+        pipx install tox --python=3.12
+        pipx install coverage --python=3.12
+
     - name: Test
       run: tox -vv -p auto -f ${{ matrix.python.tox-prefix }} -- --cov-report=xml
       env:
