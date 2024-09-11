@@ -11,5 +11,5 @@ setuptools.setup(
 version = "{version!s}"
 """,
     },
-    install_requires=("urllib3>=1.7,<2",),
+    install_requires=("urllib3>=1.26,<3",),
 )

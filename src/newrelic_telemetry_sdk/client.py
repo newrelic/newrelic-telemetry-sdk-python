@@ -161,7 +161,6 @@ class Client(object):
             port=port,
             retries=retries,
             headers=headers,
-            strict=True,
             _proxy=proxy,
             _proxy_headers=proxy_headers,
         )
