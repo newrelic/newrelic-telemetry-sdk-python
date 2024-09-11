@@ -45,15 +45,25 @@ jobs:
     - name: Install Dependencies
       run: |
         pip install -U pip
-        pip install -U wheel setuptools tox
+        pip install -U wheel setuptools tox coverage
     
     - name: Test
       run: tox -vv -p auto -f ${{ matrix.python.tox-prefix }} -- --cov-report=xml
       env:
         TOX_DISCOVER: "patch-for-windows-pypy3"
-    
-    - name: Upload coverage to Codecov
+        TOX_PARALLEL_NO_SPINNER: 1
+
+    - name: Combine Coverage
+      run: |
+        find . -name ".coverage.*" -exec mv {} ./ \;
+        coverage combine
+        coverage xml
+
+    - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v1
+      with:
+        files: coverage.xml
+        fail_ci_if_error: true
     
     - name: Lint
       run: tox -vv
