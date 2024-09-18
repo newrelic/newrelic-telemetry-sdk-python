@@ -20,7 +20,7 @@ import uuid
 import zlib
 
 import pytest
-from urllib3 import HTTPConnectionPool
+from urllib3 import HTTPConnectionPool, HTTPResponse as URLLib3HTTPResponse
 
 from newrelic_telemetry_sdk.client import (
     EventClient,
@@ -89,13 +89,15 @@ def capture_request(fn):
 
 
 def disable_sending(*args, **kwargs):
-    response = HTTPResponse(status=202)
-    response.request = Request(*args, **kwargs)
+    urllib3_response = URLLib3HTTPResponse(status=202)
+    urllib3_response.request = Request(*args, **kwargs)
+    response = HTTPResponse(urllib3_response)
     return response
 
 
 def test_response_json():
-    response = HTTPResponse(status=200, body=b"{}")
+    urllib3_response = URLLib3HTTPResponse(status=200, body=b"{}")
+    response = HTTPResponse(urllib3_response)
     assert response.json() == {}
 
 
@@ -103,19 +105,28 @@ def test_response_json():
     "status,expected", ((199, False), (200, True), (299, True), (300, False))
 )
 def test_response_ok(status, expected):
-    response = HTTPResponse(status=status)
+    urllib3_response = URLLib3HTTPResponse(status=status)
+    response = HTTPResponse(urllib3_response)
     assert response.ok is expected
 
 
 def test_response_raise_for_status_error():
-    response = HTTPResponse(status=500)
+    urllib3_response = URLLib3HTTPResponse(status=500)
+    response = HTTPResponse(urllib3_response)
     with pytest.raises(HTTPError):
         response.raise_for_status()
 
 
 def test_response_raise_for_status_ok():
-    response = HTTPResponse(status=200)
+    urllib3_response = URLLib3HTTPResponse(status=200)
+    response = HTTPResponse(urllib3_response)
     response.raise_for_status()
+
+
+def test_wrapped_response_attributes_available():
+    urllib3_response = URLLib3HTTPResponse(status=200)
+    response = HTTPResponse(urllib3_response)
+    assert response.status == 200
 
 
 @pytest.fixture
