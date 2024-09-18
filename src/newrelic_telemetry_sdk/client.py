@@ -45,13 +45,13 @@ class HTTPError(ValueError):
 class HTTPResponse(urllib3.HTTPResponse):
     """A wrapper for urllib3.HTTPResponse, providing additional helper methods"""
 
-    def  __init__(self, urllib3_response):
+    def __init__(self, response):
         """Initialize the wrapper with an urllib3.HTTPResponse object"""
-        self._urllib3_response = urllib3_response
+        self._response = response
 
     def __getattr__(self, name):
         """Expose attributes and methods of the original urllib3.HTTPResponse object"""
-        return getattr(self._urllib3_response, name)
+        return getattr(self._response, name)
 
     def json(self):
         """Returns the json-encoded content of a response.
@@ -74,8 +74,8 @@ class HTTPResponse(urllib3.HTTPResponse):
             raise HTTPError(self.status, self)
 
 
-class HTTPSConnectionPool(urllib3.HTTPSConnectionPool):
-    """Empty wrapper, only kept for backwards compatibility"""
+# No longer a subclass, kept for backwards compatibility
+HTTPSConnectionPool = urllib3.HTTPSConnectionPool
 
 
 class Client(object):
@@ -239,7 +239,9 @@ class Client(object):
             "POST", self.PATH, body=payload, headers=headers, timeout=timeout
         )
         if not isinstance(urllib3_response, urllib3.HTTPResponse):
-            raise ValueError("Expected urllib3.HTTPResponse, got {}".format(type(urllib3_response)))
+            raise ValueError(
+                "Expected urllib3.HTTPResponse, got {}".format(type(urllib3_response))
+            )
 
         return HTTPResponse(urllib3_response)
 
