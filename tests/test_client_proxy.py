@@ -83,7 +83,12 @@ def force_response(fn):
         # we just care that the connect occured with the proper request line.
         try:
             fn(*args, **kwargs)
-        except (exceptions.ProxyError, exceptions.ProtocolError, exceptions.SSLError, OSError):
+        except (
+            exceptions.ProxyError,
+            exceptions.ProtocolError,
+            exceptions.SSLError,
+            OSError,
+        ):
             pass
 
         response = HTTPResponse(status=202)
