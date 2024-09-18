@@ -2,7 +2,7 @@ import socket
 import threading
 import functools
 import logging
-from urllib3 import HTTPConnectionPool, exceptions
+from urllib3 import HTTPConnectionPool, exceptions, HTTPResponse
 
 try:
     from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -14,7 +14,6 @@ from newrelic_telemetry_sdk.client import (
     SpanClient,
     MetricClient,
     EventClient,
-    HTTPResponse,
 )
 import pytest
 
@@ -78,12 +77,17 @@ def force_response(fn):
     def wrapper(*args, **kwargs):
         # Make the actual call to urlopen so urllib3 will attempt a connect.
         # Since the proxy does not actually open a socket to the remote host we
-        # expect cPython to raise a ProxyError and PyPy will raise an OSError or
-        # SSLError. For testing these errors can be ignored, we just care that the
-        # connect occured with the proper request line.
+        # expect cPython to raise a ProxyError or ProtocolError and PyPy will
+        # raise an OSError or SSLError. For testing these errors can be ignored,
+        # we just care that the connect occured with the proper request line.
         try:
             fn(*args, **kwargs)
-        except (exceptions.ProxyError, exceptions.SSLError, OSError):
+        except (
+            exceptions.ProxyError,
+            exceptions.ProtocolError,
+            exceptions.SSLError,
+            OSError,
+        ):
             pass
 
         response = HTTPResponse(status=202)
