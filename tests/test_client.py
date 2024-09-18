@@ -123,6 +123,12 @@ def test_response_raise_for_status_ok():
     response.raise_for_status()
 
 
+def test_wrapped_response_attributes_available():
+    urllib3_response = URLLib3HTTPResponse(status=200)
+    response = HTTPResponse(urllib3_response)
+    assert response.status == 200
+
+
 @pytest.fixture
 def span_client(request, monkeypatch):
     host = os.environ.get("NEW_RELIC_HOST", "")
