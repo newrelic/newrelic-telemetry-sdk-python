@@ -43,12 +43,15 @@ class HTTPError(ValueError):
 
 
 class HTTPResponse(urllib3.HTTPResponse):
-    """Response object with helper methods
+    """A wrapper for urllib3.HTTPResponse, providing additional helper methods"""
 
-    :ivar headers: The HTTP headers
-    :ivar status: The HTTP status code
-    :ivar data: The raw byte encoded response data
-    """
+    def  __init__(self, urllib3_response):
+        """Initialize the wrapper with an urllib3.HTTPResponse object"""
+        self._urllib3_response = urllib3_response
+
+    def __getattr__(self, name):
+        """Expose attributes and methods of the original urllib3.HTTPResponse object"""
+        return getattr(self._urllib3_response, name)
 
     def json(self):
         """Returns the json-encoded content of a response.
@@ -72,9 +75,7 @@ class HTTPResponse(urllib3.HTTPResponse):
 
 
 class HTTPSConnectionPool(urllib3.HTTPSConnectionPool):
-    """Connection pool providing HTTPResponse objects"""
-
-    ResponseCls = HTTPResponse
+    """Empty wrapper, only kept for backwards compatibility"""
 
 
 class Client(object):
@@ -234,9 +235,13 @@ class Client(object):
         headers["x-request-id"] = str(uuid.uuid4())
 
         payload = self._create_payload(items, common)
-        return self._pool.urlopen(
+        urllib3_response = self._pool.urlopen(
             "POST", self.PATH, body=payload, headers=headers, timeout=timeout
         )
+        if not isinstance(urllib3_response, urllib3.HTTPResponse):
+            raise ValueError("Expected urllib3.HTTPResponse, got {}".format(type(urllib3_response)))
+
+        return HTTPResponse(urllib3_response)
 
 
 class SpanClient(Client):

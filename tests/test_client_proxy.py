@@ -2,7 +2,7 @@ import socket
 import threading
 import functools
 import logging
-from urllib3 import HTTPConnectionPool, exceptions
+from urllib3 import HTTPConnectionPool, exceptions, HTTPResponse
 
 try:
     from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -14,7 +14,6 @@ from newrelic_telemetry_sdk.client import (
     SpanClient,
     MetricClient,
     EventClient,
-    HTTPResponse,
 )
 import pytest
 
