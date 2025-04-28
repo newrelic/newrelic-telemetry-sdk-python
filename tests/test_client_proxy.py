@@ -1,3 +1,4 @@
+import contextlib
 import functools
 import logging
 import socket
@@ -82,10 +83,8 @@ def force_response(fn):
         # expect cPython to raise a ProxyError or ProtocolError and PyPy will
         # raise an OSError or SSLError. For testing these errors can be ignored,
         # we just care that the connect occured with the proper request line.
-        try:
+        with contextlib.suppress(exceptions.ProxyError, exceptions.ProtocolError, exceptions.SSLError, OSError):
             fn(*args, **kwargs)
-        except (exceptions.ProxyError, exceptions.ProtocolError, exceptions.SSLError, OSError):
-            pass
 
         return HTTPResponse(status=202)
 

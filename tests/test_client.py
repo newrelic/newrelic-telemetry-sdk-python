@@ -276,10 +276,8 @@ def validate_request(expected_url, typ, request, items, common=None):
     assert len(payload) == 1
     payload = payload[0]
 
-    if common:
-        expected_len = 2
-    else:
-        expected_len = 1
+    expected_len = 2 if common else 1
+
     assert len(payload) == expected_len
 
     assert payload[typ] == items
@@ -359,7 +357,7 @@ def test_event_endpoint_batch(event_client):
     ),
 )
 def test_defaults(client_class, host):
-    assert client_class.HOST == host
+    assert client_class.HOST == host  # noqa: SIM300
     assert client_class("test-key")._pool.port == 443
 
 

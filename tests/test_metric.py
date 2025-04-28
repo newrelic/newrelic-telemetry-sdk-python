@@ -101,7 +101,7 @@ def test_metric_none(kwargs, metric_key, attribute_name):
     ),
 )
 def test_metric_accessors(attribute_name, attribute_value):
-    if attribute_name == "interval_ms" and attribute_value is None:
+    if attribute_name == "interval_ms" and attribute_value is None:  # noqa: SIM108
         interval = None
     else:
         interval = 1000
