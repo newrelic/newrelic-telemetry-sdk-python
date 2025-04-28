@@ -20,8 +20,9 @@ PROXY_ENV_IGNORED_MSG = "Ignoring environment proxy settings as a proxy was foun
 
 
 class HttpProxy(threading.Thread):
-    def __init__(proxy):
+    def __init__(self):
         super().__init__()
+        proxy = self  # alias for self to avoid conflict in the nested class
         proxy.port = proxy.get_open_port()
         proxy.host = "127.0.0.1"
         proxy.connect_host = None
@@ -33,7 +34,7 @@ class HttpProxy(threading.Thread):
             server_version = "PROXINATOR/9000"
             protocol_version = "HTTP/1.1"
 
-            def do_CONNECT(self):
+            def do_CONNECT(self):  # noqa: N802
                 host_port = self.requestline.split(" ", 2)[1]
                 proxy.connect_host, proxy.connect_port = host_port.split(":", 1)
                 proxy.headers = dict((k.lower(), v) for k, v in self.headers.items())

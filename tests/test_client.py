@@ -50,15 +50,15 @@ LOG = {"timestamp": int(time.time() * 1000.0), "message": "Hello world"}
 
 
 class Request:
-    def __init__(instance, self, method, url, body=None, headers=None, *args, **kwargs):
+    def __init__(self, wrapped, method, url, body=None, headers=None, *args, **kwargs):
         assert isinstance(headers, dict) or headers is None
-        headers = headers or self.headers
-        instance.method = method
-        instance.url = url
-        instance.body = body
-        instance.headers = headers
-        instance.args = args
-        instance.kwargs = kwargs
+        headers = headers or wrapped.headers
+        self.method = method
+        self.url = url
+        self.body = body
+        self.headers = headers
+        self.args = args
+        self.kwargs = kwargs
 
 
 def capture_request(fn):

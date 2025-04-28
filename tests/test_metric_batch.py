@@ -115,12 +115,12 @@ def test_different_metric(metric_a, metric_b):
 
 @pytest.mark.parametrize("tags", (None, {"foo": "bar"}, CustomMapping()))
 def test_flush(monkeypatch, tags):
-    DELTA = 4.0
+    delta = 4.0
     current_t = [1.0]
 
     def _time():
-        # Move time forward by DELTA on every call
-        current_t[0] *= DELTA
+        # Move time forward by delta on every call
+        current_t[0] *= delta
         return current_t[0]
 
     monkeypatch.setattr(time, "time", _time, raising=True)

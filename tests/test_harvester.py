@@ -188,13 +188,13 @@ def test_harvester_send_failed(caplog, harvester):
 
 
 def test_harvest_timing(harvester, monkeypatch):
-    DELTA = 2
+    delta = 2
     current_t = [0]
     timeout = []
 
     def _time():
-        # Move time forward by DELTA on every call
-        current_t[0] += DELTA
+        # Move time forward by delta on every call
+        current_t[0] += delta
         return current_t[0]
 
     def _wait(t):
@@ -211,7 +211,7 @@ def test_harvest_timing(harvester, monkeypatch):
 
     # Second call should account for the time between harvest intervals
     assert harvester._wait_for_harvest()
-    assert timeout.pop() == (harvester.harvest_interval - DELTA)
+    assert timeout.pop() == (harvester.harvest_interval - delta)
 
 
 def test_defaults(harvester):
