@@ -176,7 +176,7 @@ class SummaryMetric(Metric):
         [('count', 1), ('max', 0.2), ('min', 0.2), ('sum', 0.2)]
     """
 
-    def __init__(self, name, count, sum, min, max, interval_ms, tags=None, end_time_ms=DEFAULT):
+    def __init__(self, name, count, sum, min, max, interval_ms, tags=None, end_time_ms=DEFAULT):  # noqa: A002
         value = {"count": count, "sum": sum, "min": min, "max": max}
         super().__init__(name, value, interval_ms, tags, end_time_ms)
         self["type"] = "summary"

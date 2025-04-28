@@ -16,7 +16,7 @@ import newrelic_telemetry_sdk
 # -- Project information -----------------------------------------------------
 
 project = "newrelic-telemetry-sdk"
-copyright = "2019, New Relic"
+copyright = "2019, New Relic"  # noqa: A001
 author = "New Relic"
 
 # The short X.Y version
