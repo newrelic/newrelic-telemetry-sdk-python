@@ -38,7 +38,7 @@ class HttpProxy(threading.Thread):
             def do_CONNECT(self):  # noqa: N802
                 host_port = self.requestline.split(" ", 2)[1]
                 proxy.connect_host, proxy.connect_port = host_port.split(":", 1)
-                proxy.headers = dict((k.lower(), v) for k, v in self.headers.items())
+                proxy.headers = {k.lower(): v for k, v in self.headers.items()}
 
                 self.send_response(200)
                 self.end_headers()
