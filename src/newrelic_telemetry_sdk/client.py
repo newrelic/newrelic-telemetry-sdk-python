@@ -117,7 +117,7 @@ class Client(object):
         keep_alive=True, accept_encoding=True, user_agent=USER_AGENT
     )
 
-    def __init__(self, license_key, host=None, port=443):
+    def __init__(self, license_key, host=None, port=443, **connection_pool_kwargs):
         host = host or self.HOST
         headers = self.HEADERS.copy()
         headers.update(
@@ -165,14 +165,25 @@ class Client(object):
                 # information may be leaked (control characters, etc.)
                 proxy_headers = urllib3.make_headers(proxy_basic_auth=proxy.auth)
 
-        self._pool = self.POOL_CLS(
-            host=host,
-            port=port,
-            retries=retries,
-            headers=headers,
-            _proxy=proxy,
-            _proxy_headers=proxy_headers,
-        )
+        # Merge custom config into default config
+        merged_connection_pool_kwargs = {
+            "host": host,
+            "port": port,
+            "retries": retries,
+            "_proxy": proxy,
+            "_proxy_headers": proxy_headers,
+        }
+        merged_connection_pool_kwargs.update(connection_pool_kwargs)
+
+        # Merge custom headers with default headers
+        if "headers" in connection_pool_kwargs:
+            # If the user has specified headers, we need to copy the existing
+            # headers so we don't lose any of the default ones.
+            headers.update(connection_pool_kwargs["headers"])
+
+        merged_connection_pool_kwargs["headers"] = headers
+
+        self._pool = self.POOL_CLS(**merged_connection_pool_kwargs)
         self._headers = self._pool.headers
 
     def add_version_info(self, product, product_version):
