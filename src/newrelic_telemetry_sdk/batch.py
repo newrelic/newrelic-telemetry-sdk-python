@@ -14,7 +14,7 @@
 import threading
 
 
-class Batch(object):
+class Batch:
     """Implements aggregation, providing a record / flush interface.
 
     :param tags: (optional) A dictionary of tags to attach to all flushes.
@@ -79,7 +79,7 @@ class EventBatch(Batch):
     """Aggregates events, providing a record / flush interface."""
 
     def __init__(self):
-        super(EventBatch, self).__init__()
+        super().__init__()
 
     def flush(self):
         """Flush all items from the batch
@@ -91,5 +91,5 @@ class EventBatch(Batch):
         :returns: A tuple of (items,)
         :rtype: tuple
         """
-        items, _ = super(EventBatch, self).flush()
+        items, _ = super().flush()
         return (items,)

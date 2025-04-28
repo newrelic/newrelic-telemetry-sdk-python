@@ -33,7 +33,7 @@ try:
 except ImportError:  # pragma: no cover
     __version__ = "unknown"
 
-USER_AGENT = "NewRelic-Python-TelemetrySDK/{}".format(__version__)
+USER_AGENT = f"NewRelic-Python-TelemetrySDK/{__version__}"
 
 __all__ = (
     "EventClient",
@@ -86,7 +86,7 @@ class HTTPResponse(urllib3.HTTPResponse):
 HTTPSConnectionPool = urllib3.HTTPSConnectionPool
 
 
-class Client(object):
+class Client:
     """HTTP Client for interacting with New Relic APIs
 
     This class is used to send data to the New Relic APIs over HTTP. This class
@@ -203,7 +203,7 @@ class Client(object):
         :param product_version: The version string of the product in use
         :type product_version: str
         """
-        product_ua_header = " {}/{}".format(product, product_version)
+        product_ua_header = f" {product}/{product_version}"
         self._headers["user-agent"] += product_ua_header
 
     def close(self):
@@ -261,7 +261,9 @@ class Client(object):
         payload = self._create_payload(items, common)
         urllib3_response = self._pool.urlopen("POST", self.PATH, body=payload, headers=headers, timeout=timeout)
         if not isinstance(urllib3_response, urllib3.HTTPResponse):
-            raise ValueError("Expected urllib3.HTTPResponse, got {}".format(type(urllib3_response)))
+            raise ValueError(
+                f"Expected urllib3.HTTPResponse, got {type(urllib3_response)}"
+            )
 
         return HTTPResponse(urllib3_response)
 
@@ -359,7 +361,7 @@ class EventClient(Client):
 
         :rtype: HTTPResponse
         """
-        return super(EventClient, self).send_batch(items, None, timeout=timeout)
+        return super().send_batch(items, None, timeout=timeout)
 
 
 class LogClient(Client):

@@ -126,7 +126,7 @@ class NewRelicLogFormatter(logging.Formatter):
     """
 
     def __init__(self, *args, **kwargs):
-        super(NewRelicLogFormatter, self).__init__()
+        super().__init__()
 
     def format(self, record):
         """Format the specified record as text

@@ -104,7 +104,7 @@ class GaugeMetric(Metric):
     """
 
     def __init__(self, name, value, tags=None, end_time_ms=DEFAULT):
-        super(GaugeMetric, self).__init__(name, value, None, tags, end_time_ms)
+        super().__init__(name, value, None, tags, end_time_ms)
 
 
 class CountMetric(Metric):
@@ -136,7 +136,7 @@ class CountMetric(Metric):
     """
 
     def __init__(self, name, value, interval_ms, tags=None, end_time_ms=DEFAULT):
-        super(CountMetric, self).__init__(name, value, interval_ms, tags, end_time_ms)
+        super().__init__(name, value, interval_ms, tags, end_time_ms)
         self["type"] = "count"
 
 
@@ -178,5 +178,5 @@ class SummaryMetric(Metric):
 
     def __init__(self, name, count, sum, min, max, interval_ms, tags=None, end_time_ms=DEFAULT):
         value = {"count": count, "sum": sum, "min": min, "max": max}
-        super(SummaryMetric, self).__init__(name, value, interval_ms, tags, end_time_ms)
+        super().__init__(name, value, interval_ms, tags, end_time_ms)
         self["type"] = "summary"

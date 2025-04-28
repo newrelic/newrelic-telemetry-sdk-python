@@ -59,7 +59,7 @@ class Harvester(threading.Thread):
     EVENT_CLS = threading.Event
 
     def __init__(self, client, batch, harvest_interval=5):
-        super(Harvester, self).__init__()
+        super().__init__()
         self.daemon = True
         self.client = client
         self.batch = batch

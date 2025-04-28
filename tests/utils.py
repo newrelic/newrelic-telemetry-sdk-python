@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-class CustomMapping(object):
+class CustomMapping:
     def __getitem__(self, key):
         if key == "foo":
             return "bar"

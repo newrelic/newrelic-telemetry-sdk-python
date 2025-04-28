@@ -61,8 +61,8 @@ class Span(dict):
         start_time_ms=None,
         duration_ms=None,
     ):
-        self["id"] = guid or ("%016x" % random.getrandbits(64))
-        self["trace.id"] = trace_id or ("%016x" % random.getrandbits(64))
+        self["id"] = guid or (f"{random.getrandbits(64):016x}")
+        self["trace.id"] = trace_id or (f"{random.getrandbits(64):016x}")
         self["timestamp"] = int(start_time_ms or (time.time() * 1000))
 
         attributes = tags and dict(tags) or {}

@@ -66,7 +66,7 @@ LOG = {
 }
 
 
-class Request(object):
+class Request:
     def __init__(instance, self, method, url, body=None, headers=None, *args, **kwargs):
         assert isinstance(headers, dict) or headers is None
         headers = headers or self.headers

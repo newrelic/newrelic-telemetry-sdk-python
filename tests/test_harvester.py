@@ -19,12 +19,12 @@ import pytest
 from newrelic_telemetry_sdk.harvester import Harvester
 
 
-class Response(object):
+class Response:
     status = 202
     ok = True
 
 
-class FakeBatch(object):
+class FakeBatch:
     def __init__(self):
         self.contents = []
 
@@ -37,7 +37,7 @@ class FakeBatch(object):
         return contents, None
 
 
-class FakeClient(object):
+class FakeClient:
     def __init__(self):
         self.closed = False
         self.sent = []
@@ -55,13 +55,13 @@ class FakeClient(object):
 
 class FakeEventBatch(FakeBatch):
     def flush(self):
-        results = super(FakeEventBatch, self).flush()
+        results = super().flush()
         return results[:1]
 
 
 class FakeEventClient(FakeClient):
     def send_batch(self, items):
-        return super(FakeEventClient, self).send_batch(items)
+        return super().send_batch(items)
 
 
 class ExceptionalClient(FakeClient):
