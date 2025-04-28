@@ -56,7 +56,7 @@ class Span(dict):
         self["trace.id"] = trace_id or (f"{random.getrandbits(64):016x}")
         self["timestamp"] = int(start_time_ms or (time.time() * 1000))
 
-        attributes = tags and dict(tags) or {}
+        attributes = dict(tags) if tags else {}
         self["attributes"] = attributes
 
         attributes["name"] = name
