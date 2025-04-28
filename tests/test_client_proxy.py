@@ -112,7 +112,7 @@ def test_http_proxy_connection_from_env(client_class, http_proxy, monkeypatch, c
         client = client_class("test-key", "test-host")
 
     log_record = caplog.records[-1]
-    assert log_record.msg == f"Using proxy host={http_proxy.host!r} port={http_proxy.port!r}"
+    assert log_record.message == f"Using proxy host={http_proxy.host!r} port={http_proxy.port!r}"
     assert str(client._pool.proxy) == proxy_url.lower()
 
     client.send({})
@@ -131,7 +131,7 @@ def test_http_proxy_connection_from_env_with_auth(client_class, http_proxy, monk
     with caplog.at_level(logging.INFO):
         client = client_class("test-key", "test-host")
     log_record = caplog.records[-1]
-    assert log_record.msg == f"Using proxy host={http_proxy.host!r} port={http_proxy.port!r}"
+    assert log_record.message == f"Using proxy host={http_proxy.host!r} port={http_proxy.port!r}"
     assert str(client._pool.proxy) == proxy_url_with_auth.lower()
 
     client.send({})
@@ -215,7 +215,7 @@ def test_http_proxy_connection_conflicting_kwargs_and_env(client_class, http_pro
 
     assert str(client._pool.proxy) == correct_proxy_url.lower()
     log_record = caplog.records[-1]
-    assert log_record.msg == PROXY_ENV_IGNORED_MSG
+    assert log_record.message == PROXY_ENV_IGNORED_MSG
 
     client.send({})
     assert http_proxy.connect_host == "test-host"
@@ -237,5 +237,5 @@ def test_https_proxy_no_connection(monkeypatch, client_class, caplog):
         client = client_class("test-key", "test-host")
 
     log_record = caplog.records[-1]
-    assert log_record.msg == HTTPS_PROXY_UNSUPPORTED_MSG
+    assert log_record.message == HTTPS_PROXY_UNSUPPORTED_MSG
     assert not client._pool.proxy
