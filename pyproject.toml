@@ -98,26 +98,27 @@ select = [
 
 ignore = [
     # Permanently disabled rules
+    "ARG001",  # unused-argument
     "D203",  # incorrect-blank-line-before-class
     "D213",  # multi-line-summary-second-line
-    "ARG001",  # unused-argument
-    "PYI024",  # collections-named-tuple (not currently using type annotations)
+    "E501",  # line-too-long (line length handled by formatter)
     "PLR0913", # too-many-arguments
     "PLR0915",  # too-many-statements
-    "E501",  # line-too-long (line length handled by formatter)
+    "PYI024",  # collections-named-tuple (not currently using type annotations)
+    "TRY003",  # raise-vanilla-args
     # Ruff recommended linter rules to disable when using formatter
-    "W191",  # tab-indentation
+    "COM812",  # missing-trailing-comma
+    "COM819",  # prohibited-trailing-comma
+    "D206",  # docstring-tab-indentation
+    "D300",  # triple-single-quotes
     "E111",  # indentation-with-invalid-multiple
     "E114",  # indentation-with-invalid-multiple-comment
     "E117",  # over-indented
-    "D206",  # docstring-tab-indentation
-    "D300",  # triple-single-quotes
     "Q000",  # bad-quotes-inline-string
     "Q001",  # bad-quotes-multiline-string
     "Q002",  # bad-quotes-docstring
     "Q003",  # avoidable-escaped-quote
-    "COM812",  # missing-trailing-comma
-    "COM819",  # prohibited-trailing-comma
+    "W191",  # tab-indentation
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -126,18 +127,22 @@ ignore = [
     "INP001",  # implicit-namespace-package
 ]
 "tests/*" = [
-    # Disabled rules in tests
+    # Disabled linters in tests
+    "EM",  # flake8-errmsg
     "S",  # flake8-bandit (security checks are not necessary in tests)
-    "F401",  # unused-import
-    "F811",  # redefined-while-unused (pytest fixtures trigger this)
-    "E731",  # lambda-assignment (acceptable in tests)
-    "PLR2004",  # magic-value-comparison (comparing to constant values)
+    "TRY",  # tryceratops
+    # Disabled rules in tests
+    "ARG001",  # unused-function-argument (fixtures trigger this)
+    "ARG002",  # unused-method-argument
     "ASYNC251",  # blocking-sleep-in-async-function (acceptable in tests)
     "B904",  # raise-without-from-inside-except (not necessary in tests)
+    "BLE001",  # blind-except
+    "E731",  # lambda-assignment (acceptable in tests)
+    "F401",  # unused-import
+    "F811",  # redefined-while-unused (pytest fixtures trigger this)
+    "INP001",  # implicit-namespace-package
+    "PLR2004",  # magic-value-comparison (comparing to constant values)
     "PT006",  # pytest-parametrize-names-wrong-type (style choice)
     "PT007",  # pytest-parametrize-values-wrong-type (style choice)
     "PT011",  # pytest-raises-too-broad (we frequently test for generic errors)
-    "INP001",  # implicit-namespace-package
-    "ARG001",  # unused-function-argument (fixtures trigger this)
-    "ARG002",  # unused-method-argument
 ]
