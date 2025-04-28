@@ -96,9 +96,9 @@ class Client(object):
     :type license_key: str
     :param host: (optional) Override the host for the client.
     :type host: str
-    :param port: (optional) Override the port for the client.
-        Default: 443
+    :param port: (optional) Override the port for the client. Default: 443
     :type port: int
+    :param **connection_pool_kwargs: Configuration options for urllib3.HTTPSConnectionPool
 
     Usage::
 
@@ -243,8 +243,7 @@ class Client(object):
 
         :param items: An iterable of items to send to New Relic.
         :type items: list or tuple
-        :param common: (optional) A map of attributes that will be set on each
-            item.
+        :param common: (optional) A map of attributes that will be set on each item.
         :type common: dict
         :param timeout: (optional)  a timeout in seconds for sending the request
         :type timeout: int
@@ -278,8 +277,7 @@ class SpanClient(Client):
     :type license_key: str
     :param host: (optional) Override the host for the span API endpoint.
     :type host: str
-    :param port: (optional) Override the port for the client.
-        Default: 443
+    :param port: (optional) Override the port for the client. Default: 443
     :type port: int
 
     Usage::
@@ -303,11 +301,9 @@ class MetricClient(Client):
 
     :param license_key: New Relic license key
     :type license_key: str
-    :param host: (optional) Override the host for the metric API
-        endpoint.
+    :param host: (optional) Override the host for the metric API endpoint.
     :type host: str
-    :param port: (optional) Override the port for the client.
-        Default: 443
+    :param port: (optional) Override the port for the client. Default: 443
     :type port: int
 
     Usage::
@@ -331,11 +327,9 @@ class EventClient(Client):
 
     :param license_key: New Relic license key
     :type license_key: str
-    :param host: (optional) Override the host for the event API
-        endpoint.
+    :param host: (optional) Override the host for the event API endpoint.
     :type host: str
-    :param port: (optional) Override the port for the client.
-        Default: 443
+    :param port: (optional) Override the port for the client. Default: 443
     :type port: int
 
     Usage::
@@ -376,11 +370,9 @@ class LogClient(Client):
     This class is used to send log messages to the New Relic Log API over HTTP.
     :param license_key: New Relic license key
     :type license_key: str
-    :param host: (optional) Override the host for the metric API
-        endpoint.
+    :param host: (optional) Override the host for the metric API endpoint.
     :type host: str
-    :param port: (optional) Override the port for the client.
-        Default: 443
+    :param port: (optional) Override the port for the client. Default: 443
     :type port: int
 
     Usage::
