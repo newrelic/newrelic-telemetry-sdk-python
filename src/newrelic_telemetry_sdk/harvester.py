@@ -74,10 +74,7 @@ class Harvester(threading.Thread):
             try:
                 response = self.client.send_batch(*flush_result)
                 if not response.ok:
-                    _logger.error(
-                        "New Relic send_batch failed with status code: %r",
-                        response.status,
-                    )
+                    _logger.error("New Relic send_batch failed with status code: %r", response.status)
                 return response
             except Exception:
                 _logger.exception("New Relic send_batch failed with an exception.")

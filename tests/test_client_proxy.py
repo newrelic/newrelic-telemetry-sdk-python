@@ -10,13 +10,7 @@ try:
 except ImportError:
     from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
-from newrelic_telemetry_sdk.client import (
-    Client,
-    SpanClient,
-    MetricClient,
-    EventClient,
-    LogClient,
-)
+from newrelic_telemetry_sdk.client import Client, SpanClient, MetricClient, EventClient, LogClient
 import pytest
 
 
@@ -88,12 +82,7 @@ def force_response(fn):
         # we just care that the connect occured with the proper request line.
         try:
             fn(*args, **kwargs)
-        except (
-            exceptions.ProxyError,
-            exceptions.ProtocolError,
-            exceptions.SSLError,
-            OSError,
-        ):
+        except (exceptions.ProxyError, exceptions.ProtocolError, exceptions.SSLError, OSError):
             pass
 
         response = HTTPResponse(status=202)
@@ -132,12 +121,8 @@ def test_http_proxy_connection_from_env(client_class, http_proxy, monkeypatch, c
     assert "proxy-authorization" not in http_proxy.headers
 
 
-@pytest.mark.parametrize(
-    "client_class", (SpanClient, MetricClient, EventClient, LogClient)
-)
-def test_http_proxy_connection_from_env_with_auth(
-    client_class, http_proxy, monkeypatch, caplog
-):
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
+def test_http_proxy_connection_from_env_with_auth(client_class, http_proxy, monkeypatch, caplog):
     proxy_url_with_auth = f"http://username:password@{http_proxy.host}:{http_proxy.port}"
 
     monkeypatch.setattr(HTTPConnectionPool, "urlopen", URLOPEN)
@@ -174,24 +159,15 @@ def test_http_proxy_connection_from_kwargs(client_class, http_proxy, monkeypatch
     assert "proxy-authorization" not in http_proxy.headers
 
 
-@pytest.mark.parametrize(
-    "client_class", (SpanClient, MetricClient, EventClient, LogClient)
-)
-def test_http_proxy_connection_from_kwargs_with_auth_headers(
-    client_class, http_proxy, monkeypatch
-):
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
+def test_http_proxy_connection_from_kwargs_with_auth_headers(client_class, http_proxy, monkeypatch):
     proxy_url = f"http://{http_proxy.host}:{http_proxy.port}"
     # dXNlcm5hbWU6cGFzc3dvcmQ= is "username:password" base64 encoded
     proxy_basic_auth_headers = {"proxy-authorization": "Basic dXNlcm5hbWU6cGFzc3dvcmQ="}
 
     monkeypatch.setattr(HTTPConnectionPool, "urlopen", URLOPEN)
 
-    client = client_class(
-        "test-key",
-        "test-host",
-        _proxy=parse_url(proxy_url),
-        _proxy_headers=proxy_basic_auth_headers,
-    )
+    client = client_class("test-key", "test-host", _proxy=parse_url(proxy_url), _proxy_headers=proxy_basic_auth_headers)
 
     assert str(client._pool.proxy) == proxy_url.lower()
 
@@ -204,21 +180,13 @@ def test_http_proxy_connection_from_kwargs_with_auth_headers(
     assert http_proxy.headers["proxy-authorization"] == "Basic dXNlcm5hbWU6cGFzc3dvcmQ="
 
 
-@pytest.mark.parametrize(
-    "client_class", (SpanClient, MetricClient, EventClient, LogClient)
-)
-def test_http_proxy_connection_from_kwargs_with_auth_url(
-    client_class, http_proxy, monkeypatch
-):
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
+def test_http_proxy_connection_from_kwargs_with_auth_url(client_class, http_proxy, monkeypatch):
     proxy_url = f"http://username:password@{http_proxy.host}:{http_proxy.port}"
 
     monkeypatch.setattr(HTTPConnectionPool, "urlopen", URLOPEN)
 
-    client = client_class(
-        "test-key",
-        "test-host",
-        _proxy=parse_url(proxy_url),
-    )
+    client = client_class("test-key", "test-host", _proxy=parse_url(proxy_url))
 
     assert str(client._pool.proxy) == proxy_url.lower()
     assert client._pool.proxy.auth == "username:password"
@@ -242,10 +210,7 @@ def test_http_proxy_connection_conflicting_kwargs_and_env(client_class, http_pro
 
     with caplog.at_level(logging.INFO):
         client = client_class(
-            "test-key",
-            "test-host",
-            _proxy=parse_url(correct_proxy_url),
-            _proxy_headers=proxy_basic_auth_headers,
+            "test-key", "test-host", _proxy=parse_url(correct_proxy_url), _proxy_headers=proxy_basic_auth_headers
         )
 
     assert str(client._pool.proxy) == correct_proxy_url.lower()

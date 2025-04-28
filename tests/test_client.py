@@ -22,14 +22,7 @@ import zlib
 import pytest
 from urllib3 import HTTPConnectionPool, HTTPResponse as URLLib3HTTPResponse, Retry
 
-from newrelic_telemetry_sdk.client import (
-    EventClient,
-    HTTPError,
-    HTTPResponse,
-    LogClient,
-    MetricClient,
-    SpanClient,
-)
+from newrelic_telemetry_sdk.client import EventClient, HTTPError, HTTPResponse, LogClient, MetricClient, SpanClient
 from newrelic_telemetry_sdk.version import version
 
 try:
@@ -48,22 +41,11 @@ SPAN = {
     },
 }
 
-METRIC = {
-    "name": "testing",
-    "type": "count",
-    "value": 1,
-    "timestamp": int(time.time() - 1),
-    "interval.ms": 1000,
-}
+METRIC = {"name": "testing", "type": "count", "value": 1, "timestamp": int(time.time() - 1), "interval.ms": 1000}
 
-EVENT = {
-    "eventType": "testing",
-}
+EVENT = {"eventType": "testing"}
 
-LOG = {
-    "timestamp": int(time.time() * 1000.0),
-    "message": "Hello world",
-}
+LOG = {"timestamp": int(time.time() * 1000.0), "message": "Hello world"}
 
 
 class Request:
@@ -340,10 +322,7 @@ def test_log_endpoint_batch(log_client):
     attributes = {"hostname": "localhost"}
     timestamp_ms = (time.time() - 1) * 1000.0
 
-    common = {
-        "attributes": attributes,
-        "timestamp": timestamp_ms,
-    }
+    common = {"attributes": attributes, "timestamp": timestamp_ms}
 
     response = log_client.send_batch(logs, common=common)
     validate_log_request(response.request, logs, common)
@@ -354,11 +333,7 @@ def test_span_endpoint_batch(span_client):
         {
             "id": str(uuid.uuid4()),
             "trace.id": "trace.id",
-            "attributes": {
-                "name": "testing",
-                "duration.ms": 1,
-                "service.name": "testing",
-            },
+            "attributes": {"name": "testing", "duration.ms": 1, "service.name": "testing"},
         }
     ]
     timestamp_ms = (time.time() - 1) * 1000.0

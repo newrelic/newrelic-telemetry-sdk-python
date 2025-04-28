@@ -35,15 +35,7 @@ except ImportError:  # pragma: no cover
 
 USER_AGENT = f"NewRelic-Python-TelemetrySDK/{__version__}"
 
-__all__ = (
-    "EventClient",
-    "HTTPError",
-    "HTTPResponse",
-    "HTTPSConnectionPool",
-    "LogClient",
-    "MetricClient",
-    "SpanClient",
-)
+__all__ = ("EventClient", "HTTPError", "HTTPResponse", "HTTPSConnectionPool", "LogClient", "MetricClient", "SpanClient")
 
 
 class HTTPError(ValueError):
@@ -261,9 +253,7 @@ class Client:
         payload = self._create_payload(items, common)
         urllib3_response = self._pool.urlopen("POST", self.PATH, body=payload, headers=headers, timeout=timeout)
         if not isinstance(urllib3_response, urllib3.HTTPResponse):
-            raise ValueError(
-                f"Expected urllib3.HTTPResponse, got {type(urllib3_response)}"
-            )
+            raise ValueError(f"Expected urllib3.HTTPResponse, got {type(urllib3_response)}")
 
         return HTTPResponse(urllib3_response)
 
