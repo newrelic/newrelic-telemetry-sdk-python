@@ -63,7 +63,7 @@ class HTTPResponse(urllib3.HTTPResponse):
     @property
     def ok(self):
         """Return true if status code indicates success"""
-        return 200 <= self.status < 300
+        return 200 <= self.status < 300  # noqa: PLR2004
 
     def raise_for_status(self):
         """Raise an exception for an unsuccessful HTTP status code
@@ -253,7 +253,8 @@ class Client:
         payload = self._create_payload(items, common)
         urllib3_response = self._pool.urlopen("POST", self.PATH, body=payload, headers=headers, timeout=timeout)
         if not isinstance(urllib3_response, urllib3.HTTPResponse):
-            raise ValueError(f"Expected urllib3.HTTPResponse, got {type(urllib3_response)}")
+            exc_msg = f"Expected urllib3.HTTPResponse, got {type(urllib3_response)}"
+            raise TypeError(exc_msg)
 
         return HTTPResponse(urllib3_response)
 

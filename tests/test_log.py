@@ -64,7 +64,7 @@ def test_log_extract_data_exception(error_cls):
     # Log is instantiated here to ensure a staticmethod is used
     output = Log("").extract_record_data(record)
 
-    cls_name = ".".join((error_cls.__module__, error_cls.__name__))
+    cls_name = f"{error_cls.__module__}.{error_cls.__name__}"
 
     assert output["error.class"] == cls_name
     assert output["error.message"] == "uh oh"

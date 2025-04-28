@@ -17,6 +17,6 @@ import time
 import pytest
 
 
-@pytest.fixture()
+@pytest.fixture
 def freeze_time(monkeypatch):
     monkeypatch.setattr(time, "time", lambda: 2.0)

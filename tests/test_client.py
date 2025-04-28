@@ -26,11 +26,6 @@ from urllib3 import HTTPResponse as URLLib3HTTPResponse
 from newrelic_telemetry_sdk.client import EventClient, HTTPError, HTTPResponse, LogClient, MetricClient, SpanClient
 from newrelic_telemetry_sdk.version import version
 
-try:
-    string_types = basestring
-except NameError:
-    string_types = str
-
 SPAN = {
     "id": str(uuid.uuid4()),
     "trace.id": "trace.id",
@@ -214,7 +209,7 @@ def event_client(request, monkeypatch):
 
 
 def ensure_str(s):
-    if not isinstance(s, string_types):
+    if not isinstance(s, str):
         try:
             s = s.decode("utf-8")
         except Exception:
