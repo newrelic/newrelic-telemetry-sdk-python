@@ -462,11 +462,13 @@ def test_log_client_close(log_client):
     assert log_client._pool.pool is None
 
 
-@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
+@pytest.mark.parametrize(
+    "client_class", (SpanClient, MetricClient, EventClient, LogClient)
+)
 def test_client_connection_pool_kwargs(client_class):
     retries = Retry(3)  # Parameter with default value in our subclass
-    maxsize = 3 # Parameter without default value in our subclass
-    
+    maxsize = 3  # Parameter without default value in our subclass
+
     client = client_class("test-key", "test-host", retries=retries, maxsize=maxsize)
 
     assert client._pool.retries is retries
