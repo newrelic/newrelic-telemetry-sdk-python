@@ -61,6 +61,8 @@ jobs:
           tox-prefix: py311
         - version: "3.12"
           tox-prefix: py312
+        - version: "3.13"
+          tox-prefix: py313
         - version: "pypy3.10"
           tox-prefix: pypy310
 
