@@ -137,7 +137,11 @@ class Client(object):
         proxies = getproxies()
         proxy = proxies.get("https", None)
         proxy_headers = None
-        if proxy:
+        if proxy and "_proxy" in connection_pool_kwargs:
+            _logger.warning(
+                "Ignoring environment proxy settings as a proxy was found in connection kwargs."
+            )
+        elif proxy:
             proxy = parse_url(proxy)
             _logger.info(
                 "Using proxy host={0!r} port={1!r}".format(proxy.host, proxy.port)
