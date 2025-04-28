@@ -119,7 +119,7 @@ def span_client(request, monkeypatch):
         host = "staging-trace-api.newrelic.com"
 
     if license_key:
-        urlopen = getattr(HTTPConnectionPool, "urlopen")
+        urlopen = HTTPConnectionPool.urlopen
         monkeypatch.setattr(HTTPConnectionPool, "urlopen", capture_request(urlopen))
     else:
         monkeypatch.setattr(HTTPConnectionPool, "urlopen", disable_sending)
@@ -145,7 +145,7 @@ def metric_client(request, monkeypatch):
         host = "staging-metric-api.newrelic.com"
 
     if license_key:
-        urlopen = getattr(HTTPConnectionPool, "urlopen")
+        urlopen = HTTPConnectionPool.urlopen
         monkeypatch.setattr(HTTPConnectionPool, "urlopen", capture_request(urlopen))
     else:
         monkeypatch.setattr(HTTPConnectionPool, "urlopen", disable_sending)
@@ -171,7 +171,7 @@ def log_client(request, monkeypatch):
         host = "staging-log-api.newrelic.com"
 
     if license_key:
-        urlopen = getattr(HTTPConnectionPool, "urlopen")
+        urlopen = HTTPConnectionPool.urlopen
         monkeypatch.setattr(HTTPConnectionPool, "urlopen", capture_request(urlopen))
     else:
         monkeypatch.setattr(HTTPConnectionPool, "urlopen", disable_sending)
@@ -197,7 +197,7 @@ def event_client(request, monkeypatch):
         host = "staging-insights-collector.newrelic.com"
 
     if license_key:
-        urlopen = getattr(HTTPConnectionPool, "urlopen")
+        urlopen = HTTPConnectionPool.urlopen
         monkeypatch.setattr(HTTPConnectionPool, "urlopen", capture_request(urlopen))
     else:
         monkeypatch.setattr(HTTPConnectionPool, "urlopen", disable_sending)

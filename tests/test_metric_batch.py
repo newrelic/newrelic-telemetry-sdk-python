@@ -153,7 +153,7 @@ def test_flush(monkeypatch, tags):
             assert metric["attributes"] == {"foo": "bar"}
             assert metric["value"] == 1
         else:
-            assert False, metric
+            raise AssertionError(f"Unexpected metric type: {metric}")
 
     assert common["timestamp"] == 4000
     assert common["interval.ms"] == 60000
