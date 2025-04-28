@@ -98,7 +98,8 @@ class Client(object):
     :type host: str
     :param port: (optional) Override the port for the client. Default: 443
     :type port: int
-    :param **connection_pool_kwargs: Configuration options for urllib3.HTTPSConnectionPool
+    :param \\**connection_pool_kwargs: Configuration options for urllib3.HTTPSConnectionPool.
+        See https://urllib3.readthedocs.io/en/stable/reference/urllib3.connectionpool.html#urllib3.HTTPSConnectionPool
 
     Usage::
 
