@@ -113,9 +113,7 @@ class Client(object):
     PAYLOAD_TYPE = ""
     HOST = ""
     PATH = "/"
-    HEADERS = urllib3.make_headers(
-        keep_alive=True, accept_encoding=True, user_agent=USER_AGENT
-    )
+    HEADERS = urllib3.make_headers(keep_alive=True, accept_encoding=True, user_agent=USER_AGENT)
 
     def __init__(self, license_key, host=None, port=443, **connection_pool_kwargs):
         host = host or self.HOST
@@ -127,9 +125,7 @@ class Client(object):
                 "Content-Type": "application/json",
             }
         )
-        retries = urllib3.Retry(
-            total=False, connect=None, read=None, redirect=0, status=None
-        )
+        retries = urllib3.Retry(total=False, connect=None, read=None, redirect=0, status=None)
 
         # Check if https traffic should be proxied and pass the proxy
         # information to the connectionpool
@@ -138,18 +134,13 @@ class Client(object):
         proxy = proxies.get("https", None)
         proxy_headers = None
         if proxy and "_proxy" in connection_pool_kwargs:
-            _logger.warning(
-                "Ignoring environment proxy settings as a proxy was found in connection kwargs."
-            )
+            _logger.warning("Ignoring environment proxy settings as a proxy was found in connection kwargs.")
         elif proxy:
             proxy = parse_url(proxy)
-            _logger.info(
-                "Using proxy host={0!r} port={1!r}".format(proxy.host, proxy.port)
-            )
+            _logger.info("Using proxy host={0!r} port={1!r}".format(proxy.host, proxy.port))
             if proxy.scheme.lower() != "http":
                 _logger.warning(
-                    "Contacting https destinations through "
-                    "{} proxies is not supported.".format(proxy.scheme)
+                    "Contacting https destinations through " "{} proxies is not supported.".format(proxy.scheme)
                 )
                 proxy = None
             elif proxy.auth:
@@ -257,13 +248,9 @@ class Client(object):
         headers["x-request-id"] = str(uuid.uuid4())
 
         payload = self._create_payload(items, common)
-        urllib3_response = self._pool.urlopen(
-            "POST", self.PATH, body=payload, headers=headers, timeout=timeout
-        )
+        urllib3_response = self._pool.urlopen("POST", self.PATH, body=payload, headers=headers, timeout=timeout)
         if not isinstance(urllib3_response, urllib3.HTTPResponse):
-            raise ValueError(
-                "Expected urllib3.HTTPResponse, got {}".format(type(urllib3_response))
-            )
+            raise ValueError("Expected urllib3.HTTPResponse, got {}".format(type(urllib3_response)))
 
         return HTTPResponse(urllib3_response)
 

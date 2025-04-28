@@ -101,9 +101,7 @@ def test_response_json():
     assert response.json() == {}
 
 
-@pytest.mark.parametrize(
-    "status,expected", ((199, False), (200, True), (299, True), (300, False))
-)
+@pytest.mark.parametrize("status,expected", ((199, False), (200, True), (299, True), (300, False)))
 def test_response_ok(status, expected):
     urllib3_response = URLLib3HTTPResponse(status=status)
     response = HTTPResponse(urllib3_response)
@@ -172,9 +170,7 @@ def metric_client(request, monkeypatch):
     # Allow client_args to be specified by a marker
     client_args = request.node.get_closest_marker("client_args")
     if client_args:
-        client = MetricClient(
-            license_key, host, *client_args.args, **client_args.kwargs
-        )
+        client = MetricClient(license_key, host, *client_args.args, **client_args.kwargs)
     else:
         client = MetricClient(license_key, host)
 
@@ -462,9 +458,7 @@ def test_log_client_close(log_client):
     assert log_client._pool.pool is None
 
 
-@pytest.mark.parametrize(
-    "client_class", (SpanClient, MetricClient, EventClient, LogClient)
-)
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
 def test_client_connection_pool_kwargs(client_class):
     retries = Retry(3)  # Parameter with default value in our subclass
     maxsize = 3  # Parameter without default value in our subclass

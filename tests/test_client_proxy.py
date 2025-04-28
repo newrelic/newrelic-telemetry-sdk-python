@@ -20,12 +20,8 @@ from newrelic_telemetry_sdk.client import (
 import pytest
 
 
-HTTPS_PROXY_UNSUPPORTED_MSG = (
-    "Contacting https destinations through https proxies is not supported."
-)
-PROXY_ENV_IGNORED_MSG = (
-    "Ignoring environment proxy settings as a proxy was found in connection kwargs."
-)
+HTTPS_PROXY_UNSUPPORTED_MSG = "Contacting https destinations through https proxies is not supported."
+PROXY_ENV_IGNORED_MSG = "Ignoring environment proxy settings as a proxy was found in connection kwargs."
 
 
 class HttpProxy(threading.Thread):
@@ -116,9 +112,7 @@ def http_proxy():
         yield p
 
 
-@pytest.mark.parametrize(
-    "client_class", (SpanClient, MetricClient, EventClient, LogClient)
-)
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
 def test_http_proxy_connection_from_env(client_class, http_proxy, monkeypatch, caplog):
     proxy_url = "hTtP://{}:{}".format(http_proxy.host, http_proxy.port)
 
@@ -129,9 +123,7 @@ def test_http_proxy_connection_from_env(client_class, http_proxy, monkeypatch, c
         client = client_class("test-key", "test-host")
 
     log_record = caplog.records[-1]
-    assert log_record.msg == "Using proxy host={0!r} port={1!r}".format(
-        http_proxy.host, http_proxy.port
-    )
+    assert log_record.msg == "Using proxy host={0!r} port={1!r}".format(http_proxy.host, http_proxy.port)
     assert str(client._pool.proxy) == proxy_url.lower()
 
     client.send({})
@@ -140,15 +132,9 @@ def test_http_proxy_connection_from_env(client_class, http_proxy, monkeypatch, c
     assert "proxy-authorization" not in http_proxy.headers
 
 
-@pytest.mark.parametrize(
-    "client_class", (SpanClient, MetricClient, EventClient, LogClient)
-)
-def test_http_proxy_connection_from_env_with_auth(
-    client_class, http_proxy, monkeypatch, caplog
-):
-    proxy_url_with_auth = "http://username:password@{}:{}".format(
-        http_proxy.host, http_proxy.port
-    )
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
+def test_http_proxy_connection_from_env_with_auth(client_class, http_proxy, monkeypatch, caplog):
+    proxy_url_with_auth = "http://username:password@{}:{}".format(http_proxy.host, http_proxy.port)
 
     monkeypatch.setattr(HTTPConnectionPool, "urlopen", URLOPEN)
     monkeypatch.setenv("https_proxy", proxy_url_with_auth)
@@ -156,9 +142,7 @@ def test_http_proxy_connection_from_env_with_auth(
     with caplog.at_level(logging.INFO):
         client = client_class("test-key", "test-host")
     log_record = caplog.records[-1]
-    assert log_record.msg == "Using proxy host={0!r} port={1!r}".format(
-        http_proxy.host, http_proxy.port
-    )
+    assert log_record.msg == "Using proxy host={0!r} port={1!r}".format(http_proxy.host, http_proxy.port)
     assert str(client._pool.proxy) == proxy_url_with_auth.lower()
 
     client.send({})
@@ -170,9 +154,7 @@ def test_http_proxy_connection_from_env_with_auth(
     assert http_proxy.headers["proxy-authorization"] == "Basic dXNlcm5hbWU6cGFzc3dvcmQ="
 
 
-@pytest.mark.parametrize(
-    "client_class", (SpanClient, MetricClient, EventClient, LogClient)
-)
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
 def test_http_proxy_connection_from_kwargs(client_class, http_proxy, monkeypatch):
     proxy_url = "hTtP://{}:{}".format(http_proxy.host, http_proxy.port)
 
@@ -188,12 +170,8 @@ def test_http_proxy_connection_from_kwargs(client_class, http_proxy, monkeypatch
     assert "proxy-authorization" not in http_proxy.headers
 
 
-@pytest.mark.parametrize(
-    "client_class", (SpanClient, MetricClient, EventClient, LogClient)
-)
-def test_http_proxy_connection_from_kwargs_with_auth_headers(
-    client_class, http_proxy, monkeypatch
-):
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
+def test_http_proxy_connection_from_kwargs_with_auth_headers(client_class, http_proxy, monkeypatch):
     proxy_url = "http://{}:{}".format(http_proxy.host, http_proxy.port)
     # dXNlcm5hbWU6cGFzc3dvcmQ= is "username:password" base64 encoded
     proxy_basic_auth_headers = {"proxy-authorization": "Basic dXNlcm5hbWU6cGFzc3dvcmQ="}
@@ -218,15 +196,9 @@ def test_http_proxy_connection_from_kwargs_with_auth_headers(
     assert http_proxy.headers["proxy-authorization"] == "Basic dXNlcm5hbWU6cGFzc3dvcmQ="
 
 
-@pytest.mark.parametrize(
-    "client_class", (SpanClient, MetricClient, EventClient, LogClient)
-)
-def test_http_proxy_connection_from_kwargs_with_auth_url(
-    client_class, http_proxy, monkeypatch
-):
-    proxy_url = "http://username:password@{}:{}".format(
-        http_proxy.host, http_proxy.port
-    )
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
+def test_http_proxy_connection_from_kwargs_with_auth_url(client_class, http_proxy, monkeypatch):
+    proxy_url = "http://username:password@{}:{}".format(http_proxy.host, http_proxy.port)
 
     monkeypatch.setattr(HTTPConnectionPool, "urlopen", URLOPEN)
 
@@ -245,12 +217,8 @@ def test_http_proxy_connection_from_kwargs_with_auth_url(
     assert "proxy-authorization" not in http_proxy.headers
 
 
-@pytest.mark.parametrize(
-    "client_class", (SpanClient, MetricClient, EventClient, LogClient)
-)
-def test_http_proxy_connection_conflicting_kwargs_and_env(
-    client_class, http_proxy, monkeypatch, caplog
-):
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
+def test_http_proxy_connection_conflicting_kwargs_and_env(client_class, http_proxy, monkeypatch, caplog):
     incorrect_proxy_url_with_auth = "http://baduser:badpassword@badhost:1111"
     correct_proxy_url = "http://{}:{}".format(http_proxy.host, http_proxy.port)
     # dXNlcm5hbWU6cGFzc3dvcmQ= is "username:password" base64 encoded
@@ -281,16 +249,12 @@ def test_http_proxy_connection_conflicting_kwargs_and_env(
     assert http_proxy.headers["proxy-authorization"] == "Basic dXNlcm5hbWU6cGFzc3dvcmQ="
 
 
-@pytest.mark.parametrize(
-    "client_class", (SpanClient, MetricClient, EventClient, LogClient)
-)
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
 def test_https_proxy_no_connection(monkeypatch, client_class, caplog):
     proxy_host = "random"
     proxy_port = 1234
     # Set the proxy scheme to https so it is not used
-    monkeypatch.setenv(
-        "https_proxy", "hTTPs://%s:%i" % (proxy_host, proxy_port), prepend=False
-    )
+    monkeypatch.setenv("https_proxy", "hTTPs://%s:%i" % (proxy_host, proxy_port), prepend=False)
 
     with caplog.at_level(logging.INFO):
         client = client_class("test-key", "test-host")

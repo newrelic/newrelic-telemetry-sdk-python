@@ -118,9 +118,7 @@ def test_metric_accessors(attribute_name, attribute_value):
     else:
         interval = 1000
 
-    metric = CountMetric(
-        "foo", 8, tags={"tag": "value"}, interval_ms=interval, end_time_ms=2000
-    )
+    metric = CountMetric("foo", 8, tags={"tag": "value"}, interval_ms=interval, end_time_ms=2000)
     value = getattr(metric, attribute_name)
     assert value == attribute_value
     assert type(value) is type(attribute_value)
