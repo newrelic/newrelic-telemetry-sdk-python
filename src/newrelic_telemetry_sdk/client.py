@@ -334,7 +334,7 @@ class EventClient(Client):
     HOST = "insights-collector.newrelic.com"
     PATH = "/v1/accounts/events"
 
-    def _create_payload(self, items, common):
+    def _create_payload(self, items, common):  # noqa: ARG002
         payload = json.dumps(items)
         if not isinstance(payload, bytes):
             payload = payload.encode("utf-8")

@@ -125,7 +125,7 @@ class NewRelicLogFormatter(logging.Formatter):
         True
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):  # noqa: ARG002
         super().__init__()
 
     def format(self, record):

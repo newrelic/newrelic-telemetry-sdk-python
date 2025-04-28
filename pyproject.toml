@@ -134,4 +134,6 @@ ignore = [
     "PT007",  # pytest-parametrize-values-wrong-type (style choice)
     "PT011",  # pytest-raises-too-broad (we frequently test for generic errors)
     "INP001",  # implicit-namespace-package
+    "ARG001",  # unused-function-argument (fixtures trigger this)
+    "ARG002",  # unused-method-argument
 ]
