@@ -74,8 +74,7 @@ def capture_request(fn):
 def disable_sending(*args, **kwargs):
     urllib3_response = URLLib3HTTPResponse(status=202)
     urllib3_response.request = Request(*args, **kwargs)
-    response = HTTPResponse(urllib3_response)
-    return response
+    return HTTPResponse(urllib3_response)
 
 
 def test_response_json():
@@ -219,7 +218,7 @@ def ensure_str(s):
         try:
             s = s.decode("utf-8")
         except Exception:
-            return
+            return None
     return s
 
 
@@ -267,8 +266,7 @@ def extract_and_validate_metadata(expected_url, request):
     else:
         assert request.headers["Content-Encoding"] == "identity"
 
-    payload = json.loads(ensure_str(payload))
-    return payload
+    return json.loads(ensure_str(payload))
 
 
 def validate_request(expected_url, typ, request, items, common=None):

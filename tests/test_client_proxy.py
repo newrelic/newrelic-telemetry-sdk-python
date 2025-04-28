@@ -87,8 +87,7 @@ def force_response(fn):
         except (exceptions.ProxyError, exceptions.ProtocolError, exceptions.SSLError, OSError):
             pass
 
-        response = HTTPResponse(status=202)
-        return response
+        return HTTPResponse(status=202)
 
     return wrapper
 

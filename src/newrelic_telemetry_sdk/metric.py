@@ -61,6 +61,7 @@ class Metric(dict):
         """Metric Interval"""
         if "interval.ms" in self:
             return self["interval.ms"]
+        return None
 
     @property
     def start_time_ms(self):
@@ -72,6 +73,7 @@ class Metric(dict):
         """Metric timestamp"""
         if "timestamp" in self:
             return self["timestamp"] + self.get("interval.ms", 0)
+        return None
 
     @property
     def tags(self):

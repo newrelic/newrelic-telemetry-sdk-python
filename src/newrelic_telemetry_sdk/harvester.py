@@ -78,6 +78,7 @@ class Harvester(threading.Thread):
                 return response
             except Exception:
                 _logger.exception("New Relic send_batch failed with an exception.")
+        return None
 
     def _wait_for_harvest(self):
         """Tracks and adjusts time required to maintain the harvest interval"""
