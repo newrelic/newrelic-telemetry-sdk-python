@@ -13,8 +13,9 @@
 # limitations under the License.
 
 import pytest
-from newrelic_telemetry_sdk.span import Span
 from utils import CustomMapping
+
+from newrelic_telemetry_sdk.span import Span
 
 
 def test_span_defaults(freeze_time):

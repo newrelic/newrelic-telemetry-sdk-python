@@ -1,8 +1,9 @@
-import socket
-import threading
 import functools
 import logging
-from urllib3 import HTTPConnectionPool, exceptions, HTTPResponse
+import socket
+import threading
+
+from urllib3 import HTTPConnectionPool, HTTPResponse, exceptions
 from urllib3.util.url import parse_url
 
 try:
@@ -10,9 +11,9 @@ try:
 except ImportError:
     from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
-from newrelic_telemetry_sdk.client import Client, SpanClient, MetricClient, EventClient, LogClient
 import pytest
 
+from newrelic_telemetry_sdk.client import Client, EventClient, LogClient, MetricClient, SpanClient
 
 HTTPS_PROXY_UNSUPPORTED_MSG = "Contacting https destinations through https proxies is not supported."
 PROXY_ENV_IGNORED_MSG = "Ignoring environment proxy settings as a proxy was found in connection kwargs."

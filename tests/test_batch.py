@@ -13,8 +13,9 @@
 # limitations under the License.
 
 import pytest
-from newrelic_telemetry_sdk.batch import Batch, EventBatch
 from utils import CustomMapping
+
+from newrelic_telemetry_sdk.batch import Batch, EventBatch
 
 
 class VerifyLockBatch(Batch):

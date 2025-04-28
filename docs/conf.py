@@ -13,7 +13,6 @@
 
 import newrelic_telemetry_sdk
 
-
 # -- Project information -----------------------------------------------------
 
 project = "newrelic-telemetry-sdk"

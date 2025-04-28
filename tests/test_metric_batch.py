@@ -13,9 +13,11 @@
 # limitations under the License.
 
 import time
+
 import pytest
-from newrelic_telemetry_sdk.metric_batch import MetricBatch
 from utils import CustomMapping
+
+from newrelic_telemetry_sdk.metric_batch import MetricBatch
 
 
 class VerifyLockMetricBatch(MetricBatch):

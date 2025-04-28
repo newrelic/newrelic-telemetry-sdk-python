@@ -20,7 +20,8 @@ import uuid
 import zlib
 
 import pytest
-from urllib3 import HTTPConnectionPool, HTTPResponse as URLLib3HTTPResponse, Retry
+from urllib3 import HTTPConnectionPool, Retry
+from urllib3 import HTTPResponse as URLLib3HTTPResponse
 
 from newrelic_telemetry_sdk.client import EventClient, HTTPError, HTTPResponse, LogClient, MetricClient, SpanClient
 from newrelic_telemetry_sdk.version import version

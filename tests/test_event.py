@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import pytest
+
 from newrelic_telemetry_sdk.event import Event
 
 

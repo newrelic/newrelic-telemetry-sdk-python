@@ -13,8 +13,9 @@
 # limitations under the License.
 
 import pytest
-from newrelic_telemetry_sdk.metric import Metric, GaugeMetric, CountMetric, SummaryMetric
 from utils import CustomMapping
+
+from newrelic_telemetry_sdk.metric import CountMetric, GaugeMetric, Metric, SummaryMetric
 
 
 def test_gauge_metric_defaults(freeze_time):

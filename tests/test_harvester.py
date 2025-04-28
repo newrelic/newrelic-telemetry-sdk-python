@@ -16,6 +16,7 @@ import logging
 import time
 
 import pytest
+
 from newrelic_telemetry_sdk.harvester import Harvester
 
 
