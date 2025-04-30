@@ -114,13 +114,7 @@ class Client:
 
         host = host or self.HOST
         headers = self.HEADERS.copy()
-        headers.update(
-            {
-                "Api-Key": license_key,
-                "Content-Encoding": "gzip",
-                "Content-Type": "application/json",
-            }
-        )
+        headers.update({"Api-Key": license_key, "Content-Encoding": "gzip", "Content-Type": "application/json"})
         retries = urllib3.Retry(total=False, connect=None, read=None, redirect=0, status=None)
 
         proxy, proxy_headers = self._parse_proxy_settings(connection_pool_kwargs)
@@ -162,7 +156,7 @@ class Client:
             _logger.info("Using proxy host={0!r} port={1!r}".format(proxy.host, proxy.port))
             if proxy.scheme.lower() != "http":
                 _logger.warning(
-                    "Contacting https destinations through " "{} proxies is not supported.".format(proxy.scheme)
+                    "Contacting https destinations through {} proxies is not supported.".format(proxy.scheme)
                 )
                 proxy = None
             elif proxy.auth:
