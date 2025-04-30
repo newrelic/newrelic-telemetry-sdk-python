@@ -117,6 +117,9 @@ class Client(object):
     HEADERS = urllib3.make_headers(keep_alive=True, accept_encoding=True, user_agent=USER_AGENT)
 
     def __init__(self, license_key, host=None, port=443, **connection_pool_kwargs):
+        if not license_key:
+            raise ValueError(f"Invalid license key: {license_key}")
+
         host = host or self.HOST
         headers = self.HEADERS.copy()
         headers.update(
