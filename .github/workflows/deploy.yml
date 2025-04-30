@@ -5,29 +5,47 @@ on:
     types:
       - published
 
-
 jobs:
-  pypi:
-
+  build:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
+
     - uses: actions/setup-python@v4
       with:
         python-version: '3.x'
         architecture: x64
+
     - name: Install Dependencies
       run: |
         pip install -U pip
-        pip install -U wheel setuptools twine
-    - name: Build and Upload Packages
+        pip install -U build
+
+    - name: Build Package
       run: |
-        python setup.py sdist bdist_wheel
-        twine upload --non-interactive dist/*
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        python -m build
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # 4.6.2
+      with:
+        name: dist
+        path: ./dist/*
+        if-no-files-found: error
+        retention-days: 1
+
+  publish:
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+    needs: [build]
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: dist
+
+    - name: Upload Package
+      uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # 1.12.4
 
   docs:
 
@@ -49,7 +67,7 @@ jobs:
         pip install -U pip
         pip install -U wheel setuptools tox
     - name: Generate docs
-      run: tox -edocs
+      run: tox -e docs
     - name: Publish docs
       run: |
         git add --all
