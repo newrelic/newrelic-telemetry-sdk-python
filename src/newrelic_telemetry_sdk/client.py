@@ -110,7 +110,8 @@ class Client:
 
     def __init__(self, license_key, host=None, port=443, **connection_pool_kwargs):
         if not license_key:
-            raise ValueError(f"Invalid license key: {license_key}")
+            msg = f"Invalid license key: {license_key}"
+            raise ValueError(msg)
 
         host = host or self.HOST
         headers = self.HEADERS.copy()
@@ -153,11 +154,9 @@ class Client:
             _logger.warning("Ignoring environment proxy settings as a proxy was found in connection kwargs.")
         elif proxy:
             proxy = parse_url(proxy)
-            _logger.info("Using proxy host={0!r} port={1!r}".format(proxy.host, proxy.port))
+            _logger.info("Using proxy host=%r port=%r", proxy.host, proxy.port)
             if proxy.scheme.lower() != "http":
-                _logger.warning(
-                    "Contacting https destinations through {} proxies is not supported.".format(proxy.scheme)
-                )
+                _logger.warning("Contacting https destinations through %s proxies is not supported.", proxy.scheme)
                 proxy = None
             elif proxy.auth:
                 # https://tools.ietf.org/html/rfc7617
