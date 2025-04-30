@@ -9,9 +9,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # 4.2.2
 
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # 5.5.0
       with:
         python-version: '3.x'
         architecture: x64
@@ -40,7 +40,7 @@ jobs:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     needs: [build]
     steps:
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # 4.2.1
       with:
         name: dist
 
@@ -51,8 +51,8 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-python@v4
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # 4.2.2
+    - uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # 5.5.0
       with:
         python-version: '3.x'
         architecture: x64
