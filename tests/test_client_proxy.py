@@ -3,6 +3,7 @@ import threading
 import functools
 import logging
 from urllib3 import HTTPConnectionPool, exceptions, HTTPResponse
+from urllib3.util.url import parse_url
 
 try:
     from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -14,8 +15,13 @@ from newrelic_telemetry_sdk.client import (
     SpanClient,
     MetricClient,
     EventClient,
+    LogClient,
 )
 import pytest
+
+
+HTTPS_PROXY_UNSUPPORTED_MSG = "Contacting https destinations through https proxies is not supported."
+PROXY_ENV_IGNORED_MSG = "Ignoring environment proxy settings as a proxy was found in connection kwargs."
 
 
 class HttpProxy(threading.Thread):
@@ -106,40 +112,39 @@ def http_proxy():
         yield p
 
 
-@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient))
-def test_http_proxy_connection(client_class, http_proxy, monkeypatch, caplog):
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
+def test_http_proxy_connection_from_env(client_class, http_proxy, monkeypatch, caplog):
+    proxy_url = "hTtP://{}:{}".format(http_proxy.host, http_proxy.port)
+
     monkeypatch.setattr(HTTPConnectionPool, "urlopen", URLOPEN)
-    monkeypatch.setenv(
-        "https_proxy", "hTtP://{}:{}".format(http_proxy.host, http_proxy.port)
-    )
+    monkeypatch.setenv("https_proxy", proxy_url)
 
     with caplog.at_level(logging.INFO):
         client = client_class("test-key", "test-host")
 
     log_record = caplog.records[-1]
-    assert log_record.msg == "Using proxy host={0!r} port={1!r}".format(
-        http_proxy.host, http_proxy.port
-    )
+    assert log_record.msg == "Using proxy host={0!r} port={1!r}".format(http_proxy.host, http_proxy.port)
+    assert str(client._pool.proxy) == proxy_url.lower()
+
     client.send({})
     assert http_proxy.connect_host == "test-host"
     assert http_proxy.connect_port == "443"
     assert "proxy-authorization" not in http_proxy.headers
 
 
-@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient))
-def test_http_proxy_connection_with_auth(client_class, http_proxy, monkeypatch, caplog):
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
+def test_http_proxy_connection_from_env_with_auth(client_class, http_proxy, monkeypatch, caplog):
+    proxy_url_with_auth = "http://username:password@{}:{}".format(http_proxy.host, http_proxy.port)
+
     monkeypatch.setattr(HTTPConnectionPool, "urlopen", URLOPEN)
-    monkeypatch.setenv(
-        "https_proxy",
-        "http://username:password@{}:{}".format(http_proxy.host, http_proxy.port),
-    )
+    monkeypatch.setenv("https_proxy", proxy_url_with_auth)
 
     with caplog.at_level(logging.INFO):
         client = client_class("test-key", "test-host")
     log_record = caplog.records[-1]
-    assert log_record.msg == "Using proxy host={0!r} port={1!r}".format(
-        http_proxy.host, http_proxy.port
-    )
+    assert log_record.msg == "Using proxy host={0!r} port={1!r}".format(http_proxy.host, http_proxy.port)
+    assert str(client._pool.proxy) == proxy_url_with_auth.lower()
+
     client.send({})
     assert http_proxy.connect_host == "test-host"
     assert http_proxy.connect_port == "443"
@@ -149,21 +154,111 @@ def test_http_proxy_connection_with_auth(client_class, http_proxy, monkeypatch, 
     assert http_proxy.headers["proxy-authorization"] == "Basic dXNlcm5hbWU6cGFzc3dvcmQ="
 
 
-@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient))
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
+def test_http_proxy_connection_from_kwargs(client_class, http_proxy, monkeypatch):
+    proxy_url = "hTtP://{}:{}".format(http_proxy.host, http_proxy.port)
+
+    monkeypatch.setattr(HTTPConnectionPool, "urlopen", URLOPEN)
+
+    client = client_class("test-key", "test-host", _proxy=parse_url(proxy_url))
+
+    assert str(client._pool.proxy) == proxy_url.lower()
+
+    client.send({})
+    assert http_proxy.connect_host == "test-host"
+    assert http_proxy.connect_port == "443"
+    assert "proxy-authorization" not in http_proxy.headers
+
+
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
+def test_http_proxy_connection_from_kwargs_with_auth_headers(client_class, http_proxy, monkeypatch):
+    proxy_url = "http://{}:{}".format(http_proxy.host, http_proxy.port)
+    # dXNlcm5hbWU6cGFzc3dvcmQ= is "username:password" base64 encoded
+    proxy_basic_auth_headers = {"proxy-authorization": "Basic dXNlcm5hbWU6cGFzc3dvcmQ="}
+
+    monkeypatch.setattr(HTTPConnectionPool, "urlopen", URLOPEN)
+
+    client = client_class(
+        "test-key",
+        "test-host",
+        _proxy=parse_url(proxy_url),
+        _proxy_headers=proxy_basic_auth_headers,
+    )
+
+    assert str(client._pool.proxy) == proxy_url.lower()
+
+    client.send({})
+    assert http_proxy.connect_host == "test-host"
+    assert http_proxy.connect_port == "443"
+    assert "proxy-authorization" in http_proxy.headers
+
+    # dXNlcm5hbWU6cGFzc3dvcmQ= is "username:password" base64 encoded
+    assert http_proxy.headers["proxy-authorization"] == "Basic dXNlcm5hbWU6cGFzc3dvcmQ="
+
+
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
+def test_http_proxy_connection_from_kwargs_with_auth_url(client_class, http_proxy, monkeypatch):
+    proxy_url = "http://username:password@{}:{}".format(http_proxy.host, http_proxy.port)
+
+    monkeypatch.setattr(HTTPConnectionPool, "urlopen", URLOPEN)
+
+    client = client_class(
+        "test-key",
+        "test-host",
+        _proxy=parse_url(proxy_url),
+    )
+
+    assert str(client._pool.proxy) == proxy_url.lower()
+    assert client._pool.proxy.auth == "username:password"
+
+    client.send({})
+    assert http_proxy.connect_host == "test-host"
+    assert http_proxy.connect_port == "443"
+    assert "proxy-authorization" not in http_proxy.headers
+
+
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
+def test_http_proxy_connection_conflicting_kwargs_and_env(client_class, http_proxy, monkeypatch, caplog):
+    incorrect_proxy_url_with_auth = "http://baduser:badpassword@badhost:1111"
+    correct_proxy_url = "http://{}:{}".format(http_proxy.host, http_proxy.port)
+    # dXNlcm5hbWU6cGFzc3dvcmQ= is "username:password" base64 encoded
+    proxy_basic_auth_headers = {"proxy-authorization": "Basic dXNlcm5hbWU6cGFzc3dvcmQ="}
+
+    monkeypatch.setattr(HTTPConnectionPool, "urlopen", URLOPEN)
+    # Set environment proxy to incorrect proxy information, and ensure it is ignored in favor of explicit kwargs
+    monkeypatch.setenv("https_proxy", incorrect_proxy_url_with_auth)
+
+    with caplog.at_level(logging.INFO):
+        client = client_class(
+            "test-key",
+            "test-host",
+            _proxy=parse_url(correct_proxy_url),
+            _proxy_headers=proxy_basic_auth_headers,
+        )
+
+    assert str(client._pool.proxy) == correct_proxy_url.lower()
+    log_record = caplog.records[-1]
+    assert log_record.msg == PROXY_ENV_IGNORED_MSG
+
+    client.send({})
+    assert http_proxy.connect_host == "test-host"
+    assert http_proxy.connect_port == "443"
+    assert "proxy-authorization" in http_proxy.headers
+
+    # dXNlcm5hbWU6cGFzc3dvcmQ= is "username:password" base64 encoded
+    assert http_proxy.headers["proxy-authorization"] == "Basic dXNlcm5hbWU6cGFzc3dvcmQ="
+
+
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
 def test_https_proxy_no_connection(monkeypatch, client_class, caplog):
     proxy_host = "random"
     proxy_port = 1234
     # Set the proxy scheme to https so it is not used
-    monkeypatch.setenv(
-        "https_proxy", "hTTPs://%s:%i" % (proxy_host, proxy_port), prepend=False
-    )
+    monkeypatch.setenv("https_proxy", "hTTPs://%s:%i" % (proxy_host, proxy_port), prepend=False)
 
     with caplog.at_level(logging.INFO):
         client = client_class("test-key", "test-host")
 
     log_record = caplog.records[-1]
-    assert (
-        log_record.msg
-        == "Contacting https destinations through https proxies is not supported."
-    )
+    assert log_record.msg == HTTPS_PROXY_UNSUPPORTED_MSG
     assert not client._pool.proxy

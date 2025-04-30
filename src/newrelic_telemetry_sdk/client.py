@@ -35,7 +35,15 @@ except ImportError:  # pragma: no cover
 
 USER_AGENT = "NewRelic-Python-TelemetrySDK/{}".format(__version__)
 
-__all__ = ("SpanClient", "MetricClient", "EventClient", "HTTPError", "HTTPResponse")
+__all__ = (
+    "EventClient",
+    "HTTPError",
+    "HTTPResponse",
+    "HTTPSConnectionPool",
+    "LogClient",
+    "MetricClient",
+    "SpanClient",
+)
 
 
 class HTTPError(ValueError):
@@ -88,9 +96,10 @@ class Client(object):
     :type license_key: str
     :param host: (optional) Override the host for the client.
     :type host: str
-    :param port: (optional) Override the port for the client.
-        Default: 443
+    :param port: (optional) Override the port for the client. Default: 443
     :type port: int
+    :param \\**connection_pool_kwargs: Configuration options for urllib3.HTTPSConnectionPool.
+        See https://urllib3.readthedocs.io/en/stable/reference/urllib3.connectionpool.html#urllib3.HTTPSConnectionPool
 
     Usage::
 
@@ -105,11 +114,12 @@ class Client(object):
     PAYLOAD_TYPE = ""
     HOST = ""
     PATH = "/"
-    HEADERS = urllib3.make_headers(
-        keep_alive=True, accept_encoding=True, user_agent=USER_AGENT
-    )
+    HEADERS = urllib3.make_headers(keep_alive=True, accept_encoding=True, user_agent=USER_AGENT)
 
-    def __init__(self, license_key, host=None, port=443):
+    def __init__(self, license_key, host=None, port=443, **connection_pool_kwargs):
+        if not license_key:
+            raise ValueError(f"Invalid license key: {license_key}")
+
         host = host or self.HOST
         headers = self.HEADERS.copy()
         headers.update(
@@ -119,25 +129,48 @@ class Client(object):
                 "Content-Type": "application/json",
             }
         )
-        retries = urllib3.Retry(
-            total=False, connect=None, read=None, redirect=0, status=None
-        )
+        retries = urllib3.Retry(total=False, connect=None, read=None, redirect=0, status=None)
 
-        # Check if https traffic should be proxied and pass the proxy
-        # information to the connectionpool
+        proxy, proxy_headers = self._parse_proxy_settings(connection_pool_kwargs)
+
+        # Merge custom config into default config
+        merged_connection_pool_kwargs = {
+            "host": host,
+            "port": port,
+            "retries": retries,
+            "_proxy": proxy,
+            "_proxy_headers": proxy_headers,
+        }
+        merged_connection_pool_kwargs.update(connection_pool_kwargs)
+
+        # Merge custom headers with default headers
+        if "headers" in connection_pool_kwargs:
+            # If the user has specified headers, we need to copy the existing
+            # headers so we don't lose any of the default ones.
+            headers.update(connection_pool_kwargs["headers"])
+
+        merged_connection_pool_kwargs["headers"] = headers
+
+        self._pool = self.POOL_CLS(**merged_connection_pool_kwargs)
+        self._headers = self._pool.headers
+
+    def _parse_proxy_settings(self, connection_pool_kwargs=None):
+        """
+        Check environment to see if https traffic should be proxied
+        and return the proxy information to pass to the connectionpool.
+        """
 
         proxies = getproxies()
         proxy = proxies.get("https", None)
         proxy_headers = None
-        if proxy:
+        if proxy and connection_pool_kwargs and "_proxy" in connection_pool_kwargs:
+            _logger.warning("Ignoring environment proxy settings as a proxy was found in connection kwargs.")
+        elif proxy:
             proxy = parse_url(proxy)
-            _logger.info(
-                "Using proxy host={0!r} port={1!r}".format(proxy.host, proxy.port)
-            )
+            _logger.info("Using proxy host={0!r} port={1!r}".format(proxy.host, proxy.port))
             if proxy.scheme.lower() != "http":
                 _logger.warning(
-                    "Contacting https destinations through "
-                    "{} proxies is not supported.".format(proxy.scheme)
+                    "Contacting https destinations through " "{} proxies is not supported.".format(proxy.scheme)
                 )
                 proxy = None
             elif proxy.auth:
@@ -157,15 +190,7 @@ class Client(object):
                 # information may be leaked (control characters, etc.)
                 proxy_headers = urllib3.make_headers(proxy_basic_auth=proxy.auth)
 
-        self._pool = self.POOL_CLS(
-            host=host,
-            port=port,
-            retries=retries,
-            headers=headers,
-            _proxy=proxy,
-            _proxy_headers=proxy_headers,
-        )
-        self._headers = self._pool.headers
+        return proxy, proxy_headers
 
     def add_version_info(self, product, product_version):
         """Adds product and version information to a User-Agent header
@@ -220,8 +245,7 @@ class Client(object):
 
         :param items: An iterable of items to send to New Relic.
         :type items: list or tuple
-        :param common: (optional) A map of attributes that will be set on each
-            item.
+        :param common: (optional) A map of attributes that will be set on each item.
         :type common: dict
         :param timeout: (optional)  a timeout in seconds for sending the request
         :type timeout: int
@@ -235,13 +259,9 @@ class Client(object):
         headers["x-request-id"] = str(uuid.uuid4())
 
         payload = self._create_payload(items, common)
-        urllib3_response = self._pool.urlopen(
-            "POST", self.PATH, body=payload, headers=headers, timeout=timeout
-        )
+        urllib3_response = self._pool.urlopen("POST", self.PATH, body=payload, headers=headers, timeout=timeout)
         if not isinstance(urllib3_response, urllib3.HTTPResponse):
-            raise ValueError(
-                "Expected urllib3.HTTPResponse, got {}".format(type(urllib3_response))
-            )
+            raise ValueError("Expected urllib3.HTTPResponse, got {}".format(type(urllib3_response)))
 
         return HTTPResponse(urllib3_response)
 
@@ -255,8 +275,7 @@ class SpanClient(Client):
     :type license_key: str
     :param host: (optional) Override the host for the span API endpoint.
     :type host: str
-    :param port: (optional) Override the port for the client.
-        Default: 443
+    :param port: (optional) Override the port for the client. Default: 443
     :type port: int
 
     Usage::
@@ -280,11 +299,9 @@ class MetricClient(Client):
 
     :param license_key: New Relic license key
     :type license_key: str
-    :param host: (optional) Override the host for the metric API
-        endpoint.
+    :param host: (optional) Override the host for the metric API endpoint.
     :type host: str
-    :param port: (optional) Override the port for the client.
-        Default: 443
+    :param port: (optional) Override the port for the client. Default: 443
     :type port: int
 
     Usage::
@@ -308,11 +325,9 @@ class EventClient(Client):
 
     :param license_key: New Relic license key
     :type license_key: str
-    :param host: (optional) Override the host for the event API
-        endpoint.
+    :param host: (optional) Override the host for the event API endpoint.
     :type host: str
-    :param port: (optional) Override the port for the client.
-        Default: 443
+    :param port: (optional) Override the port for the client. Default: 443
     :type port: int
 
     Usage::
@@ -353,11 +368,9 @@ class LogClient(Client):
     This class is used to send log messages to the New Relic Log API over HTTP.
     :param license_key: New Relic license key
     :type license_key: str
-    :param host: (optional) Override the host for the metric API
-        endpoint.
+    :param host: (optional) Override the host for the metric API endpoint.
     :type host: str
-    :param port: (optional) Override the port for the client.
-        Default: 443
+    :param port: (optional) Override the port for the client. Default: 443
     :type port: int
 
     Usage::

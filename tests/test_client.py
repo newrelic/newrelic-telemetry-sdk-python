@@ -20,7 +20,7 @@ import uuid
 import zlib
 
 import pytest
-from urllib3 import HTTPConnectionPool, HTTPResponse as URLLib3HTTPResponse
+from urllib3 import HTTPConnectionPool, HTTPResponse as URLLib3HTTPResponse, Retry
 
 from newrelic_telemetry_sdk.client import (
     EventClient,
@@ -101,9 +101,7 @@ def test_response_json():
     assert response.json() == {}
 
 
-@pytest.mark.parametrize(
-    "status,expected", ((199, False), (200, True), (299, True), (300, False))
-)
+@pytest.mark.parametrize("status,expected", ((199, False), (200, True), (299, True), (300, False)))
 def test_response_ok(status, expected):
     urllib3_response = URLLib3HTTPResponse(status=status)
     response = HTTPResponse(urllib3_response)
@@ -132,7 +130,7 @@ def test_wrapped_response_attributes_available():
 @pytest.fixture
 def span_client(request, monkeypatch):
     host = os.environ.get("NEW_RELIC_HOST", "")
-    license_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
+    license_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "test-key")
 
     if host.startswith("staging"):
         host = "staging-trace-api.newrelic.com"
@@ -158,7 +156,7 @@ def span_client(request, monkeypatch):
 @pytest.fixture
 def metric_client(request, monkeypatch):
     host = os.environ.get("NEW_RELIC_HOST", "")
-    license_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
+    license_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "test-key")
 
     if host.startswith("staging"):
         host = "staging-metric-api.newrelic.com"
@@ -172,9 +170,7 @@ def metric_client(request, monkeypatch):
     # Allow client_args to be specified by a marker
     client_args = request.node.get_closest_marker("client_args")
     if client_args:
-        client = MetricClient(
-            license_key, host, *client_args.args, **client_args.kwargs
-        )
+        client = MetricClient(license_key, host, *client_args.args, **client_args.kwargs)
     else:
         client = MetricClient(license_key, host)
 
@@ -186,7 +182,7 @@ def metric_client(request, monkeypatch):
 @pytest.fixture
 def log_client(request, monkeypatch):
     host = os.environ.get("NEW_RELIC_HOST", "")
-    license_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
+    license_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "test-key")
 
     if host.startswith("staging"):
         host = "staging-log-api.newrelic.com"
@@ -212,7 +208,7 @@ def log_client(request, monkeypatch):
 @pytest.fixture
 def event_client(request, monkeypatch):
     host = os.environ.get("NEW_RELIC_HOST", "")
-    license_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "")
+    license_key = os.environ.get("NEW_RELIC_LICENSE_KEY", "test-key")
 
     if host.startswith("staging"):
         host = "staging-insights-collector.newrelic.com"
@@ -380,7 +376,7 @@ def test_event_endpoint_batch(event_client):
 
 
 @pytest.mark.parametrize(
-    "cls,host",
+    "client_class,host",
     (
         (SpanClient, "trace-api.newrelic.com"),
         (MetricClient, "metric-api.newrelic.com"),
@@ -388,14 +384,14 @@ def test_event_endpoint_batch(event_client):
         (LogClient, "log-api.newrelic.com"),
     ),
 )
-def test_defaults(cls, host):
-    assert cls.HOST == host
-    assert cls(None)._pool.port == 443
+def test_defaults(client_class, host):
+    assert client_class.HOST == host
+    assert client_class("test-key")._pool.port == 443
 
 
-@pytest.mark.parametrize("cls", (SpanClient, MetricClient, EventClient, LogClient))
-def test_port_override(cls):
-    assert cls(None, port=8000)._pool.port == 8000
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
+def test_port_override(client_class):
+    assert client_class("test-key", port=8000)._pool.port == 8000
 
 
 def test_metric_add_version_info(metric_client):
@@ -442,21 +438,28 @@ def test_log_add_version_info(log_client):
     assert user_agent.endswith(" foo/0.1 bar/0.2"), user_agent
 
 
-def test_metric_client_close(metric_client):
-    metric_client.close()
-    assert metric_client._pool.pool is None
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
+def test_client_close(client_class):
+    client = client_class("test-key", "test-host")
+    assert client._pool.pool is not None
+
+    client.close()
+    assert client._pool.pool is None
 
 
-def test_event_client_close(event_client):
-    event_client.close()
-    assert event_client._pool.pool is None
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
+def test_client_connection_pool_kwargs(client_class):
+    retries = Retry(3)  # Parameter with default value in our subclass
+    maxsize = 3  # Parameter without default value in our subclass
+
+    client = client_class("test-key", "test-host", retries=retries, maxsize=maxsize)
+
+    assert client._pool.retries is retries
+    assert client._pool.pool.maxsize == maxsize
 
 
-def test_span_client_close(span_client):
-    span_client.close()
-    assert span_client._pool.pool is None
-
-
-def test_log_client_close(log_client):
-    log_client.close()
-    assert log_client._pool.pool is None
+@pytest.mark.parametrize("license_key", ("", None))
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
+def test_client_invalid_license_key(client_class, license_key):
+    with pytest.raises(ValueError, match="Invalid license key"):
+        client_class(license_key)

@@ -49,8 +49,6 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         python: 
-        - version: "3.7"
-          tox-prefix: py37
         - version: "3.8"
           tox-prefix: py38
         - version: "3.9"
@@ -61,6 +59,8 @@ jobs:
           tox-prefix: py311
         - version: "3.12"
           tox-prefix: py312
+        - version: "3.13"
+          tox-prefix: py313
         - version: "pypy3.10"
           tox-prefix: pypy310
 
