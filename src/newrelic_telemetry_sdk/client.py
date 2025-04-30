@@ -128,13 +128,39 @@ class Client(object):
         )
         retries = urllib3.Retry(total=False, connect=None, read=None, redirect=0, status=None)
 
-        # Check if https traffic should be proxied and pass the proxy
-        # information to the connectionpool
+        proxy, proxy_headers = self._parse_proxy_settings(connection_pool_kwargs)
+
+        # Merge custom config into default config
+        merged_connection_pool_kwargs = {
+            "host": host,
+            "port": port,
+            "retries": retries,
+            "_proxy": proxy,
+            "_proxy_headers": proxy_headers,
+        }
+        merged_connection_pool_kwargs.update(connection_pool_kwargs)
+
+        # Merge custom headers with default headers
+        if "headers" in connection_pool_kwargs:
+            # If the user has specified headers, we need to copy the existing
+            # headers so we don't lose any of the default ones.
+            headers.update(connection_pool_kwargs["headers"])
+
+        merged_connection_pool_kwargs["headers"] = headers
+
+        self._pool = self.POOL_CLS(**merged_connection_pool_kwargs)
+        self._headers = self._pool.headers
+
+    def _parse_proxy_settings(self, connection_pool_kwargs=None):
+        """
+        Check environment to see if https traffic should be proxied
+        and return the proxy information to pass to the connectionpool.
+        """
 
         proxies = getproxies()
         proxy = proxies.get("https", None)
         proxy_headers = None
-        if proxy and "_proxy" in connection_pool_kwargs:
+        if proxy and connection_pool_kwargs and "_proxy" in connection_pool_kwargs:
             _logger.warning("Ignoring environment proxy settings as a proxy was found in connection kwargs.")
         elif proxy:
             proxy = parse_url(proxy)
@@ -161,26 +187,7 @@ class Client(object):
                 # information may be leaked (control characters, etc.)
                 proxy_headers = urllib3.make_headers(proxy_basic_auth=proxy.auth)
 
-        # Merge custom config into default config
-        merged_connection_pool_kwargs = {
-            "host": host,
-            "port": port,
-            "retries": retries,
-            "_proxy": proxy,
-            "_proxy_headers": proxy_headers,
-        }
-        merged_connection_pool_kwargs.update(connection_pool_kwargs)
-
-        # Merge custom headers with default headers
-        if "headers" in connection_pool_kwargs:
-            # If the user has specified headers, we need to copy the existing
-            # headers so we don't lose any of the default ones.
-            headers.update(connection_pool_kwargs["headers"])
-
-        merged_connection_pool_kwargs["headers"] = headers
-
-        self._pool = self.POOL_CLS(**merged_connection_pool_kwargs)
-        self._headers = self._pool.headers
+        return proxy, proxy_headers
 
     def add_version_info(self, product, product_version):
         """Adds product and version information to a User-Agent header
