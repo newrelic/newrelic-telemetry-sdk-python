@@ -12,23 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# ===========================
+# Project Build Configuration
+# ===========================
+
 [project]
 name="newrelic-telemetry-sdk"
 description = "New Relic Telemetry SDK"
 authors = [{name = "New Relic", email = "open-source@newrelic.com"}]
+maintainers = [{name = "New Relic", email = "open-source@newrelic.com"}]
 readme = "README.rst"
-license = "Apache-2.0"
-license-files = [
-    "LICENSE",
-    "THIRD_PARTY_NOTICES.rst",
-]
+# License requires setuptools>=77.0.3 for pyproject.toml, which is Python 3.9+
+# license = "Apache-2.0"
+# license-files = [
+#     "LICENSE",
+#     "THIRD_PARTY_NOTICES.rst",
+# ]
+requires-python = ">=3.7"
 dependencies = ['urllib3<3,>=1.26']
 classifiers = [
     "Development Status :: 3 - Alpha",
-    "Topic :: System :: Monitoring",
-    "Programming Language :: Python :: Implementation :: PyPy",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
@@ -36,19 +39,20 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
-    "Operating System :: OS Independent",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: System :: Monitoring",
 ]
-requires-python = ">=3.7"
-dynamic = ["version"]
+dynamic = ["version", "license"]
 
 [project.urls]
 Homepage = "https://newrelic.github.io/newrelic-telemetry-sdk-python"
-Repository = "https://github.com/newrelic/newrelic-telemetry-sdk-python"
+GitHub = "https://github.com/newrelic/newrelic-telemetry-sdk-python"
 
 [build-system]
 requires = [
     "setuptools>=61.2",
-    "setuptools_scm",
+    "setuptools_scm>=3.2,<9",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -62,18 +66,12 @@ where = ["src"]
 namespaces = false
 
 [tool.setuptools_scm]
-version_file = "src/newrelic_telemetry_sdk/version.py"
+write_to = "src/newrelic_telemetry_sdk/version.py"
+git_describe_command = "git describe --dirty --tags --long --match '*.*.*'"
 
-[tool.pytest.ini_options]
-addopts = "--doctest-modules --strict-markers -v"
-testpaths = ["src", "tests"]
-filterwarnings = ["error"]
-xfail_strict = true
-markers = ["client_args: Extra arguments that are provided when constructing the client."]
-
-[tool.coverage.run]
-branch = true
-source = ["newrelic_telemetry_sdk"]
+# ==================
+# Ruff Configuration
+# ==================
 
 [tool.ruff]
 output-format = "grouped"
@@ -209,3 +207,18 @@ ignore = [
     "PT007",  # pytest-parametrize-values-wrong-type (style choice)
     "PT011",  # pytest-raises-too-broad (we frequently test for generic errors)
 ]
+
+# =========================
+# Other Tools Configuration
+# =========================
+
+[tool.pytest.ini_options]
+addopts = "--doctest-modules --strict-markers -v"
+testpaths = ["src", "tests"]
+filterwarnings = ["error"]
+xfail_strict = true
+markers = ["client_args: Extra arguments that are provided when constructing the client."]
+
+[tool.coverage.run]
+branch = true
+source = ["newrelic_telemetry_sdk"]
