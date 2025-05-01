@@ -6,7 +6,7 @@
 New Relic Telemetry SDK
 =======================
 
-|ci| |coverage| |docs| |black|
+|ci| |coverage| |docs| |ruff|
 
 .. |ci| image:: https://github.com/newrelic/newrelic-telemetry-sdk-python/workflows/Tests/badge.svg
     :target: https://github.com/newrelic/newrelic-telemetry-sdk-python/actions?query=workflow%3ATests
@@ -17,8 +17,8 @@ New Relic Telemetry SDK
 .. |docs| image:: https://img.shields.io/badge/docs-available-brightgreen.svg
     :target: https://newrelic.github.io/newrelic-telemetry-sdk-python/
 
-.. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
-    :target: https://github.com/psf/black
+.. |ruff| image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v0.json
+    :target: https://github.com/astral-sh/ruff
 
 `newrelic-telemetry-sdk-python <https://docs.newrelic.com/docs/data-ingest-apis/get-data-new-relic/new-relic-sdks/telemetry-sdks-send-custom-telemetry-data-new-relic>`_ provides a Python library for sending data into `New Relic <https://newrelic.com>`_ using the Python `urllib3 <https://urllib3.readthedocs.io>`_ library.
 
