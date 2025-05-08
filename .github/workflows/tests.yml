@@ -91,6 +91,8 @@ jobs:
       with:
         name: coverage-${{ github.job }}-${{ strategy.job-index }}
         path: ./**/.coverage.*
+        include-hidden-files: true
+        if-no-files-found: error
         retention-days: 1
 
     - name: Lint
