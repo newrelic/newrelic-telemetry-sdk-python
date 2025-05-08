@@ -59,7 +59,7 @@ class Harvester(threading.Thread):
     EVENT_CLS = threading.Event
 
     def __init__(self, client, batch, harvest_interval=5):
-        super(Harvester, self).__init__()
+        super().__init__()
         self.daemon = True
         self.client = client
         self.batch = batch
@@ -74,13 +74,12 @@ class Harvester(threading.Thread):
             try:
                 response = self.client.send_batch(*flush_result)
                 if not response.ok:
-                    _logger.error(
-                        "New Relic send_batch failed with status code: %r",
-                        response.status,
-                    )
-                return response
+                    _logger.error("New Relic send_batch failed with status code: %r", response.status)
             except Exception:
                 _logger.exception("New Relic send_batch failed with an exception.")
+            else:
+                return response
+        return None
 
     def _wait_for_harvest(self):
         """Tracks and adjusts time required to maintain the harvest interval"""

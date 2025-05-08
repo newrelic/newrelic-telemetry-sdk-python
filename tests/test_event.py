@@ -13,24 +13,19 @@
 # limitations under the License.
 
 import pytest
+
 from newrelic_telemetry_sdk.event import Event
 
 
 def test_event_defaults(freeze_time):
     event = Event("event")
-    assert event == {
-        "eventType": "event",
-        "timestamp": 2000,
-    }
+    assert event == {"eventType": "event", "timestamp": 2000}
     assert type(event["timestamp"]) is int
 
 
 @pytest.mark.parametrize(
     "arg_name,arg_value,event_key,event_value",
-    (
-        ("tags", {"foo": "bar"}, ("foo",), "bar"),
-        ("timestamp_ms", 1000, ("timestamp",), 1000),
-    ),
+    (("tags", {"foo": "bar"}, ("foo",), "bar"), ("timestamp_ms", 1000, ("timestamp",), 1000)),
 )
 def test_event_optional(arg_name, arg_value, event_key, event_value):
     kwargs = {arg_name: arg_value}
@@ -44,13 +39,7 @@ def test_event_optional(arg_name, arg_value, event_key, event_value):
     assert type(value) is type(event_value)
 
 
-@pytest.mark.parametrize(
-    "attribute_name,attribute_value",
-    (
-        ("event_type", "event"),
-        ("timestamp_ms", 1000),
-    ),
-)
+@pytest.mark.parametrize("attribute_name,attribute_value", (("event_type", "event"), ("timestamp_ms", 1000)))
 def test_event_attributes(attribute_name, attribute_value):
     event = Event("event", timestamp_ms=1000)
     value = getattr(event, attribute_name)

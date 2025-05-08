@@ -16,15 +16,16 @@ import logging
 import time
 
 import pytest
+
 from newrelic_telemetry_sdk.harvester import Harvester
 
 
-class Response(object):
+class Response:
     status = 202
     ok = True
 
 
-class FakeBatch(object):
+class FakeBatch:
     def __init__(self):
         self.contents = []
 
@@ -37,7 +38,7 @@ class FakeBatch(object):
         return contents, None
 
 
-class FakeClient(object):
+class FakeClient:
     def __init__(self):
         self.closed = False
         self.sent = []
@@ -55,13 +56,13 @@ class FakeClient(object):
 
 class FakeEventBatch(FakeBatch):
     def flush(self):
-        results = super(FakeEventBatch, self).flush()
+        results = super().flush()
         return results[:1]
 
 
 class FakeEventClient(FakeClient):
     def send_batch(self, items):
-        return super(FakeEventClient, self).send_batch(items)
+        return super().send_batch(items)
 
 
 class ExceptionalClient(FakeClient):
@@ -187,13 +188,13 @@ def test_harvester_send_failed(caplog, harvester):
 
 
 def test_harvest_timing(harvester, monkeypatch):
-    DELTA = 2
+    delta = 2
     current_t = [0]
     timeout = []
 
     def _time():
-        # Move time forward by DELTA on every call
-        current_t[0] += DELTA
+        # Move time forward by delta on every call
+        current_t[0] += delta
         return current_t[0]
 
     def _wait(t):
@@ -210,7 +211,7 @@ def test_harvest_timing(harvester, monkeypatch):
 
     # Second call should account for the time between harvest intervals
     assert harvester._wait_for_harvest()
-    assert timeout.pop() == (harvester.harvest_interval - DELTA)
+    assert timeout.pop() == (harvester.harvest_interval - delta)
 
 
 def test_defaults(harvester):

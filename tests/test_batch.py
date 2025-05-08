@@ -13,8 +13,9 @@
 # limitations under the License.
 
 import pytest
-from newrelic_telemetry_sdk.batch import Batch, EventBatch
 from utils import CustomMapping
+
+from newrelic_telemetry_sdk.batch import Batch, EventBatch
 
 
 class VerifyLockBatch(Batch):
@@ -51,10 +52,7 @@ class VerifyLockBatch(Batch):
 def test_batch_common_tags(tags):
     batch = VerifyLockBatch(tags)
 
-    if tags:
-        expected = {"attributes": dict(tags)}
-    else:
-        expected = None
+    expected = {"attributes": dict(tags)} if tags else None
 
     _, common = batch.flush()
     assert common == expected

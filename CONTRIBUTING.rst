@@ -88,9 +88,8 @@ tests if you’re implementing a feature!
 Coding Style Guidelines
 -----------------------
 
-Our code base is formatted according to
-`black <https://github.com/psf/black>`__ and linted with
-`flake8 <https://github.com/PyCQA/flake8>`__.
+Our code base is formatted and linted with
+`ruff <https://github.com/astral-sh/ruff>`__
 
 Testing Guidelines
 ------------------

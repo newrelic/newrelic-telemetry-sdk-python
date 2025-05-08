@@ -33,17 +33,9 @@ try:
 except ImportError:  # pragma: no cover
     __version__ = "unknown"
 
-USER_AGENT = "NewRelic-Python-TelemetrySDK/{}".format(__version__)
+USER_AGENT = f"NewRelic-Python-TelemetrySDK/{__version__}"
 
-__all__ = (
-    "EventClient",
-    "HTTPError",
-    "HTTPResponse",
-    "HTTPSConnectionPool",
-    "LogClient",
-    "MetricClient",
-    "SpanClient",
-)
+__all__ = ("EventClient", "HTTPError", "HTTPResponse", "HTTPSConnectionPool", "LogClient", "MetricClient", "SpanClient")
 
 
 class HTTPError(ValueError):
@@ -71,7 +63,7 @@ class HTTPResponse(urllib3.HTTPResponse):
     @property
     def ok(self):
         """Return true if status code indicates success"""
-        return 200 <= self.status < 300
+        return 200 <= self.status < 300  # noqa: PLR2004
 
     def raise_for_status(self):
         """Raise an exception for an unsuccessful HTTP status code
@@ -86,7 +78,7 @@ class HTTPResponse(urllib3.HTTPResponse):
 HTTPSConnectionPool = urllib3.HTTPSConnectionPool
 
 
-class Client(object):
+class Client:
     """HTTP Client for interacting with New Relic APIs
 
     This class is used to send data to the New Relic APIs over HTTP. This class
@@ -118,17 +110,12 @@ class Client(object):
 
     def __init__(self, license_key, host=None, port=443, **connection_pool_kwargs):
         if not license_key:
-            raise ValueError(f"Invalid license key: {license_key}")
+            msg = f"Invalid license key: {license_key}"
+            raise ValueError(msg)
 
         host = host or self.HOST
         headers = self.HEADERS.copy()
-        headers.update(
-            {
-                "Api-Key": license_key,
-                "Content-Encoding": "gzip",
-                "Content-Type": "application/json",
-            }
-        )
+        headers.update({"Api-Key": license_key, "Content-Encoding": "gzip", "Content-Type": "application/json"})
         retries = urllib3.Retry(total=False, connect=None, read=None, redirect=0, status=None)
 
         proxy, proxy_headers = self._parse_proxy_settings(connection_pool_kwargs)
@@ -167,11 +154,9 @@ class Client(object):
             _logger.warning("Ignoring environment proxy settings as a proxy was found in connection kwargs.")
         elif proxy:
             proxy = parse_url(proxy)
-            _logger.info("Using proxy host={0!r} port={1!r}".format(proxy.host, proxy.port))
+            _logger.info("Using proxy host=%r port=%r", proxy.host, proxy.port)
             if proxy.scheme.lower() != "http":
-                _logger.warning(
-                    "Contacting https destinations through " "{} proxies is not supported.".format(proxy.scheme)
-                )
+                _logger.warning("Contacting https destinations through %s proxies is not supported.", proxy.scheme)
                 proxy = None
             elif proxy.auth:
                 # https://tools.ietf.org/html/rfc7617
@@ -203,7 +188,7 @@ class Client(object):
         :param product_version: The version string of the product in use
         :type product_version: str
         """
-        product_ua_header = " {}/{}".format(product, product_version)
+        product_ua_header = f" {product}/{product_version}"
         self._headers["user-agent"] += product_ua_header
 
     def close(self):
@@ -261,7 +246,8 @@ class Client(object):
         payload = self._create_payload(items, common)
         urllib3_response = self._pool.urlopen("POST", self.PATH, body=payload, headers=headers, timeout=timeout)
         if not isinstance(urllib3_response, urllib3.HTTPResponse):
-            raise ValueError("Expected urllib3.HTTPResponse, got {}".format(type(urllib3_response)))
+            exc_msg = f"Expected urllib3.HTTPResponse, got {type(urllib3_response)}"
+            raise TypeError(exc_msg)
 
         return HTTPResponse(urllib3_response)
 
@@ -342,7 +328,7 @@ class EventClient(Client):
     HOST = "insights-collector.newrelic.com"
     PATH = "/v1/accounts/events"
 
-    def _create_payload(self, items, common):
+    def _create_payload(self, items, common):  # noqa: ARG002
         payload = json.dumps(items)
         if not isinstance(payload, bytes):
             payload = payload.encode("utf-8")
@@ -359,7 +345,7 @@ class EventClient(Client):
 
         :rtype: HTTPResponse
         """
-        return super(EventClient, self).send_batch(items, None, timeout=timeout)
+        return super().send_batch(items, None, timeout=timeout)
 
 
 class LogClient(Client):

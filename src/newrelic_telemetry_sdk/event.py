@@ -33,7 +33,7 @@ class Event(dict):
         timestamp = int(timestamp_ms or (time.time() * 1000))
         if tags:
             self.update(tags)
-        super(Event, self).__init__(eventType=event_type, timestamp=timestamp)
+        super().__init__(eventType=event_type, timestamp=timestamp)
 
     def copy(self):
         cls = type(self)

@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
 import time
 
+import pytest
 
-@pytest.fixture()
+
+@pytest.fixture
 def freeze_time(monkeypatch):
     monkeypatch.setattr(time, "time", lambda: 2.0)

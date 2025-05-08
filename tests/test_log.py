@@ -27,13 +27,7 @@ class MyError(Exception):
     pass
 
 
-BASE_RECORD_DICT = {
-    "name": "test_record",
-    "levelname": "WARNING",
-    "pathname": "/",
-    "lineno": 12,
-    "msg": "message",
-}
+BASE_RECORD_DICT = {"name": "test_record", "levelname": "WARNING", "pathname": "/", "lineno": 12, "msg": "message"}
 
 
 @pytest.mark.parametrize("extras", ({}, {"extra": "a little bit"}))
@@ -59,10 +53,7 @@ def test_log_extract_data(extras):
     assert output == expected_output
 
 
-@pytest.mark.parametrize(
-    "error_cls",
-    (ValueError, MyError),
-)
+@pytest.mark.parametrize("error_cls", (ValueError, MyError))
 def test_log_extract_data_exception(error_cls):
     try:
         raise error_cls("uh oh")
@@ -73,26 +64,17 @@ def test_log_extract_data_exception(error_cls):
     # Log is instantiated here to ensure a staticmethod is used
     output = Log("").extract_record_data(record)
 
-    cls_name = ".".join((error_cls.__module__, error_cls.__name__))
+    cls_name = f"{error_cls.__module__}.{error_cls.__name__}"
 
     assert output["error.class"] == cls_name
     assert output["error.message"] == "uh oh"
     assert 'raise error_cls("uh oh")\n' in output["error.stack"]
 
 
-@pytest.mark.parametrize(
-    "attributes",
-    (
-        {},
-        {"foo": "bar"},
-    ),
-)
+@pytest.mark.parametrize("attributes", ({}, {"foo": "bar"}))
 def test_log_creation(attributes):
     log = Log("message", timestamp=1, **attributes)
-    expected = {
-        "timestamp": 1,
-        "message": "message",
-    }
+    expected = {"timestamp": 1, "message": "message"}
     if attributes:
         expected["attributes"] = attributes
     assert dict(log) == expected
@@ -100,10 +82,7 @@ def test_log_creation(attributes):
 
 def test_log_default_timestamp(freeze_time):
     log = Log("message")
-    assert dict(log) == {
-        "message": "message",
-        "timestamp": 2000,
-    }
+    assert dict(log) == {"message": "message", "timestamp": 2000}
 
 
 def test_log_from_log_record():

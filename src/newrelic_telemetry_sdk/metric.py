@@ -61,6 +61,7 @@ class Metric(dict):
         """Metric Interval"""
         if "interval.ms" in self:
             return self["interval.ms"]
+        return None
 
     @property
     def start_time_ms(self):
@@ -72,6 +73,7 @@ class Metric(dict):
         """Metric timestamp"""
         if "timestamp" in self:
             return self["timestamp"] + self.get("interval.ms", 0)
+        return None
 
     @property
     def tags(self):
@@ -104,7 +106,7 @@ class GaugeMetric(Metric):
     """
 
     def __init__(self, name, value, tags=None, end_time_ms=DEFAULT):
-        super(GaugeMetric, self).__init__(name, value, None, tags, end_time_ms)
+        super().__init__(name, value, None, tags, end_time_ms)
 
 
 class CountMetric(Metric):
@@ -136,7 +138,7 @@ class CountMetric(Metric):
     """
 
     def __init__(self, name, value, interval_ms, tags=None, end_time_ms=DEFAULT):
-        super(CountMetric, self).__init__(name, value, interval_ms, tags, end_time_ms)
+        super().__init__(name, value, interval_ms, tags, end_time_ms)
         self["type"] = "count"
 
 
@@ -176,7 +178,7 @@ class SummaryMetric(Metric):
         [('count', 1), ('max', 0.2), ('min', 0.2), ('sum', 0.2)]
     """
 
-    def __init__(self, name, count, sum, min, max, interval_ms, tags=None, end_time_ms=DEFAULT):
+    def __init__(self, name, count, sum, min, max, interval_ms, tags=None, end_time_ms=DEFAULT):  # noqa: A002
         value = {"count": count, "sum": sum, "min": min, "max": max}
-        super(SummaryMetric, self).__init__(name, value, interval_ms, tags, end_time_ms)
+        super().__init__(name, value, interval_ms, tags, end_time_ms)
         self["type"] = "summary"

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Configuration file for the Sphinx documentation builder.
 #
@@ -14,11 +13,10 @@
 
 import newrelic_telemetry_sdk
 
-
 # -- Project information -----------------------------------------------------
 
 project = "newrelic-telemetry-sdk"
-copyright = "2019, New Relic"
+copyright = "2019, New Relic"  # noqa: A001
 author = "New Relic"
 
 # The short X.Y version
@@ -36,12 +34,7 @@ release = newrelic_telemetry_sdk.__version__
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.intersphinx",
-    "sphinx.ext.viewcode",
-    "sphinx.ext.githubpages",
-]
+extensions = ["sphinx.ext.autodoc", "sphinx.ext.intersphinx", "sphinx.ext.viewcode", "sphinx.ext.githubpages"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

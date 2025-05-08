@@ -16,7 +16,7 @@ import threading
 import time
 
 
-class MetricBatch(object):
+class MetricBatch:
     """Maps a metric identity to its aggregated value
 
     This is used to hold unfinalized metrics for further aggregation until they

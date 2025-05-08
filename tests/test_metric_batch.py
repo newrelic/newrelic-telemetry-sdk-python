@@ -13,9 +13,11 @@
 # limitations under the License.
 
 import time
+
 import pytest
-from newrelic_telemetry_sdk.metric_batch import MetricBatch
 from utils import CustomMapping
+
+from newrelic_telemetry_sdk.metric_batch import MetricBatch
 
 
 class VerifyLockMetricBatch(MetricBatch):
@@ -96,10 +98,7 @@ def test_merge_metric(record_method, value_1, value_2, final_value):
     (
         (("record_gauge", "name", 1, None), ("record_count", "name", 1, None)),
         (("record_gauge", "foo", 1, None), ("record_gauge", "bar", 1, None)),
-        (
-            ("record_gauge", "foo", 1, {"foo": 1}),
-            ("record_gauge", "foo", 1, {"foo": 2}),
-        ),
+        (("record_gauge", "foo", 1, {"foo": 1}), ("record_gauge", "foo", 1, {"foo": 2})),
     ),
 )
 def test_different_metric(metric_a, metric_b):
@@ -114,21 +113,14 @@ def test_different_metric(metric_a, metric_b):
     assert len(batch._internal_batch) == 2
 
 
-@pytest.mark.parametrize(
-    "tags",
-    (
-        None,
-        {"foo": "bar"},
-        CustomMapping(),
-    ),
-)
+@pytest.mark.parametrize("tags", (None, {"foo": "bar"}, CustomMapping()))
 def test_flush(monkeypatch, tags):
-    DELTA = 4.0
+    delta = 4.0
     current_t = [1.0]
 
     def _time():
-        # Move time forward by DELTA on every call
-        current_t[0] *= DELTA
+        # Move time forward by delta on every call
+        current_t[0] *= delta
         return current_t[0]
 
     monkeypatch.setattr(time, "time", _time, raising=True)
@@ -161,7 +153,7 @@ def test_flush(monkeypatch, tags):
             assert metric["attributes"] == {"foo": "bar"}
             assert metric["value"] == 1
         else:
-            assert False, metric
+            raise AssertionError(f"Unexpected metric type: {metric}")
 
     assert common["timestamp"] == 4000
     assert common["interval.ms"] == 60000

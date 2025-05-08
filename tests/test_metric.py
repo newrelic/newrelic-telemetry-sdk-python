@@ -13,13 +13,9 @@
 # limitations under the License.
 
 import pytest
-from newrelic_telemetry_sdk.metric import (
-    Metric,
-    GaugeMetric,
-    CountMetric,
-    SummaryMetric,
-)
 from utils import CustomMapping
+
+from newrelic_telemetry_sdk.metric import CountMetric, GaugeMetric, Metric, SummaryMetric
 
 
 def test_gauge_metric_defaults(freeze_time):
@@ -82,16 +78,8 @@ def test_metric_optional(arg_name, arg_value, metric_key, metric_value):
     "kwargs, metric_key, attribute_name",
     (
         ({"name": "a", "value": 0, "interval_ms": None}, "interval.ms", "interval_ms"),
-        (
-            {"name": "a", "value": 0, "interval_ms": 0, "end_time_ms": None},
-            "timestamp",
-            "start_time_ms",
-        ),
-        (
-            {"name": "a", "value": 0, "interval_ms": 0, "end_time_ms": None},
-            "timestamp",
-            "end_time_ms",
-        ),
+        ({"name": "a", "value": 0, "interval_ms": 0, "end_time_ms": None}, "timestamp", "start_time_ms"),
+        ({"name": "a", "value": 0, "interval_ms": 0, "end_time_ms": None}, "timestamp", "end_time_ms"),
     ),
 )
 def test_metric_none(kwargs, metric_key, attribute_name):
@@ -113,7 +101,7 @@ def test_metric_none(kwargs, metric_key, attribute_name):
     ),
 )
 def test_metric_accessors(attribute_name, attribute_value):
-    if attribute_name == "interval_ms" and attribute_value is None:
+    if attribute_name == "interval_ms" and attribute_value is None:  # noqa: SIM108
         interval = None
     else:
         interval = 1000
