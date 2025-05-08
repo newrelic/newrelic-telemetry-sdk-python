@@ -22,9 +22,11 @@ from newrelic_telemetry_sdk.metric_batch import MetricBatch
 from newrelic_telemetry_sdk.span import Span
 
 try:
-    from newrelic_telemetry_sdk.version import version as __version__
+    from newrelic_telemetry_sdk.version import __version__, __version_tuple__
 except ImportError:  # pragma: no cover
     __version__ = "unknown"  # pragma: no cover
+    __version_tuple__ = (0, 0, 0, "unknown")  # pragma: no cover
+
 
 __all__ = (
     "CountMetric",
