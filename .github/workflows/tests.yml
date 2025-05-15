@@ -113,12 +113,6 @@ jobs:
         if-no-files-found: error
         retention-days: 1
 
-    - name: Lint
-      run: tox -vv
-      env:
-        TOXENV: lint
-      if: matrix.python.version == 3.9 && matrix.os == 'ubuntu-latest'
-    
     - name: Docs
       run: tox -vv
       env:

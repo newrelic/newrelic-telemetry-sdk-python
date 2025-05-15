@@ -101,7 +101,9 @@ testing. The repository uses doctests in `src/ <src/>`__ and tests in
 You can run all of these tests, and verify that your code is formatted
 correctly by running:
 
-``tox -epy,lint``
+``tox -e py``
+
+``ruff format && ruff check --fix``
 
 License
 -------
