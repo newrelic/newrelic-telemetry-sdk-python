@@ -25,72 +25,71 @@ jobs:
     permissions:
       contents: read
     steps:
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # 4.2.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # 4.2.2
 
-    - uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # 5.5.0
-      with:
-        python-version: '3.x'
-        architecture: x64
+      - uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # 5.5.0
+        with:
+          python-version: "3.x"
+          architecture: x64
 
-    - name: Install Dependencies
-      run: |
-        pip install -U pip
-        pip install -U build
+      - name: Install Dependencies
+        run: |
+          pip install -U pip
+          pip install -U build
 
-    - name: Build Package
-      run: |
-        python -m build
+      - name: Build Package
+        run: |
+          python -m build
 
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # 4.6.2
-      with:
-        name: dist
-        path: ./dist/*
-        if-no-files-found: error
-        retention-days: 1
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # 4.6.2
+        with:
+          name: dist
+          path: ./dist/*
+          if-no-files-found: error
+          retention-days: 1
 
   publish:
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
-      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
       attestations: write
     needs: [build]
     steps:
-    - uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # 4.2.1
-      with:
-        name: dist
-        path: ./dist/
+      - uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # 4.2.1
+        with:
+          name: dist
+          path: ./dist/
 
-    - name: Upload Package
-      uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # 1.12.4
+      - name: Upload Package
+        uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # 1.12.4
 
   docs:
-
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # 4.2.2
-    - uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # 5.5.0
-      with:
-        python-version: '3.x'
-        architecture: x64
-    - name: Prepare git directory for docs build
-      run: |
-        git config --local user.name "github-actions[bot]"
-        git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        git fetch origin gh-pages && \
-        git worktree add --no-checkout -B gh-pages docs/_build origin/gh-pages
-    - name: Install Dependencies
-      run: |
-        pip install -U pip
-        pip install -U wheel setuptools tox
-    - name: Generate docs
-      run: tox -e docs
-    - name: Publish docs
-      run: |
-        git add --all
-        git commit --amend --no-edit --date=now
-        git push -f
-      working-directory: ./docs/_build
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # 4.2.2
+      - uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # 5.5.0
+        with:
+          python-version: "3.x"
+          architecture: x64
+      - name: Prepare git directory for docs build
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages && \
+          git worktree add --no-checkout -B gh-pages docs/_build origin/gh-pages
+      - name: Install Dependencies
+        run: |
+          pip install -U pip
+          pip install -U wheel setuptools tox
+      - name: Generate docs
+        run: tox -e docs
+      - name: Publish docs
+        run: |
+          git add --all
+          git commit --amend --no-edit --date=now
+          git push -f
+        working-directory: ./docs/_build

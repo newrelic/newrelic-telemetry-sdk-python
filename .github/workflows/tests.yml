@@ -19,7 +19,7 @@ on:
     branches:
       - main
     tags-ignore:
-      - '**'
+      - "**"
   pull_request:
 
 jobs:
@@ -64,21 +64,21 @@ jobs:
       fail-fast: False
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python: 
-        - version: "3.8"
-          tox-prefix: py38
-        - version: "3.9"
-          tox-prefix: py39
-        - version: "3.10"
-          tox-prefix: py310
-        - version: "3.11"
-          tox-prefix: py311
-        - version: "3.12"
-          tox-prefix: py312
-        - version: "3.13"
-          tox-prefix: py313
-        - version: "pypy3.10"
-          tox-prefix: pypy310
+        python:
+          - version: "3.8"
+            tox-prefix: py38
+          - version: "3.9"
+            tox-prefix: py39
+          - version: "3.10"
+            tox-prefix: py310
+          - version: "3.11"
+            tox-prefix: py311
+          - version: "3.12"
+            tox-prefix: py312
+          - version: "3.13"
+            tox-prefix: py313
+          - version: "pypy3.10"
+            tox-prefix: pypy310
 
     runs-on: ${{ matrix.os }}
     timeout-minutes: 5
@@ -86,41 +86,35 @@ jobs:
       contents: read
 
     steps:
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # 4.2.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # 4.2.2
 
-    - uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # 5.5.0
-      with:
-        python-version: ${{ matrix.python.version }}
-        architecture: x64
+      - uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # 5.5.0
+        with:
+          python-version: ${{ matrix.python.version }}
+          architecture: x64
 
-    - name: Install Dependencies
-      run: |
-        pip install -U pip
-        pip install -U wheel setuptools tox coverage
+      - name: Install Dependencies
+        run: |
+          pip install -U pip
+          pip install -U wheel setuptools tox coverage
 
-    - name: Test
-      run: tox -vv -f ${{ matrix.python.tox-prefix }} -- --cov-report=xml
-      env:
-        TOX_DISCOVER: "patch-for-windows-pypy3"
+      - name: Test
+        run: tox -vv -f ${{ matrix.python.tox-prefix }} -- --cov-report=xml
+        env:
+          TOX_DISCOVER: "patch-for-windows-pypy3"
 
-    - name: Upload Coverage Artifacts
-      if: runner.os == 'Linux'
-      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # 4.6.2
-      with:
-        name: coverage-${{ github.job }}-${{ strategy.job-index }}
-        path: ./**/.coverage.*
-        include-hidden-files: true
-        if-no-files-found: error
-        retention-days: 1
+      - name: Upload Coverage Artifacts
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # 4.6.2
+        with:
+          name: coverage-${{ github.job }}-${{ strategy.job-index }}
+          path: ./**/.coverage.*
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
 
-    - name: Lint
-      run: tox -vv
-      env:
-        TOXENV: lint
-      if: matrix.python.version == 3.9 && matrix.os == 'ubuntu-latest'
-    
-    - name: Docs
-      run: tox -vv
-      env:
-        TOXENV: docs
-      if: matrix.python.version == 3.9 && matrix.os == 'ubuntu-latest'
+      - name: Docs
+        run: tox -vv
+        env:
+          TOXENV: docs
+        if: matrix.python.version == 3.9 && matrix.os == 'ubuntu-latest'

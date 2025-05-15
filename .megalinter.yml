@@ -1,0 +1,38 @@
+# Copyright 2010 New Relic, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Configuration file for Mega-Linter
+# See all available variables at https://oxsecurity.github.io/megalinter/configuration/ and in linters documentation
+
+APPLY_FIXES: none # all, none, or list of linter keys
+DEFAULT_BRANCH: main # Usually master or main
+SHOW_ELAPSED_TIME: true
+FILEIO_REPORTER: false
+PRINT_ALPACA: false
+CLEAR_REPORT_FOLDER: true
+VALIDATE_ALL_CODEBASE: true
+IGNORE_GITIGNORED_FILES: true
+FAIL_IF_MISSING_LINTER_IN_FLAVOR: true
+
+ENABLE_LINTERS: # If you use ENABLE_LINTERS variable, all other linters will be disabled by default
+  - ACTION_ACTIONLINT
+  - PYTHON_RUFF
+  - PYTHON_RUFF_FORMAT
+  - YAML_PRETTIER
+  - YAML_V8R
+  - YAML_YAMLLINT
+
+PYTHON_DEFAULT_STYLE: ruff
+PYTHON_RUFF_CONFIG_FILE: pyproject.toml
+PYTHON_RUFF_FORMAT_CONFIG_FILE: pyproject.toml
