@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # 4.2.2
 
@@ -38,11 +40,13 @@ jobs:
     environment: pypi
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+      attestations: write
     needs: [build]
     steps:
     - uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # 4.2.1
       with:
         name: dist
+        path: ./dist/
 
     - name: Upload Package
       uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # 1.12.4
@@ -50,6 +54,8 @@ jobs:
   docs:
 
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # 4.2.2
     - uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # 5.5.0
