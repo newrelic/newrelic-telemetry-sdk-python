@@ -29,18 +29,18 @@ default_install_hook_types:
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.11.5
+    rev: v0.13.1
     hooks:
       # Run the linter.
-      - id: ruff
-        args: [--fix]
+      - id: ruff-check
+        args: [--fix, --exit-non-zero-on-fix]
         stages: [pre-push]
       # Run the formatter.
       - id: ruff-format
         stages: [pre-push]
 
   - repo: https://github.com/google/addlicense
-    rev: 55a521bf81c24480094950caa3566548fa63875e
+    rev: v1.2.0
     hooks:
       - id: addlicense
         args:
