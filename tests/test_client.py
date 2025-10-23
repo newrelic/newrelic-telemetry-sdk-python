@@ -21,11 +21,11 @@ import uuid
 import zlib
 
 import pytest
+from newrelic_telemetry_sdk.version import version
 from urllib3 import HTTPConnectionPool, Retry
 from urllib3 import HTTPResponse as URLLib3HTTPResponse
 
 from newrelic_telemetry_sdk.client import EventClient, HTTPError, HTTPResponse, LogClient, MetricClient, SpanClient
-from newrelic_telemetry_sdk.version import version
 
 SPAN = {
     "id": str(uuid.uuid4()),
