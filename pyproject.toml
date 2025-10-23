@@ -28,17 +28,16 @@ readme = "README.rst"
 #     "LICENSE",
 #     "THIRD_PARTY_NOTICES.rst",
 # ]
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 dependencies = ['urllib3<3,>=1.26']
 classifiers = [
     "Development Status :: 3 - Alpha",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
     "Topic :: System :: Monitoring",
