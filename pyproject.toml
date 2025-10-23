@@ -75,7 +75,6 @@ git_describe_command = "git describe --dirty --tags --long --match '*.*.*'"
 [tool.ruff]
 output-format = "grouped"
 line-length = 120
-target-version = "py37"
 force-exclude = true  # Fixes issue with megalinter config preventing exclusion of files
 extend-exclude = [
     "setup.py",
