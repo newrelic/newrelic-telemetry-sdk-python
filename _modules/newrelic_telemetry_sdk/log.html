@@ -1,0 +1,277 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>newrelic_telemetry_sdk.log &mdash; newrelic-telemetry-sdk 0.9.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=39bb1c6d"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            newrelic-telemetry-sdk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../advanced.html">Advanced Usage</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../proxy.html">Proxy Support</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">newrelic-telemetry-sdk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">newrelic_telemetry_sdk.log</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for newrelic_telemetry_sdk.log</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2019 New Relic, Inc.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">cStringIO</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringIO</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringIO</span>
+
+<span class="n">DEFAULT_LOG_RECORD_KEYS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">makeLogRecord</span><span class="p">({})))</span>
+
+
+<div class="viewcode-block" id="Log">
+<a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.log.Log">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Log</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A log representing a log event in the New Relic logging UI</span>
+
+<span class="sd">    This data structure represents a single log event. These objects, when JSON</span>
+<span class="sd">    serialized, can be sent to New Relic&#39;s log api.</span>
+
+<span class="sd">    :param message: The log message.</span>
+<span class="sd">    :type message: str</span>
+<span class="sd">    :param timestamp: (optional) The unix timestamp in milliseconds indicating</span>
+<span class="sd">        when the log message was generated. Defaults to now.</span>
+<span class="sd">    :type timestamp:</span>
+<span class="sd">    :param \\**attributes: Additional attribute name=value pairs provided as keyword</span>
+<span class="sd">        arguments.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">attributes</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;message&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">message</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span> <span class="ow">or</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">attributes</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attributes</span>
+
+<div class="viewcode-block" id="Log.extract_record_data">
+<a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.log.Log.extract_record_data">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extract_record_data</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extracts data from a logging.LogRecord into a flat dictionary</span>
+
+<span class="sd">        :param record: The LogRecord from which to extract data.</span>
+<span class="sd">        :type record: logging.LogRecord</span>
+
+<span class="sd">        &gt;&gt;&gt; import logging</span>
+<span class="sd">        &gt;&gt;&gt; record = logging.makeLogRecord({&quot;msg&quot;: &quot;Hello World&quot;})</span>
+<span class="sd">        &gt;&gt;&gt; result = Log.extract_record_data(record)</span>
+<span class="sd">        &gt;&gt;&gt; isinstance(result, dict)</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; result[&quot;message&quot;]</span>
+<span class="sd">        &#39;Hello World&#39;</span>
+
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">created</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">),</span>
+            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">getMessage</span><span class="p">(),</span>
+            <span class="s2">&quot;log.level&quot;</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">levelname</span><span class="p">,</span>
+            <span class="s2">&quot;logger.name&quot;</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;thread.id&quot;</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">thread</span><span class="p">,</span>
+            <span class="s2">&quot;thread.name&quot;</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">threadName</span><span class="p">,</span>
+            <span class="s2">&quot;process.id&quot;</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">process</span><span class="p">,</span>
+            <span class="s2">&quot;process.name&quot;</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">processName</span><span class="p">,</span>
+            <span class="s2">&quot;file.name&quot;</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">pathname</span><span class="p">,</span>
+            <span class="s2">&quot;line.number&quot;</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">lineno</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">DEFAULT_LOG_RECORD_KEYS</span><span class="p">):</span>
+            <span class="n">default_keys</span> <span class="o">=</span> <span class="n">DEFAULT_LOG_RECORD_KEYS</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">default_keys</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">))</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="n">output</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">exc_info</span><span class="p">:</span>
+            <span class="n">error_cls</span><span class="p">,</span> <span class="n">error_value</span><span class="p">,</span> <span class="n">error_tb</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">exc_info</span>
+            <span class="n">output</span><span class="p">[</span><span class="s2">&quot;error.class&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">error_cls</span><span class="p">,</span> <span class="s2">&quot;__module__&quot;</span><span class="p">,</span> <span class="s2">&quot;builtins&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">error_cls</span><span class="o">.</span><span class="vm">__name__</span>
+            <span class="n">output</span><span class="p">[</span><span class="s2">&quot;error.message&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">error_value</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">()</span>
+            <span class="n">traceback</span><span class="o">.</span><span class="n">print_exception</span><span class="p">(</span><span class="n">error_cls</span><span class="p">,</span> <span class="n">error_value</span><span class="p">,</span> <span class="n">error_tb</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+            <span class="n">output</span><span class="p">[</span><span class="s2">&quot;error.stack&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="Log.from_record">
+<a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.log.Log.from_record">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_record</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a logging.LogRecord into a Log</span>
+
+<span class="sd">        This converts a :py:class:`logging.LogRecord` to a New Relic</span>
+<span class="sd">        :py:class:`Log`, extracting any dimensions/labels from the record.</span>
+
+<span class="sd">        :param record: The LogRecord to convert.</span>
+<span class="sd">        :type record: logging.LogRecord</span>
+
+<span class="sd">        &gt;&gt;&gt; import logging</span>
+<span class="sd">        &gt;&gt;&gt; record = logging.makeLogRecord({&quot;msg&quot;: &quot;Hello World&quot;})</span>
+<span class="sd">        &gt;&gt;&gt; log = Log.from_record(record)</span>
+<span class="sd">        &gt;&gt;&gt; log[&quot;message&quot;]</span>
+<span class="sd">        &#39;Hello World&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="bp">cls</span><span class="o">.</span><span class="n">extract_record_data</span><span class="p">(</span><span class="n">record</span><span class="p">))</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="NewRelicLogFormatter">
+<a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.log.NewRelicLogFormatter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NewRelicLogFormatter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;New Relic Log Formatter</span>
+
+<span class="sd">    The New Relic log formatter converts LogRecord instances to strings via the</span>
+<span class="sd">    format method.</span>
+
+<span class="sd">    The New Relic log format allows for arbitrary key/value pairs to be logged.</span>
+<span class="sd">    This formatter automatically extracts all relevant information from the</span>
+<span class="sd">    LogRecord (including extras) and places those key/values into a JSON</span>
+<span class="sd">    object.</span>
+
+<span class="sd">    Since the format is not configurable, all formatter constructor arguments</span>
+<span class="sd">    are ignored.</span>
+
+<span class="sd">    Usage::</span>
+
+<span class="sd">        &gt;&gt;&gt; import logging</span>
+<span class="sd">        &gt;&gt;&gt; record = logging.makeLogRecord({})</span>
+<span class="sd">        &gt;&gt;&gt; formatter = NewRelicLogFormatter()</span>
+<span class="sd">        &gt;&gt;&gt; result = formatter.format(record)</span>
+<span class="sd">        &gt;&gt;&gt; isinstance(result, str)</span>
+<span class="sd">        True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># noqa: ARG002</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="NewRelicLogFormatter.format">
+<a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.log.NewRelicLogFormatter.format">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Format the specified record as text</span>
+
+<span class="sd">        :param record: The LogRecord to format.</span>
+<span class="sd">        :type record: logging.LogRecord</span>
+
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">Log</span><span class="o">.</span><span class="n">extract_record_data</span><span class="p">(</span><span class="n">record</span><span class="p">),</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;:&quot;</span><span class="p">))</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, New Relic.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

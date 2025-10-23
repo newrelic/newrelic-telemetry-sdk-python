@@ -21,6 +21,8 @@ Batches are broken out by data type that they contain:
 +----------------------------------------------------------+---------------------------------------------------------------------------+
 | :class:`Event <newrelic_telemetry_sdk.event.Event>`      | :class:`EventBatch <newrelic_telemetry_sdk.batch.EventBatch>`             |
 +----------------------------------------------------------+---------------------------------------------------------------------------+
+| :class:`Log <newrelic_telemetry_sdk.log.Log>`            | :class:`LogBatch <newrelic_telemetry_sdk.batch.LogBatch>`                 |
++----------------------------------------------------------+---------------------------------------------------------------------------+
 | :class:`Span <newrelic_telemetry_sdk.span.Span>`         | :class:`SpanBatch <newrelic_telemetry_sdk.batch.SpanBatch>`               |
 +----------------------------------------------------------+---------------------------------------------------------------------------+
 
@@ -53,7 +55,7 @@ Example
 ^^^^^^^
 The example code assumes you've set the following environment variables:
 
-* ``NEW_RELIC_INSERT_KEY``
+* ``NEW_RELIC_LICENSE_KEY``
 
 .. code-block:: python
 
@@ -61,7 +63,7 @@ The example code assumes you've set the following environment variables:
     import os
     from newrelic_telemetry_sdk import GaugeMetric, MetricBatch, MetricClient, Harvester
 
-    metric_client = MetricClient(os.environ['NEW_RELIC_INSERT_KEY'])
+    metric_client = MetricClient(os.environ['NEW_RELIC_LICENSE_KEY'])
     metric_batch = MetricBatch()
     metric_harvester = Harvester(metric_client, metric_batch)
 

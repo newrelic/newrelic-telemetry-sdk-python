@@ -1,0 +1,1290 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>urllib3.connectionpool &mdash; newrelic-telemetry-sdk 0.9.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=39bb1c6d"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            newrelic-telemetry-sdk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../advanced.html">Advanced Usage</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../proxy.html">Proxy Support</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">newrelic-telemetry-sdk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">urllib3.connectionpool</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for urllib3.connectionpool</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">errno</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">queue</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">weakref</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">socket</span><span class="w"> </span><span class="kn">import</span> <span class="n">timeout</span> <span class="k">as</span> <span class="n">SocketTimeout</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">TracebackType</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">._base_connection</span><span class="w"> </span><span class="kn">import</span> <span class="n">_TYPE_BODY</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPHeaderDict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._request_methods</span><span class="w"> </span><span class="kn">import</span> <span class="n">RequestMethods</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.connection</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BaseSSLError</span><span class="p">,</span>
+    <span class="ne">BrokenPipeError</span><span class="p">,</span>
+    <span class="n">DummyConnection</span><span class="p">,</span>
+    <span class="n">HTTPConnection</span><span class="p">,</span>
+    <span class="n">HTTPException</span><span class="p">,</span>
+    <span class="n">HTTPSConnection</span><span class="p">,</span>
+    <span class="n">ProxyConfig</span><span class="p">,</span>
+    <span class="n">_wrap_proxy_error</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.connection</span><span class="w"> </span><span class="kn">import</span> <span class="n">port_by_scheme</span> <span class="k">as</span> <span class="n">port_by_scheme</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ClosedPoolError</span><span class="p">,</span>
+    <span class="n">EmptyPoolError</span><span class="p">,</span>
+    <span class="n">FullPoolError</span><span class="p">,</span>
+    <span class="n">HostChangedError</span><span class="p">,</span>
+    <span class="n">InsecureRequestWarning</span><span class="p">,</span>
+    <span class="n">LocationValueError</span><span class="p">,</span>
+    <span class="n">MaxRetryError</span><span class="p">,</span>
+    <span class="n">NewConnectionError</span><span class="p">,</span>
+    <span class="n">ProtocolError</span><span class="p">,</span>
+    <span class="n">ProxyError</span><span class="p">,</span>
+    <span class="n">ReadTimeoutError</span><span class="p">,</span>
+    <span class="n">SSLError</span><span class="p">,</span>
+    <span class="ne">TimeoutError</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.response</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseHTTPResponse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.util.connection</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_connection_dropped</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.util.proxy</span><span class="w"> </span><span class="kn">import</span> <span class="n">connection_requires_http_tunnel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.util.request</span><span class="w"> </span><span class="kn">import</span> <span class="n">_TYPE_BODY_POSITION</span><span class="p">,</span> <span class="n">set_file_position</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.util.retry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Retry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.util.ssl_match_hostname</span><span class="w"> </span><span class="kn">import</span> <span class="n">CertificateError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.util.timeout</span><span class="w"> </span><span class="kn">import</span> <span class="n">_DEFAULT_TIMEOUT</span><span class="p">,</span> <span class="n">_TYPE_DEFAULT</span><span class="p">,</span> <span class="n">Timeout</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.util.url</span><span class="w"> </span><span class="kn">import</span> <span class="n">Url</span><span class="p">,</span> <span class="n">_encode_target</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.util.url</span><span class="w"> </span><span class="kn">import</span> <span class="n">_normalize_host</span> <span class="k">as</span> <span class="n">normalize_host</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.util.url</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_url</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.util.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_str</span>
+
+<span class="k">if</span> <span class="n">typing</span><span class="o">.</span><span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">ssl</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Self</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">._base_connection</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseHTTPConnection</span><span class="p">,</span> <span class="n">BaseHTTPSConnection</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="n">_TYPE_TIMEOUT</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">Timeout</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">_TYPE_DEFAULT</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+
+
+<span class="c1"># Pool objects</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConnectionPool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for all connection pools, such as</span>
+<span class="sd">    :class:`.HTTPConnectionPool` and :class:`.HTTPSConnectionPool`.</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">       ConnectionPool.urlopen() does not normalize or percent-encode target URIs</span>
+<span class="sd">       which is useful if your target server doesn&#39;t support percent-encoded</span>
+<span class="sd">       target URIs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">scheme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">QueueCls</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">LifoQueue</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">host</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">LocationValueError</span><span class="p">(</span><span class="s2">&quot;No host specified.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="n">_normalize_host</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">scheme</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scheme</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">port</span>
+
+        <span class="c1"># This property uses &#39;normalize_host()&#39; (not &#39;_normalize_host()&#39;)</span>
+        <span class="c1"># to avoid removing square braces around IPv6 addresses.</span>
+        <span class="c1"># This value is sent to `HTTPConnection.set_tunnel()` if called</span>
+        <span class="c1"># because square braces are required for HTTP CONNECT tunneling.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tunnel_host</span> <span class="o">=</span> <span class="n">normalize_host</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">scheme</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scheme</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(host=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="si">!r}</span><span class="s2">, port=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="si">!r}</span><span class="s2">)&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">exc_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="ne">BaseException</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">exc_val</span><span class="p">:</span> <span class="ne">BaseException</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">exc_tb</span><span class="p">:</span> <span class="n">TracebackType</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="c1"># Return False to re-raise any potential exceptions</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Close all pooled connections and disable the pool.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+
+<span class="c1"># This is taken from http://hg.python.org/cpython/file/7aaba721ebc0/Lib/socket.py#l252</span>
+<span class="n">_blocking_errnos</span> <span class="o">=</span> <span class="p">{</span><span class="n">errno</span><span class="o">.</span><span class="n">EAGAIN</span><span class="p">,</span> <span class="n">errno</span><span class="o">.</span><span class="n">EWOULDBLOCK</span><span class="p">}</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">HTTPConnectionPool</span><span class="p">(</span><span class="n">ConnectionPool</span><span class="p">,</span> <span class="n">RequestMethods</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Thread-safe connection pool for one host.</span>
+
+<span class="sd">    :param host:</span>
+<span class="sd">        Host used for this HTTP Connection (e.g. &quot;localhost&quot;), passed into</span>
+<span class="sd">        :class:`http.client.HTTPConnection`.</span>
+
+<span class="sd">    :param port:</span>
+<span class="sd">        Port used for this HTTP Connection (None is equivalent to 80), passed</span>
+<span class="sd">        into :class:`http.client.HTTPConnection`.</span>
+
+<span class="sd">    :param timeout:</span>
+<span class="sd">        Socket timeout in seconds for each individual connection. This can</span>
+<span class="sd">        be a float or integer, which sets the timeout for the HTTP request,</span>
+<span class="sd">        or an instance of :class:`urllib3.util.Timeout` which gives you more</span>
+<span class="sd">        fine-grained control over request timeouts. After the constructor has</span>
+<span class="sd">        been parsed, this is always a `urllib3.util.Timeout` object.</span>
+
+<span class="sd">    :param maxsize:</span>
+<span class="sd">        Number of connections to save that can be reused. More than 1 is useful</span>
+<span class="sd">        in multithreaded situations. If ``block`` is set to False, more</span>
+<span class="sd">        connections will be created but they will not be saved once they&#39;ve</span>
+<span class="sd">        been used.</span>
+
+<span class="sd">    :param block:</span>
+<span class="sd">        If set to True, no more than ``maxsize`` connections will be used at</span>
+<span class="sd">        a time. When no free connections are available, the call will block</span>
+<span class="sd">        until a connection has been released. This is a useful side effect for</span>
+<span class="sd">        particular multithreaded situations where one does not want to use more</span>
+<span class="sd">        than maxsize connections per host to prevent flooding.</span>
+
+<span class="sd">    :param headers:</span>
+<span class="sd">        Headers to include with all requests, unless other headers are given</span>
+<span class="sd">        explicitly.</span>
+
+<span class="sd">    :param retries:</span>
+<span class="sd">        Retry configuration to use by default with requests in this pool.</span>
+
+<span class="sd">    :param _proxy:</span>
+<span class="sd">        Parsed proxy URL, should not be used directly, instead, see</span>
+<span class="sd">        :class:`urllib3.ProxyManager`</span>
+
+<span class="sd">    :param _proxy_headers:</span>
+<span class="sd">        A dictionary with proxy headers, should not be used directly,</span>
+<span class="sd">        instead, see :class:`urllib3.ProxyManager`</span>
+
+<span class="sd">    :param \\**conn_kw:</span>
+<span class="sd">        Additional parameters are used to create fresh :class:`urllib3.connection.HTTPConnection`,</span>
+<span class="sd">        :class:`urllib3.connection.HTTPSConnection` instances.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">scheme</span> <span class="o">=</span> <span class="s2">&quot;http&quot;</span>
+    <span class="n">ConnectionCls</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">BaseHTTPConnection</span><span class="p">]</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">BaseHTTPSConnection</span><span class="p">]</span> <span class="o">=</span> <span class="n">HTTPConnection</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">host</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">timeout</span><span class="p">:</span> <span class="n">_TYPE_TIMEOUT</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">_DEFAULT_TIMEOUT</span><span class="p">,</span>
+        <span class="n">maxsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">block</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">headers</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">retries</span><span class="p">:</span> <span class="n">Retry</span> <span class="o">|</span> <span class="nb">bool</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">_proxy</span><span class="p">:</span> <span class="n">Url</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">_proxy_headers</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">_proxy_config</span><span class="p">:</span> <span class="n">ProxyConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">conn_kw</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">ConnectionPool</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+        <span class="n">RequestMethods</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timeout</span><span class="p">,</span> <span class="n">Timeout</span><span class="p">):</span>
+            <span class="n">timeout</span> <span class="o">=</span> <span class="n">Timeout</span><span class="o">.</span><span class="n">from_float</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">retries</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">retries</span> <span class="o">=</span> <span class="n">Retry</span><span class="o">.</span><span class="n">DEFAULT</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">retries</span> <span class="o">=</span> <span class="n">retries</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">:</span> <span class="n">queue</span><span class="o">.</span><span class="n">LifoQueue</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">QueueCls</span><span class="p">(</span><span class="n">maxsize</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">block</span> <span class="o">=</span> <span class="n">block</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span> <span class="o">=</span> <span class="n">_proxy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxy_headers</span> <span class="o">=</span> <span class="n">_proxy_headers</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxy_config</span> <span class="o">=</span> <span class="n">_proxy_config</span>
+
+        <span class="c1"># Fill the queue up so that doing get() on it will block properly</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">maxsize</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># These are mostly for testing and debugging purposes.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_connections</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_requests</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conn_kw</span> <span class="o">=</span> <span class="n">conn_kw</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="p">:</span>
+            <span class="c1"># Enable Nagle&#39;s algorithm for proxies, to avoid packet fragmentation.</span>
+            <span class="c1"># We cannot know if the user has added default socket options, so we cannot replace the</span>
+            <span class="c1"># list.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conn_kw</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;socket_options&quot;</span><span class="p">,</span> <span class="p">[])</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">conn_kw</span><span class="p">[</span><span class="s2">&quot;proxy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conn_kw</span><span class="p">[</span><span class="s2">&quot;proxy_config&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy_config</span>
+
+        <span class="c1"># Do not pass &#39;self&#39; as callback to &#39;finalize&#39;.</span>
+        <span class="c1"># Then the &#39;finalize&#39; would keep an endless living (leak) to self.</span>
+        <span class="c1"># By just passing a reference to the pool allows the garbage collector</span>
+        <span class="c1"># to free self if nobody else has a reference to it.</span>
+        <span class="n">pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span>
+
+        <span class="c1"># Close all the HTTPConnections in the pool before the</span>
+        <span class="c1"># HTTPConnectionPool object is garbage collected.</span>
+        <span class="n">weakref</span><span class="o">.</span><span class="n">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_close_pool_connections</span><span class="p">,</span> <span class="n">pool</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_new_conn</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseHTTPConnection</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a fresh :class:`HTTPConnection`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_connections</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s2">&quot;Starting new HTTP connection (</span><span class="si">%d</span><span class="s2">): </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_connections</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="ow">or</span> <span class="s2">&quot;80&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">conn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ConnectionCls</span><span class="p">(</span>
+            <span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span>
+            <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">connect_timeout</span><span class="p">,</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">conn_kw</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">conn</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_conn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseHTTPConnection</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a connection. Will return a pooled connection if one is available.</span>
+
+<span class="sd">        If no connections are available and :prop:`.block` is ``False``, then a</span>
+<span class="sd">        fresh connection is returned.</span>
+
+<span class="sd">        :param timeout:</span>
+<span class="sd">            Seconds to wait before giving up and raising</span>
+<span class="sd">            :class:`urllib3.exceptions.EmptyPoolError` if the pool is empty and</span>
+<span class="sd">            :prop:`.block` is ``True``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">conn</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ClosedPoolError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Pool is closed.&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">conn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>  <span class="c1"># self.pool is None</span>
+            <span class="k">raise</span> <span class="n">ClosedPoolError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Pool is closed.&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>  <span class="c1"># Defensive:</span>
+
+        <span class="k">except</span> <span class="n">queue</span><span class="o">.</span><span class="n">Empty</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">EmptyPoolError</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="p">,</span>
+                    <span class="s2">&quot;Pool is empty and a new connection can&#39;t be opened due to blocking mode.&quot;</span><span class="p">,</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+            <span class="k">pass</span>  <span class="c1"># Oh well, we&#39;ll create a new connection then</span>
+
+        <span class="c1"># If this is a persistent connection, check if it got disconnected</span>
+        <span class="k">if</span> <span class="n">conn</span> <span class="ow">and</span> <span class="n">is_connection_dropped</span><span class="p">(</span><span class="n">conn</span><span class="p">):</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Resetting dropped connection: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">)</span>
+            <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">conn</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new_conn</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_put_conn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conn</span><span class="p">:</span> <span class="n">BaseHTTPConnection</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Put a connection back into the pool.</span>
+
+<span class="sd">        :param conn:</span>
+<span class="sd">            Connection object for the current host and port as returned by</span>
+<span class="sd">            :meth:`._new_conn` or :meth:`._get_conn`.</span>
+
+<span class="sd">        If the pool is already full, the connection is closed and discarded</span>
+<span class="sd">        because we exceeded maxsize. If connections are discarded frequently,</span>
+<span class="sd">        then maxsize should be increased.</span>
+
+<span class="sd">        If the pool is closed, then the connection will be closed and discarded.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">return</span>  <span class="c1"># Everything is dandy, done.</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="c1"># self.pool is None.</span>
+                <span class="k">pass</span>
+            <span class="k">except</span> <span class="n">queue</span><span class="o">.</span><span class="n">Full</span><span class="p">:</span>
+                <span class="c1"># Connection never got put back into the pool, close it.</span>
+                <span class="k">if</span> <span class="n">conn</span><span class="p">:</span>
+                    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="p">:</span>
+                    <span class="c1"># This should never happen if you got the conn from self._get_conn</span>
+                    <span class="k">raise</span> <span class="n">FullPoolError</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="p">,</span>
+                        <span class="s2">&quot;Pool reached maximum size and no more connections are allowed.&quot;</span><span class="p">,</span>
+                    <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+
+                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;Connection pool is full, discarding connection: </span><span class="si">%s</span><span class="s2">. Connection pool size: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">qsize</span><span class="p">(),</span>
+                <span class="p">)</span>
+
+        <span class="c1"># Connection never got put back into the pool, close it.</span>
+        <span class="k">if</span> <span class="n">conn</span><span class="p">:</span>
+            <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_conn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conn</span><span class="p">:</span> <span class="n">BaseHTTPConnection</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called right before a request is made, after the socket is created.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_prepare_proxy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conn</span><span class="p">:</span> <span class="n">BaseHTTPConnection</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Nothing to do for HTTP connections.</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_timeout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="n">_TYPE_TIMEOUT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Timeout</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper that always returns a :class:`urllib3.util.Timeout`&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="n">_DEFAULT_TIMEOUT</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timeout</span><span class="p">,</span> <span class="n">Timeout</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">timeout</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># User passed us an int/float. This is for backwards compatibility,</span>
+            <span class="c1"># can be removed later</span>
+            <span class="k">return</span> <span class="n">Timeout</span><span class="o">.</span><span class="n">from_float</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_raise_timeout</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">err</span><span class="p">:</span> <span class="n">BaseSSLError</span> <span class="o">|</span> <span class="ne">OSError</span> <span class="o">|</span> <span class="n">SocketTimeout</span><span class="p">,</span>
+        <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">timeout_value</span><span class="p">:</span> <span class="n">_TYPE_TIMEOUT</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Is the error actually a timeout? Will raise a ReadTimeout or pass&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">err</span><span class="p">,</span> <span class="n">SocketTimeout</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ReadTimeoutError</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Read timed out. (read timeout=</span><span class="si">{</span><span class="n">timeout_value</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
+
+        <span class="c1"># See the above comment about EAGAIN in Python 3.</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">err</span><span class="p">,</span> <span class="s2">&quot;errno&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">err</span><span class="o">.</span><span class="n">errno</span> <span class="ow">in</span> <span class="n">_blocking_errnos</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ReadTimeoutError</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Read timed out. (read timeout=</span><span class="si">{</span><span class="n">timeout_value</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_request</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">conn</span><span class="p">:</span> <span class="n">BaseHTTPConnection</span><span class="p">,</span>
+        <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">:</span> <span class="n">_TYPE_BODY</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">headers</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">retries</span><span class="p">:</span> <span class="n">Retry</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">timeout</span><span class="p">:</span> <span class="n">_TYPE_TIMEOUT</span> <span class="o">=</span> <span class="n">_DEFAULT_TIMEOUT</span><span class="p">,</span>
+        <span class="n">chunked</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">response_conn</span><span class="p">:</span> <span class="n">BaseHTTPConnection</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">preload_content</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">decode_content</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">enforce_content_length</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseHTTPResponse</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform a request on a given urllib connection object taken from our</span>
+<span class="sd">        pool.</span>
+
+<span class="sd">        :param conn:</span>
+<span class="sd">            a connection from one of our connection pools</span>
+
+<span class="sd">        :param method:</span>
+<span class="sd">            HTTP request method (such as GET, POST, PUT, etc.)</span>
+
+<span class="sd">        :param url:</span>
+<span class="sd">            The URL to perform the request on.</span>
+
+<span class="sd">        :param body:</span>
+<span class="sd">            Data to send in the request body, either :class:`str`, :class:`bytes`,</span>
+<span class="sd">            an iterable of :class:`str`/:class:`bytes`, or a file-like object.</span>
+
+<span class="sd">        :param headers:</span>
+<span class="sd">            Dictionary of custom headers to send, such as User-Agent,</span>
+<span class="sd">            If-None-Match, etc. If None, pool headers are used. If provided,</span>
+<span class="sd">            these headers completely replace any pool-specific headers.</span>
+
+<span class="sd">        :param retries:</span>
+<span class="sd">            Configure the number of retries to allow before raising a</span>
+<span class="sd">            :class:`~urllib3.exceptions.MaxRetryError` exception.</span>
+
+<span class="sd">            Pass ``None`` to retry until you receive a response. Pass a</span>
+<span class="sd">            :class:`~urllib3.util.retry.Retry` object for fine-grained control</span>
+<span class="sd">            over different types of retries.</span>
+<span class="sd">            Pass an integer number to retry connection errors that many times,</span>
+<span class="sd">            but no other types of errors. Pass zero to never retry.</span>
+
+<span class="sd">            If ``False``, then retries are disabled and any exception is raised</span>
+<span class="sd">            immediately. Also, instead of raising a MaxRetryError on redirects,</span>
+<span class="sd">            the redirect response will be returned.</span>
+
+<span class="sd">        :type retries: :class:`~urllib3.util.retry.Retry`, False, or an int.</span>
+
+<span class="sd">        :param timeout:</span>
+<span class="sd">            If specified, overrides the default timeout for this one</span>
+<span class="sd">            request. It may be a float (in seconds) or an instance of</span>
+<span class="sd">            :class:`urllib3.util.Timeout`.</span>
+
+<span class="sd">        :param chunked:</span>
+<span class="sd">            If True, urllib3 will send the body using chunked transfer</span>
+<span class="sd">            encoding. Otherwise, urllib3 will send the body using the standard</span>
+<span class="sd">            content-length form. Defaults to False.</span>
+
+<span class="sd">        :param response_conn:</span>
+<span class="sd">            Set this to ``None`` if you will handle releasing the connection or</span>
+<span class="sd">            set the connection to have the response release it.</span>
+
+<span class="sd">        :param preload_content:</span>
+<span class="sd">          If True, the response&#39;s body will be preloaded during construction.</span>
+
+<span class="sd">        :param decode_content:</span>
+<span class="sd">            If True, will attempt to decode the body based on the</span>
+<span class="sd">            &#39;content-encoding&#39; header.</span>
+
+<span class="sd">        :param enforce_content_length:</span>
+<span class="sd">            Enforce content length checking. Body returned by server must match</span>
+<span class="sd">            value of Content-Length header, if present. Otherwise, raise error.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_requests</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">timeout_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_timeout</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="n">timeout_obj</span><span class="o">.</span><span class="n">start_connect</span><span class="p">()</span>
+        <span class="n">conn</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">Timeout</span><span class="o">.</span><span class="n">resolve_default_timeout</span><span class="p">(</span><span class="n">timeout_obj</span><span class="o">.</span><span class="n">connect_timeout</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Trigger any extra validation we need to do.</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_validate_conn</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="n">SocketTimeout</span><span class="p">,</span> <span class="n">BaseSSLError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_raise_timeout</span><span class="p">(</span><span class="n">err</span><span class="o">=</span><span class="n">e</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout_value</span><span class="o">=</span><span class="n">conn</span><span class="o">.</span><span class="n">timeout</span><span class="p">)</span>
+                <span class="k">raise</span>
+
+        <span class="c1"># _validate_conn() starts the connection to an HTTPS proxy</span>
+        <span class="c1"># so we need to wrap errors with &#39;ProxyError&#39; here too.</span>
+        <span class="k">except</span> <span class="p">(</span>
+            <span class="ne">OSError</span><span class="p">,</span>
+            <span class="n">NewConnectionError</span><span class="p">,</span>
+            <span class="ne">TimeoutError</span><span class="p">,</span>
+            <span class="n">BaseSSLError</span><span class="p">,</span>
+            <span class="n">CertificateError</span><span class="p">,</span>
+            <span class="n">SSLError</span><span class="p">,</span>
+        <span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">new_e</span><span class="p">:</span> <span class="ne">Exception</span> <span class="o">=</span> <span class="n">e</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="p">(</span><span class="n">BaseSSLError</span><span class="p">,</span> <span class="n">CertificateError</span><span class="p">)):</span>
+                <span class="n">new_e</span> <span class="o">=</span> <span class="n">SSLError</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="c1"># If the connection didn&#39;t successfully connect to it&#39;s proxy</span>
+            <span class="c1"># then there</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="n">new_e</span><span class="p">,</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="n">NewConnectionError</span><span class="p">,</span> <span class="ne">TimeoutError</span><span class="p">,</span> <span class="n">SSLError</span><span class="p">)</span>
+            <span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">conn</span> <span class="ow">and</span> <span class="n">conn</span><span class="o">.</span><span class="n">proxy</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">conn</span><span class="o">.</span><span class="n">has_connected_to_proxy</span><span class="p">):</span>
+                <span class="n">new_e</span> <span class="o">=</span> <span class="n">_wrap_proxy_error</span><span class="p">(</span><span class="n">new_e</span><span class="p">,</span> <span class="n">conn</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">scheme</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">new_e</span>
+
+        <span class="c1"># conn.request() calls http.client.*.request, not the method in</span>
+        <span class="c1"># urllib3.request. It also calls makefile (recv) on the socket.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">conn</span><span class="o">.</span><span class="n">request</span><span class="p">(</span>
+                <span class="n">method</span><span class="p">,</span>
+                <span class="n">url</span><span class="p">,</span>
+                <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+                <span class="n">chunked</span><span class="o">=</span><span class="n">chunked</span><span class="p">,</span>
+                <span class="n">preload_content</span><span class="o">=</span><span class="n">preload_content</span><span class="p">,</span>
+                <span class="n">decode_content</span><span class="o">=</span><span class="n">decode_content</span><span class="p">,</span>
+                <span class="n">enforce_content_length</span><span class="o">=</span><span class="n">enforce_content_length</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># We are swallowing BrokenPipeError (errno.EPIPE) since the server is</span>
+        <span class="c1"># legitimately able to close the connection after sending a valid response.</span>
+        <span class="c1"># With this behaviour, the received response is still readable.</span>
+        <span class="k">except</span> <span class="ne">BrokenPipeError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># MacOS/Linux</span>
+            <span class="c1"># EPROTOTYPE and ECONNRESET are needed on macOS</span>
+            <span class="c1"># https://erickt.github.io/blog/2014/11/19/adventures-in-debugging-a-potential-osx-kernel-bug/</span>
+            <span class="c1"># Condition changed later to emit ECONNRESET instead of only EPROTOTYPE.</span>
+            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="o">!=</span> <span class="n">errno</span><span class="o">.</span><span class="n">EPROTOTYPE</span> <span class="ow">and</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="o">!=</span> <span class="n">errno</span><span class="o">.</span><span class="n">ECONNRESET</span><span class="p">:</span>
+                <span class="k">raise</span>
+
+        <span class="c1"># Reset the timeout for the recv() on the socket</span>
+        <span class="n">read_timeout</span> <span class="o">=</span> <span class="n">timeout_obj</span><span class="o">.</span><span class="n">read_timeout</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">conn</span><span class="o">.</span><span class="n">is_closed</span><span class="p">:</span>
+            <span class="c1"># In Python 3 socket.py will catch EAGAIN and return None when you</span>
+            <span class="c1"># try and read into the file pointer created by http.client, which</span>
+            <span class="c1"># instead raises a BadStatusLine exception. Instead of catching</span>
+            <span class="c1"># the exception and assuming all BadStatusLine exceptions are read</span>
+            <span class="c1"># timeouts, check for a zero timeout before making the request.</span>
+            <span class="k">if</span> <span class="n">read_timeout</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ReadTimeoutError</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Read timed out. (read timeout=</span><span class="si">{</span><span class="n">read_timeout</span><span class="si">}</span><span class="s2">)&quot;</span>
+                <span class="p">)</span>
+            <span class="n">conn</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">read_timeout</span>
+
+        <span class="c1"># Receive the response from the server</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">getresponse</span><span class="p">()</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">BaseSSLError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_timeout</span><span class="p">(</span><span class="n">err</span><span class="o">=</span><span class="n">e</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout_value</span><span class="o">=</span><span class="n">read_timeout</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+        <span class="c1"># Set properties that are used by the pooling layer.</span>
+        <span class="n">response</span><span class="o">.</span><span class="n">retries</span> <span class="o">=</span> <span class="n">retries</span>
+        <span class="n">response</span><span class="o">.</span><span class="n">_connection</span> <span class="o">=</span> <span class="n">response_conn</span>  <span class="c1"># type: ignore[attr-defined]</span>
+        <span class="n">response</span><span class="o">.</span><span class="n">_pool</span> <span class="o">=</span> <span class="bp">self</span>  <span class="c1"># type: ignore[attr-defined]</span>
+
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1"> &quot;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&quot; </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scheme</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
+            <span class="n">method</span><span class="p">,</span>
+            <span class="n">url</span><span class="p">,</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">version_string</span><span class="p">,</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">length_remaining</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">response</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Close all pooled connections and disable the pool.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="c1"># Disable access to the pool</span>
+        <span class="n">old_pool</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="c1"># Close all the HTTPConnections in the pool.</span>
+        <span class="n">_close_pool_connections</span><span class="p">(</span><span class="n">old_pool</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_same_host</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if the given ``url`` is a member of the same host as this</span>
+<span class="sd">        connection pool.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">url</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="c1"># TODO: Add optional support for socket.gethostbyname checking.</span>
+        <span class="n">scheme</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">parse_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">scheme</span> <span class="o">=</span> <span class="n">scheme</span> <span class="ow">or</span> <span class="s2">&quot;http&quot;</span>
+        <span class="k">if</span> <span class="n">host</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">host</span> <span class="o">=</span> <span class="n">_normalize_host</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">scheme</span><span class="o">=</span><span class="n">scheme</span><span class="p">)</span>
+
+        <span class="c1"># Use explicit default port for comparison when none is given</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">port</span><span class="p">:</span>
+            <span class="n">port</span> <span class="o">=</span> <span class="n">port_by_scheme</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">scheme</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="ow">and</span> <span class="n">port</span> <span class="o">==</span> <span class="n">port_by_scheme</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">scheme</span><span class="p">):</span>
+            <span class="n">port</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">scheme</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scheme</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">urlopen</span><span class="p">(</span>  <span class="c1"># type: ignore[override]</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">:</span> <span class="n">_TYPE_BODY</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">headers</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">retries</span><span class="p">:</span> <span class="n">Retry</span> <span class="o">|</span> <span class="nb">bool</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">redirect</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">assert_same_host</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">timeout</span><span class="p">:</span> <span class="n">_TYPE_TIMEOUT</span> <span class="o">=</span> <span class="n">_DEFAULT_TIMEOUT</span><span class="p">,</span>
+        <span class="n">pool_timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">release_conn</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">chunked</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">body_pos</span><span class="p">:</span> <span class="n">_TYPE_BODY_POSITION</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">preload_content</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">decode_content</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">response_kw</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseHTTPResponse</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a connection from the pool and perform an HTTP request. This is the</span>
+<span class="sd">        lowest level call for making a request, so you&#39;ll need to specify all</span>
+<span class="sd">        the raw details.</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">           More commonly, it&#39;s appropriate to use a convenience method</span>
+<span class="sd">           such as :meth:`request`.</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">           `release_conn` will only behave as expected if</span>
+<span class="sd">           `preload_content=False` because we want to make</span>
+<span class="sd">           `preload_content=False` the default behaviour someday soon without</span>
+<span class="sd">           breaking backwards compatibility.</span>
+
+<span class="sd">        :param method:</span>
+<span class="sd">            HTTP request method (such as GET, POST, PUT, etc.)</span>
+
+<span class="sd">        :param url:</span>
+<span class="sd">            The URL to perform the request on.</span>
+
+<span class="sd">        :param body:</span>
+<span class="sd">            Data to send in the request body, either :class:`str`, :class:`bytes`,</span>
+<span class="sd">            an iterable of :class:`str`/:class:`bytes`, or a file-like object.</span>
+
+<span class="sd">        :param headers:</span>
+<span class="sd">            Dictionary of custom headers to send, such as User-Agent,</span>
+<span class="sd">            If-None-Match, etc. If None, pool headers are used. If provided,</span>
+<span class="sd">            these headers completely replace any pool-specific headers.</span>
+
+<span class="sd">        :param retries:</span>
+<span class="sd">            Configure the number of retries to allow before raising a</span>
+<span class="sd">            :class:`~urllib3.exceptions.MaxRetryError` exception.</span>
+
+<span class="sd">            If ``None`` (default) will retry 3 times, see ``Retry.DEFAULT``. Pass a</span>
+<span class="sd">            :class:`~urllib3.util.retry.Retry` object for fine-grained control</span>
+<span class="sd">            over different types of retries.</span>
+<span class="sd">            Pass an integer number to retry connection errors that many times,</span>
+<span class="sd">            but no other types of errors. Pass zero to never retry.</span>
+
+<span class="sd">            If ``False``, then retries are disabled and any exception is raised</span>
+<span class="sd">            immediately. Also, instead of raising a MaxRetryError on redirects,</span>
+<span class="sd">            the redirect response will be returned.</span>
+
+<span class="sd">        :type retries: :class:`~urllib3.util.retry.Retry`, False, or an int.</span>
+
+<span class="sd">        :param redirect:</span>
+<span class="sd">            If True, automatically handle redirects (status codes 301, 302,</span>
+<span class="sd">            303, 307, 308). Each redirect counts as a retry. Disabling retries</span>
+<span class="sd">            will disable redirect, too.</span>
+
+<span class="sd">        :param assert_same_host:</span>
+<span class="sd">            If ``True``, will make sure that the host of the pool requests is</span>
+<span class="sd">            consistent else will raise HostChangedError. When ``False``, you can</span>
+<span class="sd">            use the pool on an HTTP proxy and request foreign hosts.</span>
+
+<span class="sd">        :param timeout:</span>
+<span class="sd">            If specified, overrides the default timeout for this one</span>
+<span class="sd">            request. It may be a float (in seconds) or an instance of</span>
+<span class="sd">            :class:`urllib3.util.Timeout`.</span>
+
+<span class="sd">        :param pool_timeout:</span>
+<span class="sd">            If set and the pool is set to block=True, then this method will</span>
+<span class="sd">            block for ``pool_timeout`` seconds and raise EmptyPoolError if no</span>
+<span class="sd">            connection is available within the time period.</span>
+
+<span class="sd">        :param bool preload_content:</span>
+<span class="sd">            If True, the response&#39;s body will be preloaded into memory.</span>
+
+<span class="sd">        :param bool decode_content:</span>
+<span class="sd">            If True, will attempt to decode the body based on the</span>
+<span class="sd">            &#39;content-encoding&#39; header.</span>
+
+<span class="sd">        :param release_conn:</span>
+<span class="sd">            If False, then the urlopen call will not release the connection</span>
+<span class="sd">            back into the pool once a response is received (but will release if</span>
+<span class="sd">            you read the entire contents of the response such as when</span>
+<span class="sd">            `preload_content=True`). This is useful if you&#39;re not preloading</span>
+<span class="sd">            the response&#39;s content immediately. You will need to call</span>
+<span class="sd">            ``r.release_conn()`` on the response ``r`` to return the connection</span>
+<span class="sd">            back into the pool. If None, it takes the value of ``preload_content``</span>
+<span class="sd">            which defaults to ``True``.</span>
+
+<span class="sd">        :param bool chunked:</span>
+<span class="sd">            If True, urllib3 will send the body using chunked transfer</span>
+<span class="sd">            encoding. Otherwise, urllib3 will send the body using the standard</span>
+<span class="sd">            content-length form. Defaults to False.</span>
+
+<span class="sd">        :param int body_pos:</span>
+<span class="sd">            Position to seek to in file-like body in the event of a retry or</span>
+<span class="sd">            redirect. Typically this won&#39;t need to be set because urllib3 will</span>
+<span class="sd">            auto-populate the value when needed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">parsed_url</span> <span class="o">=</span> <span class="n">parse_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">destination_scheme</span> <span class="o">=</span> <span class="n">parsed_url</span><span class="o">.</span><span class="n">scheme</span>
+
+        <span class="k">if</span> <span class="n">headers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">headers</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">retries</span><span class="p">,</span> <span class="n">Retry</span><span class="p">):</span>
+            <span class="n">retries</span> <span class="o">=</span> <span class="n">Retry</span><span class="o">.</span><span class="n">from_int</span><span class="p">(</span><span class="n">retries</span><span class="p">,</span> <span class="n">redirect</span><span class="o">=</span><span class="n">redirect</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">retries</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">release_conn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">release_conn</span> <span class="o">=</span> <span class="n">preload_content</span>
+
+        <span class="c1"># Check host</span>
+        <span class="k">if</span> <span class="n">assert_same_host</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_same_host</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">HostChangedError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">retries</span><span class="p">)</span>
+
+        <span class="c1"># Ensure that the URL we&#39;re connecting to is properly encoded</span>
+        <span class="k">if</span> <span class="n">url</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">):</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="n">to_str</span><span class="p">(</span><span class="n">_encode_target</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="n">to_str</span><span class="p">(</span><span class="n">parsed_url</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+
+        <span class="n">conn</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Track whether `conn` needs to be released before</span>
+        <span class="c1"># returning/raising/recursing. Update this variable if necessary, and</span>
+        <span class="c1"># leave `release_conn` constant throughout the function. That way, if</span>
+        <span class="c1"># the function recurses, the original value of `release_conn` will be</span>
+        <span class="c1"># passed down into the recursive call, and its value will be respected.</span>
+        <span class="c1">#</span>
+        <span class="c1"># See issue #651 [1] for details.</span>
+        <span class="c1">#</span>
+        <span class="c1"># [1] &lt;https://github.com/urllib3/urllib3/issues/651&gt;</span>
+        <span class="n">release_this_conn</span> <span class="o">=</span> <span class="n">release_conn</span>
+
+        <span class="n">http_tunnel_required</span> <span class="o">=</span> <span class="n">connection_requires_http_tunnel</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy_config</span><span class="p">,</span> <span class="n">destination_scheme</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Merge the proxy headers. Only done when not using HTTP CONNECT. We</span>
+        <span class="c1"># have to copy the headers dict so we can safely change it without those</span>
+        <span class="c1"># changes being reflected in anyone else&#39;s copy.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">http_tunnel_required</span><span class="p">:</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># type: ignore[attr-defined]</span>
+            <span class="n">headers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proxy_headers</span><span class="p">)</span>  <span class="c1"># type: ignore[union-attr]</span>
+
+        <span class="c1"># Must keep the exception bound to a separate variable or else Python 3</span>
+        <span class="c1"># complains about UnboundLocalError.</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Keep track of whether we cleanly exited the except block. This</span>
+        <span class="c1"># ensures we do proper cleanup in finally.</span>
+        <span class="n">clean_exit</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># Rewind body position, if needed. Record current position</span>
+        <span class="c1"># for future rewinds in the event of a redirect/retry.</span>
+        <span class="n">body_pos</span> <span class="o">=</span> <span class="n">set_file_position</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">body_pos</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Request a connection from the queue.</span>
+            <span class="n">timeout_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_timeout</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+            <span class="n">conn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_conn</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">pool_timeout</span><span class="p">)</span>
+
+            <span class="n">conn</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout_obj</span><span class="o">.</span><span class="n">connect_timeout</span>  <span class="c1"># type: ignore[assignment]</span>
+
+            <span class="c1"># Is this a closed/new connection that requires CONNECT tunnelling?</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">http_tunnel_required</span> <span class="ow">and</span> <span class="n">conn</span><span class="o">.</span><span class="n">is_closed</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_proxy</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+                <span class="k">except</span> <span class="p">(</span><span class="n">BaseSSLError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">,</span> <span class="n">SocketTimeout</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_raise_timeout</span><span class="p">(</span>
+                        <span class="n">err</span><span class="o">=</span><span class="n">e</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout_value</span><span class="o">=</span><span class="n">conn</span><span class="o">.</span><span class="n">timeout</span>
+                    <span class="p">)</span>
+                    <span class="k">raise</span>
+
+            <span class="c1"># If we&#39;re going to release the connection in ``finally:``, then</span>
+            <span class="c1"># the response doesn&#39;t need to know about the connection. Otherwise</span>
+            <span class="c1"># it will also try to release it and we&#39;ll have a double-release</span>
+            <span class="c1"># mess.</span>
+            <span class="n">response_conn</span> <span class="o">=</span> <span class="n">conn</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">release_conn</span> <span class="k">else</span> <span class="kc">None</span>
+
+            <span class="c1"># Make the request on the HTTPConnection object</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_request</span><span class="p">(</span>
+                <span class="n">conn</span><span class="p">,</span>
+                <span class="n">method</span><span class="p">,</span>
+                <span class="n">url</span><span class="p">,</span>
+                <span class="n">timeout</span><span class="o">=</span><span class="n">timeout_obj</span><span class="p">,</span>
+                <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+                <span class="n">chunked</span><span class="o">=</span><span class="n">chunked</span><span class="p">,</span>
+                <span class="n">retries</span><span class="o">=</span><span class="n">retries</span><span class="p">,</span>
+                <span class="n">response_conn</span><span class="o">=</span><span class="n">response_conn</span><span class="p">,</span>
+                <span class="n">preload_content</span><span class="o">=</span><span class="n">preload_content</span><span class="p">,</span>
+                <span class="n">decode_content</span><span class="o">=</span><span class="n">decode_content</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">response_kw</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Everything went great!</span>
+            <span class="n">clean_exit</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">except</span> <span class="n">EmptyPoolError</span><span class="p">:</span>
+            <span class="c1"># Didn&#39;t get a connection from the pool, no need to clean up</span>
+            <span class="n">clean_exit</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">release_this_conn</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">raise</span>
+
+        <span class="k">except</span> <span class="p">(</span>
+            <span class="ne">TimeoutError</span><span class="p">,</span>
+            <span class="n">HTTPException</span><span class="p">,</span>
+            <span class="ne">OSError</span><span class="p">,</span>
+            <span class="n">ProtocolError</span><span class="p">,</span>
+            <span class="n">BaseSSLError</span><span class="p">,</span>
+            <span class="n">SSLError</span><span class="p">,</span>
+            <span class="n">CertificateError</span><span class="p">,</span>
+            <span class="n">ProxyError</span><span class="p">,</span>
+        <span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># Discard the connection for these exceptions. It will be</span>
+            <span class="c1"># replaced during the next _get_conn() call.</span>
+            <span class="n">clean_exit</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">new_e</span><span class="p">:</span> <span class="ne">Exception</span> <span class="o">=</span> <span class="n">e</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="p">(</span><span class="n">BaseSSLError</span><span class="p">,</span> <span class="n">CertificateError</span><span class="p">)):</span>
+                <span class="n">new_e</span> <span class="o">=</span> <span class="n">SSLError</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="n">new_e</span><span class="p">,</span>
+                <span class="p">(</span>
+                    <span class="ne">OSError</span><span class="p">,</span>
+                    <span class="n">NewConnectionError</span><span class="p">,</span>
+                    <span class="ne">TimeoutError</span><span class="p">,</span>
+                    <span class="n">SSLError</span><span class="p">,</span>
+                    <span class="n">HTTPException</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">conn</span> <span class="ow">and</span> <span class="n">conn</span><span class="o">.</span><span class="n">proxy</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">conn</span><span class="o">.</span><span class="n">has_connected_to_proxy</span><span class="p">):</span>
+                <span class="n">new_e</span> <span class="o">=</span> <span class="n">_wrap_proxy_error</span><span class="p">(</span><span class="n">new_e</span><span class="p">,</span> <span class="n">conn</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">scheme</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_e</span><span class="p">,</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="n">HTTPException</span><span class="p">)):</span>
+                <span class="n">new_e</span> <span class="o">=</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s2">&quot;Connection aborted.&quot;</span><span class="p">,</span> <span class="n">new_e</span><span class="p">)</span>
+
+            <span class="n">retries</span> <span class="o">=</span> <span class="n">retries</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span>
+                <span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">new_e</span><span class="p">,</span> <span class="n">_pool</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">_stacktrace</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">retries</span><span class="o">.</span><span class="n">sleep</span><span class="p">()</span>
+
+            <span class="c1"># Keep track of the error for the retry warning.</span>
+            <span class="n">err</span> <span class="o">=</span> <span class="n">e</span>
+
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">clean_exit</span><span class="p">:</span>
+                <span class="c1"># We hit some kind of exception, handled or otherwise. We need</span>
+                <span class="c1"># to throw the connection away unless explicitly told not to.</span>
+                <span class="c1"># Close the connection, set the variable to None, and make sure</span>
+                <span class="c1"># we put the None back in the pool to avoid leaking it.</span>
+                <span class="k">if</span> <span class="n">conn</span><span class="p">:</span>
+                    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="n">conn</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">release_this_conn</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">if</span> <span class="n">release_this_conn</span><span class="p">:</span>
+                <span class="c1"># Put the connection back to be reused. If the connection is</span>
+                <span class="c1"># expired then it will be None, which will get replaced with a</span>
+                <span class="c1"># fresh connection during _get_conn.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_put_conn</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">conn</span><span class="p">:</span>
+            <span class="c1"># Try again</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Retrying (</span><span class="si">%r</span><span class="s2">) after connection broken by &#39;</span><span class="si">%r</span><span class="s2">&#39;: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">retries</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">url</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span>
+                <span class="n">method</span><span class="p">,</span>
+                <span class="n">url</span><span class="p">,</span>
+                <span class="n">body</span><span class="p">,</span>
+                <span class="n">headers</span><span class="p">,</span>
+                <span class="n">retries</span><span class="p">,</span>
+                <span class="n">redirect</span><span class="p">,</span>
+                <span class="n">assert_same_host</span><span class="p">,</span>
+                <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+                <span class="n">pool_timeout</span><span class="o">=</span><span class="n">pool_timeout</span><span class="p">,</span>
+                <span class="n">release_conn</span><span class="o">=</span><span class="n">release_conn</span><span class="p">,</span>
+                <span class="n">chunked</span><span class="o">=</span><span class="n">chunked</span><span class="p">,</span>
+                <span class="n">body_pos</span><span class="o">=</span><span class="n">body_pos</span><span class="p">,</span>
+                <span class="n">preload_content</span><span class="o">=</span><span class="n">preload_content</span><span class="p">,</span>
+                <span class="n">decode_content</span><span class="o">=</span><span class="n">decode_content</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">response_kw</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Handle redirect?</span>
+        <span class="n">redirect_location</span> <span class="o">=</span> <span class="n">redirect</span> <span class="ow">and</span> <span class="n">response</span><span class="o">.</span><span class="n">get_redirect_location</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">redirect_location</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="mi">303</span><span class="p">:</span>
+                <span class="c1"># Change the method according to RFC 9110, Section 15.4.4.</span>
+                <span class="n">method</span> <span class="o">=</span> <span class="s2">&quot;GET&quot;</span>
+                <span class="c1"># And lose the body not to transfer anything sensitive.</span>
+                <span class="n">body</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">headers</span> <span class="o">=</span> <span class="n">HTTPHeaderDict</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span><span class="o">.</span><span class="n">_prepare_for_method_change</span><span class="p">()</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">retries</span> <span class="o">=</span> <span class="n">retries</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">,</span> <span class="n">_pool</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">MaxRetryError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">retries</span><span class="o">.</span><span class="n">raise_on_redirect</span><span class="p">:</span>
+                    <span class="n">response</span><span class="o">.</span><span class="n">drain_conn</span><span class="p">()</span>
+                    <span class="k">raise</span>
+                <span class="k">return</span> <span class="n">response</span>
+
+            <span class="n">response</span><span class="o">.</span><span class="n">drain_conn</span><span class="p">()</span>
+            <span class="n">retries</span><span class="o">.</span><span class="n">sleep_for_retry</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Redirecting </span><span class="si">%s</span><span class="s2"> -&gt; </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">redirect_location</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span>
+                <span class="n">method</span><span class="p">,</span>
+                <span class="n">redirect_location</span><span class="p">,</span>
+                <span class="n">body</span><span class="p">,</span>
+                <span class="n">headers</span><span class="p">,</span>
+                <span class="n">retries</span><span class="o">=</span><span class="n">retries</span><span class="p">,</span>
+                <span class="n">redirect</span><span class="o">=</span><span class="n">redirect</span><span class="p">,</span>
+                <span class="n">assert_same_host</span><span class="o">=</span><span class="n">assert_same_host</span><span class="p">,</span>
+                <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+                <span class="n">pool_timeout</span><span class="o">=</span><span class="n">pool_timeout</span><span class="p">,</span>
+                <span class="n">release_conn</span><span class="o">=</span><span class="n">release_conn</span><span class="p">,</span>
+                <span class="n">chunked</span><span class="o">=</span><span class="n">chunked</span><span class="p">,</span>
+                <span class="n">body_pos</span><span class="o">=</span><span class="n">body_pos</span><span class="p">,</span>
+                <span class="n">preload_content</span><span class="o">=</span><span class="n">preload_content</span><span class="p">,</span>
+                <span class="n">decode_content</span><span class="o">=</span><span class="n">decode_content</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">response_kw</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Check if we should retry the HTTP response.</span>
+        <span class="n">has_retry_after</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Retry-After&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">retries</span><span class="o">.</span><span class="n">is_retry</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">has_retry_after</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">retries</span> <span class="o">=</span> <span class="n">retries</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">,</span> <span class="n">_pool</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">MaxRetryError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">retries</span><span class="o">.</span><span class="n">raise_on_status</span><span class="p">:</span>
+                    <span class="n">response</span><span class="o">.</span><span class="n">drain_conn</span><span class="p">()</span>
+                    <span class="k">raise</span>
+                <span class="k">return</span> <span class="n">response</span>
+
+            <span class="n">response</span><span class="o">.</span><span class="n">drain_conn</span><span class="p">()</span>
+            <span class="n">retries</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Retry: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span>
+                <span class="n">method</span><span class="p">,</span>
+                <span class="n">url</span><span class="p">,</span>
+                <span class="n">body</span><span class="p">,</span>
+                <span class="n">headers</span><span class="p">,</span>
+                <span class="n">retries</span><span class="o">=</span><span class="n">retries</span><span class="p">,</span>
+                <span class="n">redirect</span><span class="o">=</span><span class="n">redirect</span><span class="p">,</span>
+                <span class="n">assert_same_host</span><span class="o">=</span><span class="n">assert_same_host</span><span class="p">,</span>
+                <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+                <span class="n">pool_timeout</span><span class="o">=</span><span class="n">pool_timeout</span><span class="p">,</span>
+                <span class="n">release_conn</span><span class="o">=</span><span class="n">release_conn</span><span class="p">,</span>
+                <span class="n">chunked</span><span class="o">=</span><span class="n">chunked</span><span class="p">,</span>
+                <span class="n">body_pos</span><span class="o">=</span><span class="n">body_pos</span><span class="p">,</span>
+                <span class="n">preload_content</span><span class="o">=</span><span class="n">preload_content</span><span class="p">,</span>
+                <span class="n">decode_content</span><span class="o">=</span><span class="n">decode_content</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">response_kw</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">response</span>
+
+
+<div class="viewcode-block" id="HTTPSConnectionPool">
+<a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.HTTPSConnectionPool">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HTTPSConnectionPool</span><span class="p">(</span><span class="n">HTTPConnectionPool</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Same as :class:`.HTTPConnectionPool`, but HTTPS.</span>
+
+<span class="sd">    :class:`.HTTPSConnection` uses one of ``assert_fingerprint``,</span>
+<span class="sd">    ``assert_hostname`` and ``host`` in this order to verify connections.</span>
+<span class="sd">    If ``assert_hostname`` is False, no verification is done.</span>
+
+<span class="sd">    The ``key_file``, ``cert_file``, ``cert_reqs``, ``ca_certs``,</span>
+<span class="sd">    ``ca_cert_dir``, ``ssl_version``, ``key_password`` are only used if :mod:`ssl`</span>
+<span class="sd">    is available and are fed into :meth:`urllib3.util.ssl_wrap_socket` to upgrade</span>
+<span class="sd">    the connection socket into an SSL socket.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">scheme</span> <span class="o">=</span> <span class="s2">&quot;https&quot;</span>
+    <span class="n">ConnectionCls</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">BaseHTTPSConnection</span><span class="p">]</span> <span class="o">=</span> <span class="n">HTTPSConnection</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">host</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">timeout</span><span class="p">:</span> <span class="n">_TYPE_TIMEOUT</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">_DEFAULT_TIMEOUT</span><span class="p">,</span>
+        <span class="n">maxsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">block</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">headers</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">retries</span><span class="p">:</span> <span class="n">Retry</span> <span class="o">|</span> <span class="nb">bool</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">_proxy</span><span class="p">:</span> <span class="n">Url</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">_proxy_headers</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">key_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cert_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cert_reqs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">key_password</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ca_certs</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ssl_version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ssl_minimum_version</span><span class="p">:</span> <span class="n">ssl</span><span class="o">.</span><span class="n">TLSVersion</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ssl_maximum_version</span><span class="p">:</span> <span class="n">ssl</span><span class="o">.</span><span class="n">TLSVersion</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">assert_hostname</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">assert_fingerprint</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ca_cert_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">conn_kw</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">host</span><span class="p">,</span>
+            <span class="n">port</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="p">,</span>
+            <span class="n">maxsize</span><span class="p">,</span>
+            <span class="n">block</span><span class="p">,</span>
+            <span class="n">headers</span><span class="p">,</span>
+            <span class="n">retries</span><span class="p">,</span>
+            <span class="n">_proxy</span><span class="p">,</span>
+            <span class="n">_proxy_headers</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">conn_kw</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">key_file</span> <span class="o">=</span> <span class="n">key_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cert_file</span> <span class="o">=</span> <span class="n">cert_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cert_reqs</span> <span class="o">=</span> <span class="n">cert_reqs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key_password</span> <span class="o">=</span> <span class="n">key_password</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ca_certs</span> <span class="o">=</span> <span class="n">ca_certs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ca_cert_dir</span> <span class="o">=</span> <span class="n">ca_cert_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ssl_version</span> <span class="o">=</span> <span class="n">ssl_version</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ssl_minimum_version</span> <span class="o">=</span> <span class="n">ssl_minimum_version</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ssl_maximum_version</span> <span class="o">=</span> <span class="n">ssl_maximum_version</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_hostname</span> <span class="o">=</span> <span class="n">assert_hostname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_fingerprint</span> <span class="o">=</span> <span class="n">assert_fingerprint</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_prepare_proxy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conn</span><span class="p">:</span> <span class="n">HTTPSConnection</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Establishes a tunnel connection through HTTP CONNECT.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">scheme</span> <span class="o">==</span> <span class="s2">&quot;https&quot;</span><span class="p">:</span>
+            <span class="n">tunnel_scheme</span> <span class="o">=</span> <span class="s2">&quot;https&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tunnel_scheme</span> <span class="o">=</span> <span class="s2">&quot;http&quot;</span>
+
+        <span class="n">conn</span><span class="o">.</span><span class="n">set_tunnel</span><span class="p">(</span>
+            <span class="n">scheme</span><span class="o">=</span><span class="n">tunnel_scheme</span><span class="p">,</span>
+            <span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tunnel_host</span><span class="p">,</span>
+            <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
+            <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proxy_headers</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">conn</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_new_conn</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseHTTPSConnection</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a fresh :class:`urllib3.connection.HTTPConnection`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_connections</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s2">&quot;Starting new HTTPS connection (</span><span class="si">%d</span><span class="s2">): </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_connections</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="ow">or</span> <span class="s2">&quot;443&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ConnectionCls</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">ConnectionCls</span> <span class="ow">is</span> <span class="n">DummyConnection</span><span class="p">:</span>  <span class="c1"># type: ignore[comparison-overlap]</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+                <span class="s2">&quot;Can&#39;t connect to HTTPS URL because the SSL module is not available.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">actual_host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">host</span>
+        <span class="n">actual_port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">host</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">actual_host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">host</span>
+            <span class="n">actual_port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">port</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ConnectionCls</span><span class="p">(</span>
+            <span class="n">host</span><span class="o">=</span><span class="n">actual_host</span><span class="p">,</span>
+            <span class="n">port</span><span class="o">=</span><span class="n">actual_port</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">connect_timeout</span><span class="p">,</span>
+            <span class="n">cert_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cert_file</span><span class="p">,</span>
+            <span class="n">key_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">key_file</span><span class="p">,</span>
+            <span class="n">key_password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">key_password</span><span class="p">,</span>
+            <span class="n">cert_reqs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cert_reqs</span><span class="p">,</span>
+            <span class="n">ca_certs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ca_certs</span><span class="p">,</span>
+            <span class="n">ca_cert_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ca_cert_dir</span><span class="p">,</span>
+            <span class="n">assert_hostname</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">assert_hostname</span><span class="p">,</span>
+            <span class="n">assert_fingerprint</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">assert_fingerprint</span><span class="p">,</span>
+            <span class="n">ssl_version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ssl_version</span><span class="p">,</span>
+            <span class="n">ssl_minimum_version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ssl_minimum_version</span><span class="p">,</span>
+            <span class="n">ssl_maximum_version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ssl_maximum_version</span><span class="p">,</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">conn_kw</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_conn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conn</span><span class="p">:</span> <span class="n">BaseHTTPConnection</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called right before a request is made, after the socket is created.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_validate_conn</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+
+        <span class="c1"># Force connect early to allow us to validate the connection.</span>
+        <span class="k">if</span> <span class="n">conn</span><span class="o">.</span><span class="n">is_closed</span><span class="p">:</span>
+            <span class="n">conn</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+
+        <span class="c1"># TODO revise this, see https://github.com/urllib3/urllib3/issues/2791</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">conn</span><span class="o">.</span><span class="n">is_verified</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">conn</span><span class="o">.</span><span class="n">proxy_is_verified</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Unverified HTTPS request is being made to host &#39;</span><span class="si">{</span><span class="n">conn</span><span class="o">.</span><span class="n">host</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
+                    <span class="s2">&quot;Adding certificate verification is strongly advised. See: &quot;</span>
+                    <span class="s2">&quot;https://urllib3.readthedocs.io/en/latest/advanced-usage.html&quot;</span>
+                    <span class="s2">&quot;#tls-warnings&quot;</span>
+                <span class="p">),</span>
+                <span class="n">InsecureRequestWarning</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">connection_from_url</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">HTTPConnectionPool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a url, return an :class:`.ConnectionPool` instance of its host.</span>
+
+<span class="sd">    This is a shortcut for not having to parse out the scheme, host, and port</span>
+<span class="sd">    of the url before creating an :class:`.ConnectionPool` instance.</span>
+
+<span class="sd">    :param url:</span>
+<span class="sd">        Absolute URL string that must include the scheme. Port is optional.</span>
+
+<span class="sd">    :param \\**kw:</span>
+<span class="sd">        Passes additional parameters to the constructor of the appropriate</span>
+<span class="sd">        :class:`.ConnectionPool`. Useful for specifying things like</span>
+<span class="sd">        timeout, maxsize, headers, etc.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        &gt;&gt;&gt; conn = connection_from_url(&#39;http://google.com/&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; r = conn.request(&#39;GET&#39;, &#39;/&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">scheme</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">parse_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">scheme</span> <span class="o">=</span> <span class="n">scheme</span> <span class="ow">or</span> <span class="s2">&quot;http&quot;</span>
+    <span class="n">port</span> <span class="o">=</span> <span class="n">port</span> <span class="ow">or</span> <span class="n">port_by_scheme</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">scheme</span><span class="p">,</span> <span class="mi">80</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">scheme</span> <span class="o">==</span> <span class="s2">&quot;https&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">HTTPSConnectionPool</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">HTTPConnectionPool</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+
+
+<span class="nd">@typing</span><span class="o">.</span><span class="n">overload</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalize_host</span><span class="p">(</span><span class="n">host</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="n">scheme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@typing</span><span class="o">.</span><span class="n">overload</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalize_host</span><span class="p">(</span><span class="n">host</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scheme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalize_host</span><span class="p">(</span><span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">scheme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Normalize hosts for comparisons and use with sockets.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">host</span> <span class="o">=</span> <span class="n">normalize_host</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">scheme</span><span class="p">)</span>
+
+    <span class="c1"># httplib doesn&#39;t like it when we include brackets in IPv6 addresses</span>
+    <span class="c1"># Specifically, if we include brackets but also pass the port then</span>
+    <span class="c1"># httplib crazily doubles up the square brackets on the Host header.</span>
+    <span class="c1"># Instead, we need to make sure we never pass ``None`` as the port.</span>
+    <span class="c1"># However, for backward compatibility reasons we can&#39;t actually</span>
+    <span class="c1"># *assert* that.  See http://bugs.python.org/issue28539</span>
+    <span class="k">if</span> <span class="n">host</span> <span class="ow">and</span> <span class="n">host</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">host</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;]&quot;</span><span class="p">):</span>
+        <span class="n">host</span> <span class="o">=</span> <span class="n">host</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">host</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_url_from_pool</span><span class="p">(</span>
+    <span class="n">pool</span><span class="p">:</span> <span class="n">HTTPConnectionPool</span> <span class="o">|</span> <span class="n">HTTPSConnectionPool</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the URL from a given connection pool. This is mainly used for testing and logging.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Url</span><span class="p">(</span><span class="n">scheme</span><span class="o">=</span><span class="n">pool</span><span class="o">.</span><span class="n">scheme</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="n">pool</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">pool</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">url</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_close_pool_connections</span><span class="p">(</span><span class="n">pool</span><span class="p">:</span> <span class="n">queue</span><span class="o">.</span><span class="n">LifoQueue</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Drains a queue of connections and closes each one.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">conn</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">conn</span><span class="p">:</span>
+                <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">except</span> <span class="n">queue</span><span class="o">.</span><span class="n">Empty</span><span class="p">:</span>
+        <span class="k">pass</span>  <span class="c1"># Done.</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, New Relic.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

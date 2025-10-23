@@ -27,6 +27,11 @@ Events
 .. automodule:: newrelic_telemetry_sdk.event
     :members:
 
+Logs
+----
+.. automodule:: newrelic_telemetry_sdk.log
+    :members:
+
 Spans
 -----
 .. automodule:: newrelic_telemetry_sdk.span

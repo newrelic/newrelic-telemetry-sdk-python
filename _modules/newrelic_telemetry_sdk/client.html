@@ -1,87 +1,44 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>newrelic_telemetry_sdk.client &mdash; newrelic-telemetry-sdk 0.4.0 documentation</title>
-  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>newrelic_telemetry_sdk.client &mdash; newrelic-telemetry-sdk 0.9.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=39bb1c6d"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../../index.html" class="icon icon-home"> newrelic-telemetry-sdk
           
-
-          
+          <a href="../../index.html" class="icon icon-home">
+            newrelic-telemetry-sdk
           </a>
-
-          
-            
-            
-              <div class="version">
-                0.4
-              </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
 </ul>
@@ -95,66 +52,30 @@
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">newrelic-telemetry-sdk</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
-        
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-        
-      <li>newrelic_telemetry_sdk.client</li>
-    
-    
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">newrelic_telemetry_sdk.client</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for newrelic_telemetry_sdk.client</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Copyright 2019 New Relic, Inc.</span>
 <span class="c1">#</span>
@@ -170,89 +91,104 @@
 <span class="c1"># See the License for the specific language governing permissions and</span>
 <span class="c1"># limitations under the License.</span>
 
-<span class="kn">import</span> <span class="nn">base64</span>
-<span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">urllib3</span>
-<span class="kn">import</span> <span class="nn">zlib</span>
-<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">zlib</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">urllib3</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">urllib3.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_url</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">urllib.request</span> <span class="kn">import</span> <span class="n">getproxies</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">urllib.request</span><span class="w"> </span><span class="kn">import</span> <span class="n">getproxies</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">urllib</span> <span class="kn">import</span> <span class="n">getproxies</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">urllib</span><span class="w"> </span><span class="kn">import</span> <span class="n">getproxies</span>
 
-<span class="kn">from</span> <span class="nn">urllib3.util</span> <span class="kn">import</span> <span class="n">parse_url</span>
 
 <span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">newrelic_telemetry_sdk.version</span> <span class="kn">import</span> <span class="n">version</span> <span class="k">as</span> <span class="n">__version__</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">newrelic_telemetry_sdk.version</span><span class="w"> </span><span class="kn">import</span> <span class="n">version</span> <span class="k">as</span> <span class="n">__version__</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
     <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;unknown&quot;</span>
 
-<span class="n">USER_AGENT</span> <span class="o">=</span> <span class="s2">&quot;NewRelic-Python-TelemetrySDK/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__version__</span><span class="p">)</span>
+<span class="n">USER_AGENT</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;NewRelic-Python-TelemetrySDK/</span><span class="si">{</span><span class="n">__version__</span><span class="si">}</span><span class="s2">&quot;</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;SpanClient&quot;</span><span class="p">,</span> <span class="s2">&quot;MetricClient&quot;</span><span class="p">,</span> <span class="s2">&quot;EventClient&quot;</span><span class="p">,</span> <span class="s2">&quot;HTTPError&quot;</span><span class="p">,</span> <span class="s2">&quot;HTTPResponse&quot;</span><span class="p">)</span>
-
-
-<div class="viewcode-block" id="HTTPError"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.HTTPError">[docs]</a><span class="k">class</span> <span class="nc">HTTPError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Unexpected HTTP Status&quot;&quot;&quot;</span></div>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;EventClient&quot;</span><span class="p">,</span> <span class="s2">&quot;HTTPError&quot;</span><span class="p">,</span> <span class="s2">&quot;HTTPResponse&quot;</span><span class="p">,</span> <span class="s2">&quot;HTTPSConnectionPool&quot;</span><span class="p">,</span> <span class="s2">&quot;LogClient&quot;</span><span class="p">,</span> <span class="s2">&quot;MetricClient&quot;</span><span class="p">,</span> <span class="s2">&quot;SpanClient&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="HTTPResponse"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.HTTPResponse">[docs]</a><span class="k">class</span> <span class="nc">HTTPResponse</span><span class="p">(</span><span class="n">urllib3</span><span class="o">.</span><span class="n">HTTPResponse</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Response object with helper methods</span>
+<div class="viewcode-block" id="HTTPError">
+<a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.HTTPError">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HTTPError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unexpected HTTP Status&quot;&quot;&quot;</span></div>
 
-<span class="sd">    :ivar headers: The HTTP headers</span>
-<span class="sd">    :ivar status: The HTTP status code</span>
-<span class="sd">    :ivar data: The raw byte encoded response data</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="HTTPResponse.json"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.HTTPResponse.json">[docs]</a>    <span class="k">def</span> <span class="nf">json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns the json-encoded content of a response.</span>
+
+<div class="viewcode-block" id="HTTPResponse">
+<a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.HTTPResponse">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HTTPResponse</span><span class="p">(</span><span class="n">urllib3</span><span class="o">.</span><span class="n">HTTPResponse</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A wrapper for urllib3.HTTPResponse, providing additional helper methods&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the wrapper with an urllib3.HTTPResponse object&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_response</span> <span class="o">=</span> <span class="n">response</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Expose attributes and methods of the original urllib3.HTTPResponse object&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_response</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+<div class="viewcode-block" id="HTTPResponse.json">
+<a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.HTTPResponse.json">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the json-encoded content of a response.</span>
 
 <span class="sd">        :rtype: dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span></div>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ok</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return true if status code indicates success&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="mi">200</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">&lt;</span> <span class="mi">300</span>
 
-<div class="viewcode-block" id="HTTPResponse.raise_for_status"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.HTTPResponse.raise_for_status">[docs]</a>    <span class="k">def</span> <span class="nf">raise_for_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Raise an exception for an unsuccessful HTTP status code</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ok</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return true if status code indicates success&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">200</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">&lt;</span> <span class="mi">300</span>  <span class="c1"># noqa: PLR2004</span>
+
+<div class="viewcode-block" id="HTTPResponse.raise_for_status">
+<a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.HTTPResponse.raise_for_status">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">raise_for_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Raise an exception for an unsuccessful HTTP status code</span>
 
 <span class="sd">        :raises HTTPError: if response status is not successful</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">HTTPError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span></div></div>
+            <span class="k">raise</span> <span class="n">HTTPError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span></div>
+</div>
 
 
-<span class="k">class</span> <span class="nc">HTTPSConnectionPool</span><span class="p">(</span><span class="n">urllib3</span><span class="o">.</span><span class="n">HTTPSConnectionPool</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Connection pool providing HTTPResponse objects&quot;&quot;&quot;</span>
 
-    <span class="n">ResponseCls</span> <span class="o">=</span> <span class="n">HTTPResponse</span>
+<span class="c1"># No longer a subclass, kept for backwards compatibility</span>
+<span class="n">HTTPSConnectionPool</span> <span class="o">=</span> <span class="n">urllib3</span><span class="o">.</span><span class="n">HTTPSConnectionPool</span>
 
 
-<span class="k">class</span> <span class="nc">Client</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;HTTP Client for interacting with New Relic APIs</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Client</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;HTTP Client for interacting with New Relic APIs</span>
 
 <span class="sd">    This class is used to send data to the New Relic APIs over HTTP. This class</span>
 <span class="sd">    will automatically handle retries as needed.</span>
 
-<span class="sd">    :param insert_key: Insights insert key</span>
-<span class="sd">    :type insert_key: str</span>
+<span class="sd">    :param license_key: New Relic license key</span>
+<span class="sd">    :type license_key: str</span>
 <span class="sd">    :param host: (optional) Override the host for the client.</span>
 <span class="sd">    :type host: str</span>
-<span class="sd">    :param port: (optional) Override the port for the client.</span>
-<span class="sd">        Default: 443</span>
+<span class="sd">    :param port: (optional) Override the port for the client. Default: 443</span>
 <span class="sd">    :type port: int</span>
+<span class="sd">    :param \\**connection_pool_kwargs: Configuration options for urllib3.HTTPSConnectionPool.</span>
+<span class="sd">        See https://urllib3.readthedocs.io/en/stable/reference/urllib3.connectionpool.html#urllib3.HTTPSConnectionPool</span>
 
 <span class="sd">    Usage::</span>
 
 <span class="sd">        &gt;&gt;&gt; import os</span>
-<span class="sd">        &gt;&gt;&gt; insert_key = os.environ.get(&quot;NEW_RELIC_INSERT_KEY&quot;, &quot;&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; client = Client(insert_key, host=&quot;metric-api.newrelic.com&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; license_key = os.environ.get(&quot;NEW_RELIC_LICENSE_KEY&quot;, &quot;&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; client = Client(license_key, host=&quot;metric-api.newrelic.com&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; response = client.send({})</span>
 <span class="sd">        &gt;&gt;&gt; client.close()</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -261,40 +197,57 @@
     <span class="n">PAYLOAD_TYPE</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="n">HOST</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="n">PATH</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span>
-    <span class="n">HEADERS</span> <span class="o">=</span> <span class="n">urllib3</span><span class="o">.</span><span class="n">make_headers</span><span class="p">(</span>
-        <span class="n">keep_alive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">accept_encoding</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">user_agent</span><span class="o">=</span><span class="n">USER_AGENT</span>
-    <span class="p">)</span>
+    <span class="n">HEADERS</span> <span class="o">=</span> <span class="n">urllib3</span><span class="o">.</span><span class="n">make_headers</span><span class="p">(</span><span class="n">keep_alive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">accept_encoding</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">user_agent</span><span class="o">=</span><span class="n">USER_AGENT</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">insert_key</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">443</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">license_key</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">443</span><span class="p">,</span> <span class="o">**</span><span class="n">connection_pool_kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">license_key</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Invalid license key: </span><span class="si">{</span><span class="n">license_key</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
         <span class="n">host</span> <span class="o">=</span> <span class="n">host</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">HOST</span>
         <span class="n">headers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">HEADERS</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">headers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;Api-Key&quot;</span><span class="p">:</span> <span class="n">insert_key</span><span class="p">,</span>
-                <span class="s2">&quot;Content-Encoding&quot;</span><span class="p">:</span> <span class="s2">&quot;gzip&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
-            <span class="p">}</span>
-        <span class="p">)</span>
-        <span class="n">retries</span> <span class="o">=</span> <span class="n">urllib3</span><span class="o">.</span><span class="n">Retry</span><span class="p">(</span>
-            <span class="n">total</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">connect</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">redirect</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="kc">None</span>
-        <span class="p">)</span>
+        <span class="n">headers</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;Api-Key&quot;</span><span class="p">:</span> <span class="n">license_key</span><span class="p">,</span> <span class="s2">&quot;Content-Encoding&quot;</span><span class="p">:</span> <span class="s2">&quot;gzip&quot;</span><span class="p">,</span> <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">})</span>
+        <span class="n">retries</span> <span class="o">=</span> <span class="n">urllib3</span><span class="o">.</span><span class="n">Retry</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">connect</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">redirect</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
-        <span class="c1"># Check if https traffic should be proxied and pass the proxy</span>
-        <span class="c1"># information to the connectionpool</span>
+        <span class="n">proxy</span><span class="p">,</span> <span class="n">proxy_headers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_proxy_settings</span><span class="p">(</span><span class="n">connection_pool_kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Merge custom config into default config</span>
+        <span class="n">merged_connection_pool_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="n">host</span><span class="p">,</span>
+            <span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="n">port</span><span class="p">,</span>
+            <span class="s2">&quot;retries&quot;</span><span class="p">:</span> <span class="n">retries</span><span class="p">,</span>
+            <span class="s2">&quot;_proxy&quot;</span><span class="p">:</span> <span class="n">proxy</span><span class="p">,</span>
+            <span class="s2">&quot;_proxy_headers&quot;</span><span class="p">:</span> <span class="n">proxy_headers</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">merged_connection_pool_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">connection_pool_kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Merge custom headers with default headers</span>
+        <span class="k">if</span> <span class="s2">&quot;headers&quot;</span> <span class="ow">in</span> <span class="n">connection_pool_kwargs</span><span class="p">:</span>
+            <span class="c1"># If the user has specified headers, we need to copy the existing</span>
+            <span class="c1"># headers so we don&#39;t lose any of the default ones.</span>
+            <span class="n">headers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">connection_pool_kwargs</span><span class="p">[</span><span class="s2">&quot;headers&quot;</span><span class="p">])</span>
+
+        <span class="n">merged_connection_pool_kwargs</span><span class="p">[</span><span class="s2">&quot;headers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">headers</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">POOL_CLS</span><span class="p">(</span><span class="o">**</span><span class="n">merged_connection_pool_kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_headers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">headers</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parse_proxy_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection_pool_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check environment to see if https traffic should be proxied</span>
+<span class="sd">        and return the proxy information to pass to the connectionpool.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">proxies</span> <span class="o">=</span> <span class="n">getproxies</span><span class="p">()</span>
         <span class="n">proxy</span> <span class="o">=</span> <span class="n">proxies</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">proxy_headers</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">proxy</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">proxy</span> <span class="ow">and</span> <span class="n">connection_pool_kwargs</span> <span class="ow">and</span> <span class="s2">&quot;_proxy&quot;</span> <span class="ow">in</span> <span class="n">connection_pool_kwargs</span><span class="p">:</span>
+            <span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Ignoring environment proxy settings as a proxy was found in connection kwargs.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">proxy</span><span class="p">:</span>
             <span class="n">proxy</span> <span class="o">=</span> <span class="n">parse_url</span><span class="p">(</span><span class="n">proxy</span><span class="p">)</span>
-            <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="s2">&quot;Using proxy host=</span><span class="si">{0!r}</span><span class="s2"> port=</span><span class="si">{1!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">proxy</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">proxy</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Using proxy host=</span><span class="si">%r</span><span class="s2"> port=</span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">proxy</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">proxy</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">proxy</span><span class="o">.</span><span class="n">scheme</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;http&quot;</span><span class="p">:</span>
-                <span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="s2">&quot;Contacting https destinations through &quot;</span>
-                    <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> proxies is not supported.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">proxy</span><span class="o">.</span><span class="n">scheme</span><span class="p">)</span>
-                <span class="p">)</span>
+                <span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Contacting https destinations through </span><span class="si">%s</span><span class="s2"> proxies is not supported.&quot;</span><span class="p">,</span> <span class="n">proxy</span><span class="o">.</span><span class="n">scheme</span><span class="p">)</span>
                 <span class="n">proxy</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">elif</span> <span class="n">proxy</span><span class="o">.</span><span class="n">auth</span><span class="p">:</span>
                 <span class="c1"># https://tools.ietf.org/html/rfc7617</span>
@@ -311,23 +264,12 @@
                 <span class="c1"># hopefully be interpreted as an incorrect username/password</span>
                 <span class="c1"># combination rather than causing a security issue where</span>
                 <span class="c1"># information may be leaked (control characters, etc.)</span>
-                <span class="n">basic_auth</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">proxy</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
-                <span class="n">proxy_headers</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s2">&quot;Proxy-Authorization&quot;</span><span class="p">:</span> <span class="s2">&quot;Basic &quot;</span> <span class="o">+</span> <span class="n">basic_auth</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
-                <span class="p">}</span>
+                <span class="n">proxy_headers</span> <span class="o">=</span> <span class="n">urllib3</span><span class="o">.</span><span class="n">make_headers</span><span class="p">(</span><span class="n">proxy_basic_auth</span><span class="o">=</span><span class="n">proxy</span><span class="o">.</span><span class="n">auth</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">POOL_CLS</span><span class="p">(</span>
-            <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span>
-            <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span>
-            <span class="n">retries</span><span class="o">=</span><span class="n">retries</span><span class="p">,</span>
-            <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
-            <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">_proxy</span><span class="o">=</span><span class="n">proxy</span><span class="p">,</span>
-            <span class="n">_proxy_headers</span><span class="o">=</span><span class="n">proxy_headers</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">proxy</span><span class="p">,</span> <span class="n">proxy_headers</span>
 
-    <span class="k">def</span> <span class="nf">add_version_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product</span><span class="p">,</span> <span class="n">product_version</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Adds product and version information to a User-Agent header</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_version_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product</span><span class="p">,</span> <span class="n">product_version</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds product and version information to a User-Agent header</span>
 
 <span class="sd">        This method implements</span>
 <span class="sd">        https://tools.ietf.org/html/rfc7231#section-5.5.3</span>
@@ -337,73 +279,89 @@
 <span class="sd">        :param product_version: The version string of the product in use</span>
 <span class="sd">        :type product_version: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">product_ua_header</span> <span class="o">=</span> <span class="s2">&quot; </span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">product</span><span class="p">,</span> <span class="n">product_version</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;user-agent&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">product_ua_header</span>
+        <span class="n">product_ua_header</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">product</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">product_version</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_headers</span><span class="p">[</span><span class="s2">&quot;user-agent&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">product_ua_header</span>
 
-    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Close all open connections and disable internal connection pool.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Close all open connections and disable internal connection pool.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_compress_payload</span><span class="p">(</span><span class="n">payload</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compress_payload</span><span class="p">(</span><span class="n">payload</span><span class="p">):</span>
         <span class="n">level</span> <span class="o">=</span> <span class="n">zlib</span><span class="o">.</span><span class="n">Z_DEFAULT_COMPRESSION</span>
         <span class="n">compressor</span> <span class="o">=</span> <span class="n">zlib</span><span class="o">.</span><span class="n">compressobj</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">zlib</span><span class="o">.</span><span class="n">DEFLATED</span><span class="p">,</span> <span class="mi">31</span><span class="p">)</span>
         <span class="n">payload</span> <span class="o">=</span> <span class="n">compressor</span><span class="o">.</span><span class="n">compress</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
         <span class="n">payload</span> <span class="o">+=</span> <span class="n">compressor</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">payload</span>
 
-    <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Send a single item</span>
-
-<span class="sd">        :param item: The object to send</span>
-<span class="sd">        :type item: dict</span>
-
-<span class="sd">        :rtype: HTTPResponse</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">send_batch</span><span class="p">((</span><span class="n">item</span><span class="p">,))</span>
-
-    <span class="k">def</span> <span class="nf">send_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">common</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Send a batch of items</span>
-
-<span class="sd">        :param items: An iterable of items to send to New Relic.</span>
-<span class="sd">        :type items: list or tuple</span>
-<span class="sd">        :param common: (optional) A map of attributes that will be set on each</span>
-<span class="sd">            item.</span>
-<span class="sd">        :type common: dict</span>
-
-<span class="sd">        :rtype: HTTPResponse</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_payload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">common</span><span class="p">):</span>
         <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">PAYLOAD_TYPE</span><span class="p">:</span> <span class="n">items</span><span class="p">}</span>
         <span class="k">if</span> <span class="n">common</span><span class="p">:</span>
             <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;common&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">common</span>
 
-        <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">([</span><span class="n">payload</span><span class="p">])</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">([</span><span class="n">payload</span><span class="p">],</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;:&quot;</span><span class="p">))</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="n">payload</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
 
-        <span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compress_payload</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compress_payload</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">PATH</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a single item</span>
+
+<span class="sd">        :param item: The object to send</span>
+<span class="sd">        :type item: dict</span>
+<span class="sd">        :param timeout: (optional)  a timeout in seconds for sending the request</span>
+<span class="sd">        :type timeout: int</span>
+<span class="sd">        :rtype: HTTPResponse</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">send_batch</span><span class="p">((</span><span class="n">item</span><span class="p">,),</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">send_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">common</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a batch of items</span>
+
+<span class="sd">        :param items: An iterable of items to send to New Relic.</span>
+<span class="sd">        :type items: list or tuple</span>
+<span class="sd">        :param common: (optional) A map of attributes that will be set on each item.</span>
+<span class="sd">        :type common: dict</span>
+<span class="sd">        :param timeout: (optional)  a timeout in seconds for sending the request</span>
+<span class="sd">        :type timeout: int</span>
+<span class="sd">        :rtype: HTTPResponse</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Specifying the headers argument overrides any base headers existing</span>
+        <span class="c1"># in the pool, so we must copy all existing headers</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_headers</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># Generate a unique request ID for this request</span>
+        <span class="n">headers</span><span class="p">[</span><span class="s2">&quot;x-request-id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
+
+        <span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_payload</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">common</span><span class="p">)</span>
+        <span class="n">urllib3_response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">PATH</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">urllib3_response</span><span class="p">,</span> <span class="n">urllib3</span><span class="o">.</span><span class="n">HTTPResponse</span><span class="p">):</span>
+            <span class="n">exc_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Expected urllib3.HTTPResponse, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">urllib3_response</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">exc_msg</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">HTTPResponse</span><span class="p">(</span><span class="n">urllib3_response</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="SpanClient"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.SpanClient">[docs]</a><span class="k">class</span> <span class="nc">SpanClient</span><span class="p">(</span><span class="n">Client</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;HTTP Client for interacting with the New Relic Span API</span>
+<div class="viewcode-block" id="SpanClient">
+<a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.SpanClient">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SpanClient</span><span class="p">(</span><span class="n">Client</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;HTTP Client for interacting with the New Relic Span API</span>
 
 <span class="sd">    This class is used to send spans to the New Relic Span API over HTTP.</span>
 
-<span class="sd">    :param insert_key: Insights insert key</span>
-<span class="sd">    :type insert_key: str</span>
+<span class="sd">    :param license_key: New Relic license key</span>
+<span class="sd">    :type license_key: str</span>
 <span class="sd">    :param host: (optional) Override the host for the span API endpoint.</span>
 <span class="sd">    :type host: str</span>
-<span class="sd">    :param port: (optional) Override the port for the client.</span>
-<span class="sd">        Default: 443</span>
+<span class="sd">    :param port: (optional) Override the port for the client. Default: 443</span>
 <span class="sd">    :type port: int</span>
 
 <span class="sd">    Usage::</span>
 
 <span class="sd">        &gt;&gt;&gt; import os</span>
-<span class="sd">        &gt;&gt;&gt; insert_key = os.environ.get(&quot;NEW_RELIC_INSERT_KEY&quot;, &quot;&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; span_client = SpanClient(insert_key)</span>
+<span class="sd">        &gt;&gt;&gt; license_key = os.environ.get(&quot;NEW_RELIC_LICENSE_KEY&quot;, &quot;&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; span_client = SpanClient(license_key)</span>
 <span class="sd">        &gt;&gt;&gt; response = span_client.send({})</span>
 <span class="sd">        &gt;&gt;&gt; span_client.close()</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -413,25 +371,26 @@
     <span class="n">PAYLOAD_TYPE</span> <span class="o">=</span> <span class="s2">&quot;spans&quot;</span></div>
 
 
-<div class="viewcode-block" id="MetricClient"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.MetricClient">[docs]</a><span class="k">class</span> <span class="nc">MetricClient</span><span class="p">(</span><span class="n">Client</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;HTTP Client for interacting with the New Relic Metric API</span>
+
+<div class="viewcode-block" id="MetricClient">
+<a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.MetricClient">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MetricClient</span><span class="p">(</span><span class="n">Client</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;HTTP Client for interacting with the New Relic Metric API</span>
 
 <span class="sd">    This class is used to send metrics to the New Relic Metric API over HTTP.</span>
 
-<span class="sd">    :param insert_key: Insights insert key</span>
-<span class="sd">    :type insert_key: str</span>
-<span class="sd">    :param host: (optional) Override the host for the metric API</span>
-<span class="sd">        endpoint.</span>
+<span class="sd">    :param license_key: New Relic license key</span>
+<span class="sd">    :type license_key: str</span>
+<span class="sd">    :param host: (optional) Override the host for the metric API endpoint.</span>
 <span class="sd">    :type host: str</span>
-<span class="sd">    :param port: (optional) Override the port for the client.</span>
-<span class="sd">        Default: 443</span>
+<span class="sd">    :param port: (optional) Override the port for the client. Default: 443</span>
 <span class="sd">    :type port: int</span>
 
 <span class="sd">    Usage::</span>
 
 <span class="sd">        &gt;&gt;&gt; import os</span>
-<span class="sd">        &gt;&gt;&gt; insert_key = os.environ.get(&quot;NEW_RELIC_INSERT_KEY&quot;, &quot;&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; metric_client = MetricClient(insert_key)</span>
+<span class="sd">        &gt;&gt;&gt; license_key = os.environ.get(&quot;NEW_RELIC_LICENSE_KEY&quot;, &quot;&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; metric_client = MetricClient(license_key)</span>
 <span class="sd">        &gt;&gt;&gt; response = metric_client.send({})</span>
 <span class="sd">        &gt;&gt;&gt; metric_client.close()</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -441,25 +400,26 @@
     <span class="n">PAYLOAD_TYPE</span> <span class="o">=</span> <span class="s2">&quot;metrics&quot;</span></div>
 
 
-<div class="viewcode-block" id="EventClient"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.EventClient">[docs]</a><span class="k">class</span> <span class="nc">EventClient</span><span class="p">(</span><span class="n">Client</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;HTTP Client for interacting with the New Relic Event API</span>
+
+<div class="viewcode-block" id="EventClient">
+<a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.EventClient">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">EventClient</span><span class="p">(</span><span class="n">Client</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;HTTP Client for interacting with the New Relic Event API</span>
 
 <span class="sd">    This class is used to send events to the New Relic Event API over HTTP.</span>
 
-<span class="sd">    :param insert_key: Insights insert key</span>
-<span class="sd">    :type insert_key: str</span>
-<span class="sd">    :param host: (optional) Override the host for the event API</span>
-<span class="sd">        endpoint.</span>
+<span class="sd">    :param license_key: New Relic license key</span>
+<span class="sd">    :type license_key: str</span>
+<span class="sd">    :param host: (optional) Override the host for the event API endpoint.</span>
 <span class="sd">    :type host: str</span>
-<span class="sd">    :param port: (optional) Override the port for the client.</span>
-<span class="sd">        Default: 443</span>
+<span class="sd">    :param port: (optional) Override the port for the client. Default: 443</span>
 <span class="sd">    :type port: int</span>
 
 <span class="sd">    Usage::</span>
 
 <span class="sd">        &gt;&gt;&gt; import os</span>
-<span class="sd">        &gt;&gt;&gt; insert_key = os.environ.get(&quot;NEW_RELIC_INSERT_KEY&quot;, &quot;&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; event_client = EventClient(insert_key)</span>
+<span class="sd">        &gt;&gt;&gt; license_key = os.environ.get(&quot;NEW_RELIC_LICENSE_KEY&quot;, &quot;&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; event_client = EventClient(license_key)</span>
 <span class="sd">        &gt;&gt;&gt; response = event_client.send({})</span>
 <span class="sd">        &gt;&gt;&gt; event_client.close()</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -467,60 +427,83 @@
     <span class="n">HOST</span> <span class="o">=</span> <span class="s2">&quot;insights-collector.newrelic.com&quot;</span>
     <span class="n">PATH</span> <span class="o">=</span> <span class="s2">&quot;/v1/accounts/events&quot;</span>
 
-<div class="viewcode-block" id="EventClient.send_batch"><a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.EventClient.send_batch">[docs]</a>    <span class="k">def</span> <span class="nf">send_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Send a batch of items</span>
-
-<span class="sd">        :param items: An iterable of items to send to New Relic.</span>
-<span class="sd">        :type items: list or tuple</span>
-
-<span class="sd">        :rtype: HTTPResponse</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_payload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">common</span><span class="p">):</span>  <span class="c1"># noqa: ARG002</span>
         <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="n">payload</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
 
-        <span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compress_payload</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compress_payload</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">PATH</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span></div></div>
+<div class="viewcode-block" id="EventClient.send_batch">
+<a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.EventClient.send_batch">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">send_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a batch of items</span>
+
+<span class="sd">        :param items: An iterable of items to send to New Relic.</span>
+<span class="sd">        :type items: list or tuple</span>
+<span class="sd">        :param timeout: (optional)  a timeout in seconds for sending the request</span>
+<span class="sd">        :type timeout: int</span>
+
+<span class="sd">        :rtype: HTTPResponse</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">send_batch</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="LogClient">
+<a class="viewcode-back" href="../../api.html#newrelic_telemetry_sdk.client.LogClient">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LogClient</span><span class="p">(</span><span class="n">Client</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;HTTP Client for interacting with the New Relic Log API</span>
+
+<span class="sd">    This class is used to send log messages to the New Relic Log API over HTTP.</span>
+<span class="sd">    :param license_key: New Relic license key</span>
+<span class="sd">    :type license_key: str</span>
+<span class="sd">    :param host: (optional) Override the host for the metric API endpoint.</span>
+<span class="sd">    :type host: str</span>
+<span class="sd">    :param port: (optional) Override the port for the client. Default: 443</span>
+<span class="sd">    :type port: int</span>
+
+<span class="sd">    Usage::</span>
+
+<span class="sd">        &gt;&gt;&gt; import os</span>
+<span class="sd">        &gt;&gt;&gt; license_key = os.environ.get(&quot;NEW_RELIC_LICENSE_KEY&quot;, &quot;&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; log_client = LogClient(license_key)</span>
+<span class="sd">        &gt;&gt;&gt; response = log_client.send({})</span>
+<span class="sd">        &gt;&gt;&gt; log_client.close()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">HOST</span> <span class="o">=</span> <span class="s2">&quot;log-api.newrelic.com&quot;</span>
+    <span class="n">PATH</span> <span class="o">=</span> <span class="s2">&quot;/log/v1&quot;</span>
+    <span class="n">PAYLOAD_TYPE</span> <span class="o">=</span> <span class="s2">&quot;logs&quot;</span></div>
+
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2019, New Relic
-
-    </p>
+    <p>&#169; Copyright 2019, New Relic.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
