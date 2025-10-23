@@ -15,6 +15,7 @@
 import functools
 import json
 import os
+import sys
 import time
 import uuid
 import zlib
@@ -232,7 +233,7 @@ def extract_and_validate_metadata(expected_url, request):
     assert request.headers["connection"] == "keep-alive"
 
     # Should accept gzip and deflate encoding
-    assert request.headers["accept-encoding"] == "gzip,deflate"
+    assert request.headers["accept-encoding"] == "gzip,deflate" if sys.version_info < (3, 14) else "gzip,deflate,zstd"
 
     # Validate that the user agent string is correct
     user_agent = request.headers["user-agent"]
