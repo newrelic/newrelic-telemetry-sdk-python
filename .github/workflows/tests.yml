@@ -33,14 +33,14 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # 5.0.0
-      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # 6.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # 6.0.1
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # 6.1.0
         with:
           python-version: "3.13"
           architecture: x64
 
       - name: Download Coverage Artifacts
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # 6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # 7.0.0
         with:
           path: ./
 
@@ -52,7 +52,7 @@ jobs:
           coverage xml
 
       - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # 5.5.1
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # 5.5.2
         with:
           files: coverage.xml
           fail_ci_if_error: true
@@ -86,9 +86,9 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # 5.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # 6.0.1
 
-      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # 6.0.0
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # 6.1.0
         with:
           python-version: ${{ matrix.python.version }}
           architecture: x64
@@ -105,7 +105,7 @@ jobs:
 
       - name: Upload Coverage Artifacts
         if: runner.os == 'Linux'
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # 5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # 6.0.0
         with:
           name: coverage-${{ github.job }}-${{ strategy.job-index }}
           path: ./**/.coverage.*
