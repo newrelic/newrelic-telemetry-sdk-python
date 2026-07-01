@@ -45,7 +45,7 @@ jobs:
     steps:
       # Git Checkout
       - name: Checkout Code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # 6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # 7.0.0
         with:
           token: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
           fetch-depth: 0 # Required for pushing commits to PRs
@@ -53,7 +53,7 @@ jobs:
       # MegaLinter
       - name: MegaLinter
         id: ml
-        uses: oxsecurity/megalinter/flavors/python@8fbdead70d1409964ab3d5afa885e18ee85388bb # 9.4.0
+        uses: oxsecurity/megalinter/flavors/python@ef3e84b8b836d76db562d0f3ed7da61e8fd538bc # 9.6.0
         env:
           # All available variables are described in documentation
           # https://megalinter.io/latest/configuration/
@@ -109,7 +109,7 @@ jobs:
         run: sudo chown -Rc $UID .git/
 
       - name: Commit and push applied linter fixes
-        uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9 # 7.1.0
+        uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # 7.2.0
         if: env.APPLY_FIXES_IF_COMMIT == 'true'
         with:
           branch: >-
