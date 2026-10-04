@@ -21,11 +21,11 @@ import uuid
 import zlib
 
 import pytest
-from newrelic_telemetry_sdk.version import version
-from urllib3 import HTTPConnectionPool, Retry
+from urllib3 import HTTPConnectionPool, Retry, Timeout
 from urllib3 import HTTPResponse as URLLib3HTTPResponse
 
 from newrelic_telemetry_sdk.client import EventClient, HTTPError, HTTPResponse, LogClient, MetricClient, SpanClient
+from newrelic_telemetry_sdk.version import version
 
 SPAN = {
     "id": str(uuid.uuid4()),
@@ -360,6 +360,26 @@ def test_defaults(client_class, host):
 @pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
 def test_port_override(client_class):
     assert client_class("test-key", port=8000)._pool.port == 8000
+
+
+@pytest.mark.parametrize("client_class", (SpanClient, MetricClient, EventClient, LogClient))
+@pytest.mark.parametrize("method", ("send", "send_batch"))
+@pytest.mark.parametrize("kwargs,expected", (({}, (1, 2)), ({"timeout": 3}, (3, 3)), ({"timeout": None}, (None, None))))
+def test_request_timeout(client_class, method, kwargs, expected, monkeypatch):
+    timeouts = []
+
+    def urlopen(pool, *args, **kwargs):
+        timeout = pool._get_timeout(kwargs["timeout"])
+        timeouts.append((timeout.connect_timeout, timeout.read_timeout))
+        return URLLib3HTTPResponse(status=202)
+
+    monkeypatch.setattr(HTTPConnectionPool, "urlopen", urlopen)
+    client = client_class("test-key", timeout=Timeout(connect=1, read=2))
+    try:
+        getattr(client, method)({} if method == "send" else [{}], **kwargs)
+        assert timeouts == [expected]
+    finally:
+        client.close()
 
 
 def test_metric_add_version_info(metric_client):
