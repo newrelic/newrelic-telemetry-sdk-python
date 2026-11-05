@@ -64,7 +64,7 @@ class Harvester(threading.Thread):
         self.client = client
         self.batch = batch
         self.harvest_interval = harvest_interval
-        self._harvest_interval_start = 0
+        self._harvest_interval_start = None
         self._shutdown = self.EVENT_CLS()
 
     def _send(self):
@@ -83,11 +83,13 @@ class Harvester(threading.Thread):
 
     def _wait_for_harvest(self):
         """Tracks and adjusts time required to maintain the harvest interval"""
-        current_time = time.time()
-        interval_start = self._harvest_interval_start or current_time
+        current_time = time.monotonic()
+        interval_start = self._harvest_interval_start
+        if interval_start is None:
+            interval_start = current_time
         timeout = max(self.harvest_interval - (current_time - interval_start), 0)
         shutdown = self._shutdown.wait(timeout)
-        self._harvest_interval_start = time.time()
+        self._harvest_interval_start = time.monotonic()
         return shutdown
 
     def run(self):

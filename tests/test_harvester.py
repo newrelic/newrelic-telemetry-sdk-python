@@ -202,7 +202,7 @@ def test_harvest_timing(harvester, monkeypatch):
         timeout.append(t)
         return True
 
-    monkeypatch.setattr(time, "time", _time, raising=True)
+    monkeypatch.setattr(time, "monotonic", _time, raising=True)
     harvester._shutdown.wait = _wait
 
     # First call should result in full timeout
@@ -217,3 +217,20 @@ def test_harvest_timing(harvester, monkeypatch):
 def test_defaults(harvester):
     assert harvester.daemon is True
     assert harvester.harvest_interval == 5
+
+
+@pytest.mark.parametrize("clock_change", [-3600, 3600])
+def test_harvest_interval_ignores_wall_clock_changes(harvester, monkeypatch, clock_change):
+    wall_time = [10000]
+    elapsed_time = [100]
+    timeouts = []
+    monkeypatch.setattr(time, "time", lambda: wall_time[0])
+    monkeypatch.setattr(time, "monotonic", lambda: elapsed_time[0])
+    harvester._shutdown.wait = timeouts.append
+
+    harvester._wait_for_harvest()
+    wall_time[0] += clock_change
+    elapsed_time[0] += 2
+    harvester._wait_for_harvest()
+
+    assert timeouts == [5, 3]
