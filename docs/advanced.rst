@@ -44,6 +44,42 @@ Example
     # The interval is automatically set by the batch!
     print(common["interval.ms"])
 
+Common fields
+-------------
+
+``SpanClient.send_batch``, ``MetricClient.send_batch``, and
+``LogClient.send_batch`` accept an optional ``common`` dictionary. Its keys
+use the same wire format as the telemetry items being sent, with all fields
+optional. It is not a flat dictionary of tags: put shared tags inside the
+``attributes`` key.
+
+For example, spans can share a trace ID and service name:
+
+.. code-block:: python
+
+    import os
+    from newrelic_telemetry_sdk import SpanClient
+
+    client = SpanClient(os.environ["NEW_RELIC_LICENSE_KEY"])
+    spans = [{
+        "id": "0123456789abcdef",
+        "timestamp": 1700000000000,
+        "attributes": {"name": "example", "duration.ms": 10},
+    }]
+    common = {
+        "trace.id": "0123456789abcdef0123456789abcdef",
+        "attributes": {"service.name": "example-service"},
+    }
+    response = client.send_batch(spans, common=common)
+    response.raise_for_status()
+
+The example uses a fixed timestamp for illustration; use the actual span
+start time when sending telemetry. A plain dictionary avoids generating
+per-span IDs or timestamps for the shared block. ``SpanBatch(tags=...)`` and
+``LogBatch(tags=...)`` create the nested ``attributes`` block for you when
+flushed; ``MetricBatch`` also supplies the aggregation interval.
+``EventClient.send_batch`` does not accept ``common``.
+
 Harvester
 ---------
 

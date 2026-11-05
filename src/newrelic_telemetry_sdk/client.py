@@ -230,7 +230,9 @@ class Client:
 
         :param items: An iterable of items to send to New Relic.
         :type items: list or tuple
-        :param common: (optional) A map of attributes that will be set on each item.
+        :param common: (optional) Shared fields in the same wire format as the
+            items, with all fields optional. Put shared tags in an
+            ``attributes`` dictionary within this map.
         :type common: dict
         :param timeout: (optional)  a timeout in seconds for sending the request
         :type timeout: int
