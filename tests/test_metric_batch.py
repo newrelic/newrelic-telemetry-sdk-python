@@ -61,7 +61,7 @@ class VerifyLockMetricBatch(MetricBatch):
         self._internal_common = value
 
 
-@pytest.mark.parametrize("tags", (None, {"foo": "bar"}))
+@pytest.mark.parametrize("tags", (None, {}, {"foo": "bar"}))
 def test_create_identity(tags):
     expected_tags = frozenset(tags.items()) if tags else None
     identity = MetricBatch.create_identity("name", tags)
@@ -79,12 +79,13 @@ def test_create_identity(tags):
         ("record_summary", 1, 2, {"count": 2, "max": 2, "min": 1, "sum": 3}),
     ),
 )
-def test_merge_metric(record_method, value_1, value_2, final_value):
+@pytest.mark.parametrize("tags", (None, {}))
+def test_merge_metric(record_method, value_1, value_2, final_value, tags):
     batch = VerifyLockMetricBatch()
 
     record_method = getattr(batch, record_method)
     record_method("name", value_1)
-    record_method("name", value_2)
+    record_method("name", value_2, tags=tags)
 
     assert len(batch._internal_batch) == 1
     identity, value = batch._internal_batch.popitem()

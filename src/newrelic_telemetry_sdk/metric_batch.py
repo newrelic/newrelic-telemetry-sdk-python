@@ -51,8 +51,7 @@ class MetricBatch:
             "gauge" or None. Default: None (gauge type).
         :type typ: str
         """
-        if tags:
-            tags = frozenset(tags.items())
+        tags = frozenset(tags.items()) if tags else None
         return (typ, name, tags)
 
     def record_gauge(self, name, value, tags=None):
