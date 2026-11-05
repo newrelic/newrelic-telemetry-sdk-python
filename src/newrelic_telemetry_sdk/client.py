@@ -27,6 +27,7 @@ except ImportError:
 
 
 _logger = logging.getLogger(__name__)
+_DEFAULT_TIMEOUT = object()
 
 try:
     from newrelic_telemetry_sdk.version import version as __version__
@@ -214,25 +215,27 @@ class Client:
 
         return self._compress_payload(payload)
 
-    def send(self, item, timeout=None):
+    def send(self, item, timeout=_DEFAULT_TIMEOUT):
         """Send a single item
 
         :param item: The object to send
         :type item: dict
-        :param timeout: (optional)  a timeout in seconds for sending the request
+        :param timeout: (optional) a timeout in seconds for sending the request.
+            Defaults to the connection pool timeout. Pass None to disable it.
         :type timeout: int
         :rtype: HTTPResponse
         """
         return self.send_batch((item,), timeout=timeout)
 
-    def send_batch(self, items, common=None, timeout=None):
+    def send_batch(self, items, common=None, timeout=_DEFAULT_TIMEOUT):
         """Send a batch of items
 
         :param items: An iterable of items to send to New Relic.
         :type items: list or tuple
         :param common: (optional) A map of attributes that will be set on each item.
         :type common: dict
-        :param timeout: (optional)  a timeout in seconds for sending the request
+        :param timeout: (optional) a timeout in seconds for sending the request.
+            Defaults to the connection pool timeout. Pass None to disable it.
         :type timeout: int
         :rtype: HTTPResponse
         """
@@ -242,6 +245,9 @@ class Client:
 
         # Generate a unique request ID for this request
         headers["x-request-id"] = str(uuid.uuid4())
+
+        if timeout is _DEFAULT_TIMEOUT:
+            timeout = self._pool.timeout
 
         payload = self._create_payload(items, common)
         urllib3_response = self._pool.urlopen("POST", self.PATH, body=payload, headers=headers, timeout=timeout)
@@ -335,12 +341,13 @@ class EventClient(Client):
 
         return self._compress_payload(payload)
 
-    def send_batch(self, items, timeout=None):
+    def send_batch(self, items, timeout=_DEFAULT_TIMEOUT):
         """Send a batch of items
 
         :param items: An iterable of items to send to New Relic.
         :type items: list or tuple
-        :param timeout: (optional)  a timeout in seconds for sending the request
+        :param timeout: (optional) a timeout in seconds for sending the request.
+            Defaults to the connection pool timeout. Pass None to disable it.
         :type timeout: int
 
         :rtype: HTTPResponse
